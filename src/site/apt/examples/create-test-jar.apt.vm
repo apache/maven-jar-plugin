@@ -28,15 +28,15 @@
 
 How to create a jar containing test classes
 
-  When you want to create a jar containing test-classes, you would probably want to reuse those classes.
+  When you want to create a jar containing <test-classes>, you would probably want to reuse those classes.
   There are two ways to solve this:
   
-  * Create an attached jar with the test-classes from the current project and loose its transitive <<<test>>>-scoped dependencies.
+  * Create an attached jar with the <test-classes> from the current project and loose its transitive <<<test>>>-scoped dependencies.
   
-  * Create a separate project with the test-classes.
+  * Create a separate project with the <test-classes>.
   
   []
-  
+
 * The easy way 
   
   You can produce a jar which will include your test classes and resources.
@@ -75,6 +75,7 @@ How to create a jar containing test classes
     <dependency>
       <groupId>groupId</groupId>
       <artifactId>artifactId</artifactId>
+      <classifier>tests</classifier>
       <type>test-jar</type>
       <version>version</version>
       <scope>test</scope>
@@ -84,9 +85,18 @@ How to create a jar containing test classes
 </project>
 +-----------------+
 
+  Based on such configuration there will be two jar files generated. The first one contains the 
+  classes from <<<src/main/java>>> whereas the second one will contain the classes from <<<src/test/java>>>.
+  The generated jar files follow the naming schema <<<artifactId-version.jar>>> for the first one and
+  <<<artifactId-version-classifier.jar>>> for the second one. The parts <<<artifactId>>>, <<<versions>>>
+  will be replaced by the values given within your project <<<pom.xml>>> file. The <<<classifier>>>
+  will be set to <<<tests>>> which is a default of the maven-jar-plugin which can be changed if you need by
+  using the configuration in the jar goal
+  {{{../test-jar-mojo.html}using the configuration in the jar goal}}.
+
   <<Note:>> The downside of this solution is that you don't get the transitive <<<test>>>-scoped dependencies automatically. 
   Maven only resolves the <<<compile>>>-time dependencies, so you'll have to add all the other required <<<test>>>-scoped dependencies by hand.
-
+  
 * The preferred way
 
   In order to let Maven resolve all <<<test>>>-scoped transitive dependencies you should create a separate project.
@@ -100,14 +110,17 @@ How to create a jar containing test classes
 </project>
 +-----------------+
 
-   * Move the sources files from <<<src/test/java>>> you want to share from the original project to the <<<src/main/java>>> of this project.
+   * Move the sources files from <<<src/test/java>>> you want to share from 
+     the original project to the <<<src/main/java>>> of this project.
      The same type of movement counts for the resources as well of course.
    
-   * Move the required <<<test>>>-scoped dependencies and from the original project to this project and remove the scope (i.e. changing it to the <<<compile>>>-scope).
-     And yes, that means that the junit dependency (or any other testing framework dependency) gets the default scope too.
-     You'll probably need to add some project specific dependencies as well to let it all compile again.
+   * Move the required <<<test>>>-scoped dependencies and from the original 
+     project to this project and remove the scope (i.e. changing it to the <<<compile>>>-scope).
+     And yes, that means that the junit dependency (or any other testing 
+     framework dependency) gets the default scope too. You'll probably need 
+     to add some project specific dependencies as well to let it all compile again.
   
-  Now you have your reusable test-classes and you can refer to it as you're used to:
+  Now you have your reusable <test-classes> and you can refer to it as you're used to:
    
 +-----------------+
 <project>
