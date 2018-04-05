@@ -80,8 +80,7 @@
   <properties>
     <mavenArchiverVersion>3.2.0</mavenArchiverVersion>
     <mavenVersion>3.0</mavenVersion>
-    <maven.compiler.target>1.7</maven.compiler.target>
-    <maven.compiler.source>1.7</maven.compiler.source>
+    <javaVersion>7</javaVersion>
     <surefire.version>2.21.0</surefire.version>
   </properties>
 
