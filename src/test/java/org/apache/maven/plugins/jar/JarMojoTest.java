@@ -46,7 +46,7 @@ public class JarMojoTest
     /**
      * tests the proper discovery and configuration of the mojo
      *
-     * @throws Exception
+     * @throws Exception in case of an error.
      */
     public void testJarTestEnvironment()
         throws Exception
