@@ -25,7 +25,7 @@
   <parent>
     <artifactId>maven-plugins</artifactId>
     <groupId>org.apache.maven.plugins</groupId>
-    <version>31</version>
+    <version>32</version>
     <relativePath>../../pom/maven/maven-plugins/pom.xml</relativePath>
   </parent>
 
@@ -78,7 +78,6 @@
     <mavenArchiverVersion>3.2.0</mavenArchiverVersion>
     <mavenVersion>3.0</mavenVersion>
     <javaVersion>7</javaVersion>
-    <surefire.version>2.21.0</surefire.version>
   </properties>
 
   <dependencies>
@@ -182,6 +181,8 @@
                 <goal>clean</goal>
                 <goal>package</goal>
               </goals>
+              <streamLogs>true</streamLogs>
+              <showErrors>true</showErrors>
             </configuration>
             <executions>
               <execution>
