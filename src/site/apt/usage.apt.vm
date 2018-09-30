@@ -78,3 +78,22 @@ mvn package
   the {{{/guides/introduction/introduction-to-the-lifecycle.html}Maven Build Life Cycle}}.
 
   For full documentation, click {{{./plugin-info.html}here}}.
+
+* Modular JAR files
+
+  The {{{https://openjdk.java.net/projects/jigsaw/spec/}Java Platform Module System (JPMS)}} introduced
+  {{{https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html}changes in the JAR file specifications}}
+  as well - Modular JAR files. Modular JAR files are JAR files with <<<module-info.class>>> file in the root directory
+  (or in the versioned area for multi-release JAR files). If the project contains <<<module-info.class>>>
+  the resulting JAR will be a Modular JAR without a need for any configuration regardless of the plugin version used.
+
+  Starting with version 3.1.2, if the JAR file contains <<<module-info.class>>>, this plugin will update
+  the modular descriptor (<<<module-info.class>>>) with additional attributes such as the list of packages included
+  and will validate the resulting modular descriptor (for example if all services provided by the module are actually
+  included in the JAR file). The most notable additional attribute added is the module main class.
+  If the JAR manifest contains <<<Main-Class>>> attribute this plugin will set the module main class to the same value
+  (for example how to set it read {{{../../shared/maven-archiver/examples/classpath.html}Make The Jar Executable}}).
+  Internally the plugin uses the JDK <<<jar>>> tool so in order to add the additional attributes and to
+  verify the modular descriptor Maven should be run with JDK version 9 or newer. If version 8 or earlier is used
+  the resulting JAR still will be Modular JAR (as it contains <<<module-info.class>>>) but no additional attributes
+  will be added and no validation will be performed.
