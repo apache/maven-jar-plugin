@@ -75,7 +75,7 @@
   </distributionManagement>
 
   <properties>
-    <mavenArchiverVersion>3.2.0</mavenArchiverVersion>
+    <mavenArchiverVersion>3.3.0</mavenArchiverVersion>
     <mavenVersion>3.0</mavenVersion>
     <javaVersion>7</javaVersion>
   </properties>
