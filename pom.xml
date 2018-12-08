@@ -30,7 +30,7 @@
   </parent>
 
   <artifactId>maven-jar-plugin</artifactId>
-  <version>3.1.1-SNAPSHOT</version>
+  <version>3.1.1</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven JAR Plugin</name>
@@ -57,7 +57,7 @@
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-jar-plugin.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-jar-plugin.git</developerConnection>
     <url>https://github.com/apache/maven-jar-plugin/tree/${project.scm.tag}</url>
-    <tag>HEAD</tag>
+    <tag>maven-jar-plugin-3.1.1</tag>
   </scm>
   <issueManagement>
     <system>JIRA</system>
