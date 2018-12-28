@@ -48,7 +48,6 @@
                   <mainClass>A</mainClass>
                 </manifest>
               </archive>
-              <finalName>executable</finalName>
             </configuration>
           </execution>
         </executions>

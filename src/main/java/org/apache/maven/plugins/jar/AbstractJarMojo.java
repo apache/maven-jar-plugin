@@ -272,9 +272,11 @@ public abstract class AbstractJarMojo
 
     private boolean projectHasAlreadySetAnArtifact()
     {
-        if ( getProject().getArtifact().getFile() != null )
+        final File artifact = getProject().getArtifact().getFile();
+        if ( artifact != null )
         {
-            return getProject().getArtifact().getFile().isFile();
+            final String defaultArtifactName = artifact.getName().replace( ".jar", "" );
+            return artifact.isFile() && defaultArtifactName.equals( finalName );
         }
         else
         {
