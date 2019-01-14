@@ -20,9 +20,9 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>0</groupId>
-    <artifactId>0</artifactId>
-    <version>@project.version@</version>
+    <groupId>org.apache.maven.its.jars</groupId>
+    <artifactId>mjar254</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <description>MJAR-254 integration test</description>
 
     <build>
@@ -78,6 +78,44 @@
                                 </manifest>
                             </archive>
                             <classifier>test</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <file>target/${build.finalName}.jar</file>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-executable1</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>executable1</artifactId>
+                            <version>${project.version}</version>
+                            <file>target/executable1.jar</file>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-executable2</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>executable2</artifactId>
+                            <version>${project.version}</version>
+                            <file>target/executable2.jar</file>
+                            <packaging>jar</packaging>
                         </configuration>
                     </execution>
                 </executions>
