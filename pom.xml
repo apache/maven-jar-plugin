@@ -181,8 +181,6 @@
                 <goal>clean</goal>
                 <goal>package</goal>
               </goals>
-              <streamLogs>true</streamLogs>
-              <showErrors>true</showErrors>
             </configuration>
             <executions>
               <execution>

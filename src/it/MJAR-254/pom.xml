@@ -82,44 +82,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <configuration>
-                    <file>target/${build.finalName}.jar</file>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-executable1</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>executable1</artifactId>
-                            <version>${project.version}</version>
-                            <file>target/executable1.jar</file>
-                            <packaging>jar</packaging>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-executable2</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>executable2</artifactId>
-                            <version>${project.version}</version>
-                            <file>target/executable2.jar</file>
-                            <packaging>jar</packaging>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>
