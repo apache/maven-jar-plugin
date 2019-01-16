@@ -28,11 +28,15 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.shared.model.fileset.FileSet;
+import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
@@ -49,6 +53,8 @@ public abstract class AbstractJarMojo
     private static final String[] DEFAULT_EXCLUDES = new String[] { "**/package.html" };
 
     private static final String[] DEFAULT_INCLUDES = new String[] { "**/**" };
+
+    private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -79,8 +85,8 @@ public abstract class AbstractJarMojo
     /**
      * The Jar archiver.
      */
-    @Component( role = Archiver.class, hint = "jar" )
-    private JarArchiver jarArchiver;
+    @Component
+    private Map<String, Archiver> archivers;
 
     /**
      * The {@link {MavenProject}.
@@ -204,9 +210,41 @@ public abstract class AbstractJarMojo
     {
         File jarFile = getJarFile( outputDirectory, finalName, getClassifier() );
 
+        FileSetManager fileSetManager = new FileSetManager();
+        FileSet jarContentFileSet = new FileSet();
+        jarContentFileSet.setDirectory( getClassesDirectory().getAbsolutePath() );
+        jarContentFileSet.setIncludes( Arrays.asList( getIncludes() ) );
+        jarContentFileSet.setExcludes( Arrays.asList( getExcludes() ) );
+
+        boolean containsModuleDescriptor = false;
+        String[] includedFiles = fileSetManager.getIncludedFiles( jarContentFileSet );
+        for ( String includedFile : includedFiles )
+        {
+            // May give false positives if the files is named as module descriptor
+            // but is not in the root of the archive or in the versioned area
+            // (and hence not actually a module descriptor).
+            // That is fine since the modular Jar archiver will gracefully
+            // handle such case.
+            // And also such case is unlikely to happen as file ending
+            // with "module-info.class" is unlikely to be included in Jar file
+            // unless it is a module descriptor.
+            if ( includedFile.endsWith( MODULE_DESCRIPTOR_FILE_NAME ) )
+            {
+                containsModuleDescriptor = true;
+                break;
+            }
+        }
+
         MavenArchiver archiver = new MavenArchiver();
 
-        archiver.setArchiver( jarArchiver );
+        if ( containsModuleDescriptor )
+        {
+            archiver.setArchiver( (JarArchiver) archivers.get( "mjar" ) );
+        }
+        else
+        {
+            archiver.setArchiver( (JarArchiver) archivers.get( "jar" ) );
+        }
 
         archiver.setOutputFile( jarFile );
 
@@ -283,7 +321,7 @@ public abstract class AbstractJarMojo
                 {
                     JarFile existingJarFile = new JarFile( getProject().getArtifact().getFile() );
                     Attributes existingJarFileAttr = existingJarFile.getManifest().getMainAttributes();
-                    JarFile currentJarFile = new JarFile( jarArchiver.getDestFile() );
+                    JarFile currentJarFile = new JarFile( archivers.get( "jar" ).getDestFile() );
                     Attributes currentJarFileAttr = currentJarFile.getManifest().getMainAttributes();
                     return existingJarFile.getName().equals( currentJarFile.getName() )
                             && existingJarFileAttr.equals( currentJarFileAttr );
