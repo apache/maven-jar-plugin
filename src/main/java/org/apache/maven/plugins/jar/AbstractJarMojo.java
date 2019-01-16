@@ -32,6 +32,9 @@ import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
 /**
  * Base class for creating a jar from project classes.
@@ -272,11 +275,25 @@ public abstract class AbstractJarMojo
 
     private boolean projectHasAlreadySetAnArtifact()
     {
-        final File artifact = getProject().getArtifact().getFile();
-        if ( artifact != null )
+        if ( getProject().getArtifact().getFile() != null )
         {
-            final String defaultArtifactName = artifact.getName().replace( ".jar", "" );
-            return artifact.isFile() && defaultArtifactName.equals( finalName );
+            if ( getProject().getArtifact().getFile().isFile() )
+            {
+                try
+                {
+                    JarFile existingJarFile = new JarFile( getProject().getArtifact().getFile() );
+                    Attributes existingJarFileAttr = existingJarFile.getManifest().getMainAttributes();
+                    JarFile currentJarFile = new JarFile( jarArchiver.getDestFile() );
+                    Attributes currentJarFileAttr = currentJarFile.getManifest().getMainAttributes();
+                    return existingJarFile.getName().equals( currentJarFile.getName() )
+                            && existingJarFileAttr.equals( currentJarFileAttr );
+                }
+                catch ( IOException e )
+                {
+                    e.printStackTrace();
+                }
+            }
+            return false;
         }
         else
         {
