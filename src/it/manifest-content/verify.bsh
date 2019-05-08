@@ -25,6 +25,7 @@ import org.codehaus.plexus.util.*;
 
 boolean result = true;
 
+
 try
 {
     File target = new File( basedir, "target" );
@@ -44,13 +45,6 @@ try
     JarFile jar = new JarFile( artifact );
 
     Attributes manifest = jar.getManifest().getMainAttributes();
-
-    if ( !manifest.getValue( new Attributes.Name( "Created-By" ) ).startsWith( "Apache Maven" ) )
-    {
-        System.err.println( "Created-By not equals Apache Maven" );
-        return false;
-    }
-
 
     if ( !"manifest-content-it".equals( manifest.get( Attributes.Name.SPECIFICATION_TITLE ) ) )
     {
@@ -81,12 +75,6 @@ try
     if ( !"1.0-SNAPSHOT".equals( manifest.get( Attributes.Name.IMPLEMENTATION_VERSION ) ) )
     {
         System.err.println( Attributes.Name.SPECIFICATION_VERSION.toString() + " not equals 1.0-SNAPSHOT" );
-        return false;
-    }
-
-    if ( !"org.apache.maven.plugins".equals( manifest.get( Attributes.Name.IMPLEMENTATION_VENDOR_ID ) ) )
-    {
-        System.err.println( Attributes.Name.IMPLEMENTATION_VENDOR_ID.toString() + " not equals org.apache.maven.plugins" );
         return false;
     }
 
