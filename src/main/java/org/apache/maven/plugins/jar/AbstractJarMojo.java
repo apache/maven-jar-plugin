@@ -141,6 +141,16 @@ public abstract class AbstractJarMojo
     private boolean skipIfEmpty;
 
     /**
+     * Timestamp for reproducible output archive entries, either formatted as ISO 8601
+     * <code>yyyy-MM-dd'T'HH:mm:ssXXX</code> or as an int representing seconds since the epoch (like
+     * <a href="https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>).
+     *
+     * @since 3.2.0
+     */
+    @Parameter( defaultValue = "${project.build.outputTimestamp}" )
+    private String outputTimestamp;
+
+    /**
      * Return the specific output directory to serve as the root for the archive.
      * @return get classes directory.
      */
@@ -233,6 +243,7 @@ public abstract class AbstractJarMojo
         }
 
         MavenArchiver archiver = new MavenArchiver();
+        archiver.setCreatedBy( "Maven Jar Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
 
         if ( containsModuleDescriptor )
         {
@@ -244,6 +255,9 @@ public abstract class AbstractJarMojo
         }
 
         archiver.setOutputFile( jarFile );
+
+        // configure for Reproducible Builds based on outputTimestamp value
+        archiver.configureReproducible( outputTimestamp );
 
         archive.setForced( forceCreation );
 

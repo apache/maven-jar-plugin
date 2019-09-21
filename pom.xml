@@ -30,7 +30,7 @@
   </parent>
 
   <artifactId>maven-jar-plugin</artifactId>
-  <version>3.1.3-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven JAR Plugin</name>
@@ -76,7 +76,7 @@
 
   <properties>
     <mavenFileManagementVersion>3.0.0</mavenFileManagementVersion>
-    <mavenArchiverVersion>3.4.0</mavenArchiverVersion>
+    <mavenArchiverVersion>3.5.0</mavenArchiverVersion>
     <mavenVersion>3.0</mavenVersion>
     <javaVersion>7</javaVersion>
   </properties>
@@ -133,13 +133,13 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-archiver</artifactId>
-      <version>4.1.0</version>
+      <version>4.2.1</version>
     </dependency>
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-utils</artifactId>
-			<version>3.2.0</version>
-		</dependency>
+	<dependency>
+		<groupId>org.codehaus.plexus</groupId>
+		<artifactId>plexus-utils</artifactId>
+		<version>3.3.0</version>
+	</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -199,7 +199,6 @@
                 <goal>clean</goal>
                 <goal>package</goal>
               </goals>
-              <streamLogs>true</streamLogs>
               <showErrors>true</showErrors>
             </configuration>
             <executions>
