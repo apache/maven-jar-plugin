@@ -301,6 +301,7 @@ public abstract class AbstractJarMojo
     {
         if (skip) {
             getLog().info("Skipping packaging since 'maven.jar.skip' = true");
+            return;
         }
         if ( useDefaultManifestFile )
         {
