@@ -149,6 +149,14 @@ public abstract class AbstractJarMojo
      */
     @Parameter( defaultValue = "${project.build.outputTimestamp}" )
     private String outputTimestamp;
+    
+    /**
+     * Set this to <code>true</code> to bypass jar packaging.
+     * 
+     * @since 3.3.0
+     */
+    @Parameter( property = "maven.jar.skip", defaultValue = "false" )
+    private boolean skip;
 
     /**
      * Return the specific output directory to serve as the root for the archive.
@@ -291,6 +299,9 @@ public abstract class AbstractJarMojo
     public void execute()
         throws MojoExecutionException
     {
+        if (skip) {
+            getLog().info("Skipping packaging since 'maven.jar.skip' = true");
+        }
         if ( useDefaultManifestFile )
         {
             throw new MojoExecutionException( "You are using 'useDefaultManifestFile' which has been removed"
