@@ -151,6 +151,14 @@ public abstract class AbstractJarMojo
     private String outputTimestamp;
 
     /**
+     * Specifies whether or not to attach the artifact to the project
+     *
+     * @since 3.2.2
+     */
+    @Parameter( property = "maven.jar.attach", defaultValue = "true" )
+    private boolean attach;
+
+    /**
      * Return the specific output directory to serve as the root for the archive.
      * @return get classes directory.
      */
@@ -306,18 +314,26 @@ public abstract class AbstractJarMojo
         {
             File jarFile = createArchive();
 
-            if ( hasClassifier() )
+            if ( attach )
             {
-                projectHelper.attachArtifact( getProject(), getType(), getClassifier(), jarFile );
+                if ( hasClassifier() )
+                {
+                    projectHelper.attachArtifact( getProject(), getType(), getClassifier(), jarFile );
+                }
+                else
+                {
+                    if ( projectHasAlreadySetAnArtifact() )
+                    {
+                        throw new MojoExecutionException( "You have to use a classifier "
+                            + "to attach supplemental artifacts to the project instead of replacing them." );
+                    }
+                    getProject().getArtifact().setFile( jarFile );
+                }
             }
             else
             {
-                if ( projectHasAlreadySetAnArtifact() )
-                {
-                    throw new MojoExecutionException( "You have to use a classifier "
-                        + "to attach supplemental artifacts to the project instead of replacing them." );
-                }
-                getProject().getArtifact().setFile( jarFile );
+                getLog().info( "NOT adding jar to attached artifacts list." + jarFile );
+                getLog().warn( "A maven module with jar packaging must produce an artifact. Make sure you understand what you are doing. If this is not what you intended set <attach>true</attach> (or remove <attach>false</attach>)." );
             }
         }
     }
