@@ -29,7 +29,7 @@
 ${project.name}
 
   This plugin provides the capability to build jars.
-  If you like to sign jars please use the 
+  To sign jars, use the 
   {{{/plugins/maven-jarsigner-plugin/}Maven Jarsigner Plugin}}.
 
 * Goals Overview
@@ -42,24 +42,24 @@ ${project.name}
 * Usage
 
   General instructions on how to use the JAR Plugin can be found on the {{{./usage.html}usage page}}. Some more
-  specific use cases are described in the examples given below. 
+  specific use cases are described in the examples below. 
 
   In case you still have questions regarding the plugin's usage, please have a look at the {{{./faq.html}FAQ}} and feel
   free to contact the {{{./mailing-lists.html}user mailing list}}. The posts to the mailing list are archived and could
   already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching
   the {{{./mailing-lists.html}mail archive}}.
 
-  If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
-  {{{./issue-management.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
+  If you feel like the plugin is missing a feature or has a defect, you can file a feature request or bug report in our
+  {{{https://issues.apache.org/jira/projects/MJAR/issues}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
   concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason,
-  entire debug logs, POMs or most preferably little demo projects attached to the issue are very much appreciated.
+  entire debug logs, POMs, or most preferably little demo projects attached to the issue are very much appreciated.
   Of course, patches are welcome, too. Contributors can check out the project from our
   {{{./scm.html}source repository}} and will find supplementary information in the
   {{{http://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
 
 * Archiver Configuration
 
-  The plugin use Maven Archiver to handle jar content and manifest configuration.
+  The plugin uses Maven Archiver to handle jar content and manifest configuration.
 
   You can have a look at the {{{/shared/maven-archiver/}Maven Archiver Documentation}} to understand how to setup this.
 
