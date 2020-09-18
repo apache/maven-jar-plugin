@@ -91,7 +91,6 @@ How to create a jar containing test classes
   <<<artifactId-version-classifier.jar>>> for the second one. The parts <<<artifactId>>>, <<<versions>>>
   will be replaced by the values given within your project <<<pom.xml>>> file. The <<<classifier>>>
   will be set to <<<tests>>> which is a default of the maven-jar-plugin which can be changed if you need by
-  using the configuration in the jar goal
   {{{../test-jar-mojo.html}using the configuration in the jar goal}}.
 
   <<Note:>> The downside of this solution is that you don't get the transitive <<<test>>>-scoped dependencies automatically. 
