@@ -266,7 +266,10 @@ public abstract class AbstractJarMojo
             File contentDirectory = getClassesDirectory();
             if ( !contentDirectory.exists() )
             {
-                getLog().warn( "JAR will be empty - no content was marked for inclusion!" );
+                if ( !forceCreation )
+                {
+                    getLog().warn( "JAR will be empty - no content was marked for inclusion!" );
+                }
             }
             else
             {
