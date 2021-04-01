@@ -53,7 +53,7 @@ public class TestJarMojo
     private File testClassesDirectory;
 
     /**
-     * Classifier to used for {@code test-jar}.
+     * Classifier to use for {@code test-jar}.
      */
     @Parameter( defaultValue = "tests" )
     private String classifier;
