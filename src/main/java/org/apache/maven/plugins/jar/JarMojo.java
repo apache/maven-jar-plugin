@@ -50,7 +50,7 @@ public class JarMojo
      * If you try to do that a second time without using a classifier the build will fail.
      */
     @Parameter
-    private String classifier;
+    private Stringde classifier;
 
     /**
      * {@inheritDoc}
