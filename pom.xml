@@ -81,7 +81,7 @@
     <!-- TODO remove with Maven APi upgrade -->
     <!-- the same version as in Maven 3.1.0 -->
     <sisuVersion>0.0.0.M2a</sisuVersion>
-    <javaVersion>7</javaVersion>
+    <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2022-01-08T21:19:21Z</project.build.outputTimestamp>
   </properties>
 
