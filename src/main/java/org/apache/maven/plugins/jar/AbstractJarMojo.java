@@ -243,7 +243,7 @@ public abstract class AbstractJarMojo
         }
 
         MavenArchiver archiver = new MavenArchiver();
-        archiver.setCreatedBy( "Maven Jar Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
+        archiver.setCreatedBy( "Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
 
         if ( containsModuleDescriptor )
         {
