@@ -117,7 +117,7 @@
     <!--
       ! other dependencies contain references to older versions
       ! so we define it here explicit to make sure we get the
-      ! correct version for plexus-archiver and plexus-utils.
+      ! correct version for plexus-utils.
     -->
     <!--
      ! maven-shared-utils is pulled by file-management
@@ -130,11 +130,7 @@
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-shared-utils</artifactId>
       <version>3.3.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-archiver</artifactId>
-      <version>4.2.5</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
