@@ -52,7 +52,7 @@ try
     }
     if ( !"META-INF/MANIFEST.MF".equals( resultingEntries.nextElement().getName() ) )
     {
-        System.err.println( "META-INF/MANIFEST.MF must be first zip entry" );
+        System.err.println( "META-INF/MANIFEST.MF must be second zip entry" );
         return false;
     }
     zip.close();
