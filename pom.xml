@@ -75,10 +75,10 @@
   </distributionManagement>
 
   <properties>
-    <mavenFileManagementVersion>3.0.0</mavenFileManagementVersion>
-    <mavenArchiverVersion>3.5.2</mavenArchiverVersion>
-    <mavenVersion>3.1.0</mavenVersion>
-    <javaVersion>7</javaVersion>
+    <mavenFileManagementVersion>3.0.1-SNAPSHOT</mavenFileManagementVersion>
+    <mavenArchiverVersion>3.5.3-SNAPSHOT</mavenArchiverVersion>
+    <mavenVersion>4.0.0-alpha-1-SNAPSHOT</mavenVersion>
+    <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2022-01-08T21:19:21Z</project.build.outputTimestamp>
   </properties>
 
@@ -129,7 +129,7 @@
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-shared-utils</artifactId>
-      <version>3.3.4</version>
+      <version>4.0.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -147,7 +147,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-testing</groupId>
       <artifactId>maven-plugin-testing-harness</artifactId>
-      <version>3.1.0</version>
+      <version>3.4.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
