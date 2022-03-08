@@ -113,7 +113,7 @@ How to create a jar containing test classes
      the original project to the <<<src/main/java>>> of this project.
      The same type of movement counts for the resources as well of course.
    
-   * Move the required <<<test>>>-scoped dependencies and from the original 
+   * Move the required <<<test>>>-scoped dependencies from the original 
      project to this project and remove the scope (i.e. changing it to the <<<compile>>>-scope).
      And yes, that means that the junit dependency (or any other testing 
      framework dependency) gets the default scope too. You'll probably need 
