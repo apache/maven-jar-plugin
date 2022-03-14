@@ -77,7 +77,7 @@
   <properties>
     <mavenFileManagementVersion>3.0.0</mavenFileManagementVersion>
     <mavenArchiverVersion>3.5.2</mavenArchiverVersion>
-    <mavenVersion>3.1.0</mavenVersion>
+    <mavenVersion>3.8.5</mavenVersion>
     <javaVersion>7</javaVersion>
     <project.build.outputTimestamp>2022-01-08T21:19:21Z</project.build.outputTimestamp>
   </properties>
