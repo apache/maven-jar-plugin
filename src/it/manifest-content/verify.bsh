@@ -21,6 +21,7 @@
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
+import java.util.zip.*;
 import org.codehaus.plexus.util.*;
 
 boolean result = true;
@@ -41,6 +42,20 @@ try
         System.err.println( "artifact file is missing or a directory." );
         return false;
     }
+
+    ZipFile zip = new ZipFile( artifact );
+    Enumeration resultingEntries = zip.entries();
+    if ( !"META-INF/".equals( resultingEntries.nextElement().getName() ) )
+    {
+        System.err.println( "META-INF/ must be first zip entry" );
+        return false;
+    }
+    if ( !"META-INF/MANIFEST.MF".equals( resultingEntries.nextElement().getName() ) )
+    {
+        System.err.println( "META-INF/MANIFEST.MF must be second zip entry" );
+        return false;
+    }
+    zip.close();
 
     JarFile jar = new JarFile( artifact );
 

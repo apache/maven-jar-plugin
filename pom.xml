@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>maven-jar-plugin</artifactId>
-  <version>3.2.1-SNAPSHOT</version>
+  <version>3.2.3-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven JAR Plugin</name>
@@ -75,10 +75,10 @@
 
   <properties>
     <mavenFileManagementVersion>3.0.0</mavenFileManagementVersion>
-    <mavenArchiverVersion>3.5.1</mavenArchiverVersion>
+    <mavenArchiverVersion>3.5.2</mavenArchiverVersion>
     <mavenVersion>3.2.5</mavenVersion>
     <javaVersion>7</javaVersion>
-    <project.build.outputTimestamp>2020-04-07T21:04:00Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2022-01-08T21:19:21Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
@@ -119,7 +119,7 @@
     <!--
       ! other dependencies contain references to older versions
       ! so we define it here explicit to make sure we get the
-      ! correct version for plexus-archiver and plexus-utils.
+      ! correct version for plexus-utils.
     -->
     <!--
      ! maven-shared-utils is pulled by file-management
@@ -141,7 +141,8 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>3.3.0</version>
+      <version>3.3.1</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
