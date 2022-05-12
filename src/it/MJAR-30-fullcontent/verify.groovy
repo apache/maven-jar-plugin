@@ -41,10 +41,10 @@ try
         return false;
     }
 
-    String[] artifactNames = new String[] { "default-configuration.properties",
+    String[] artifactNames = [ "default-configuration.properties",
             "foo/project001/App.class", "META-INF/MANIFEST.MF",
             "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-30-01/pom.properties",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-30-01/pom.xml" };
+            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-30-01/pom.xml" ];
 
     Set contents = new HashSet();
 
