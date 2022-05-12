@@ -34,21 +34,28 @@ try
         return false;
     }
 
-    File artifact = new File( target, "maven-jar-plugin-test-project-004-99.0.jar" );
+    File artifact = new File( target, "maven-jar-plugin-test-mjar-80-02-99.0.jar" );
     if ( !artifact.exists() || artifact.isDirectory() )
     {
-        System.err.println( "target file is missing or a directory." );
+        System.err.println( "artifact file is missing or a directory." );
         return false;
     }
 
-    String[] artifactNames = new String[] { "service/TestInterface.class",
-            "service/impl/TestImplementation.class", "TestCompile1.class", "notIncluded.xml", "META-INF/MANIFEST.MF",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.properties",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.xml" };
+    File testArtifact = new File( target, "maven-jar-plugin-test-mjar-80-02-99.0-tests.jar" );
+    if ( !testArtifact.exists() || testArtifact.isDirectory() )
+    {
+        System.err.println( "testArtifact file is missing or a directory." );
+        return false;
+    }
+
+    String[] artifactNames =  [ "foo/project003/AppIntegrationTest.class",
+            "META-INF/MANIFEST.MF",
+            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-80-02/pom.properties",
+            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-80-02/pom.xml" ];
 
     Set contents = new HashSet();
 
-    JarFile jar = new JarFile( artifact );
+    JarFile jar = new JarFile( testArtifact );
     Enumeration jarEntries = jar.entries();
     while ( jarEntries.hasMoreElements() )
     {
@@ -75,48 +82,6 @@ try
         }
     }
 
-    // second jar
-
-    artifact = new File( target, "maven-jar-plugin-test-project-004-99.0-service.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "target file is missing or a directory." );
-        return false;
-    }
-
-    artifactNames =  new String[] { "service/TestInterface.class",
-            "META-INF/MANIFEST.MF",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.properties",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.xml" };
-
-    contents = new HashSet();
-
-    jar = new JarFile( artifact );
-    jarEntries = jar.entries();
-    while ( jarEntries.hasMoreElements() )
-    {
-        JarEntry entry = (JarEntry) jarEntries.nextElement();
-        if ( !entry.isDirectory() )
-        {
-            // Only compare files
-            contents.add( entry.getName() );
-        }
-    }
-
-    if  ( artifactNames.length != contents.size() )
-    {
-    	System.err.println( "jar content size is different from the expected content size" );
-    	return false;
-    }
-    for ( int i = 0; i < artifactNames.length; i++ )
-    {
-        String artifactName = artifactNames[i];
-		if ( !contents.contains( artifactName ) )
-		{
-        	System.err.println( "Artifact[" + artifactName + "] not found in jar archive" );
-        	return false;
-        }
-    }
 }
 catch( Throwable e )
 {

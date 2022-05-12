@@ -34,24 +34,24 @@ try
         return false;
     }
 
-    File artifact = new File( target, "maven-jar-plugin-test-mjar-80-02-99.0.jar" );
+    File artifact = new File( target, "maven-jar-plugin-test-mjar-80-03-99.0.jar" );
     if ( !artifact.exists() || artifact.isDirectory() )
     {
         System.err.println( "artifact file is missing or a directory." );
         return false;
     }
 
-    File testArtifact = new File( target, "maven-jar-plugin-test-mjar-80-02-99.0-tests.jar" );
+    File testArtifact = new File( target, "maven-jar-plugin-test-mjar-80-03-99.0-tests.jar" );
     if ( !testArtifact.exists() || testArtifact.isDirectory() )
     {
         System.err.println( "testArtifact file is missing or a directory." );
         return false;
     }
 
-    String[] artifactNames =  new String[] { "foo/project003/AppIntegrationTest.class",
-            "META-INF/MANIFEST.MF",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-80-02/pom.properties",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-80-02/pom.xml" };
+    String[] artifactNames = [ "test-default-configuration.properties",
+            "foo/project003/AppTest.class", "foo/project003/AppIntegrationTest.class", "META-INF/MANIFEST.MF",
+            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-80-03/pom.properties",
+            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-mjar-80-03/pom.xml" ];
 
     Set contents = new HashSet();
 
