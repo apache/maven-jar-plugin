@@ -77,7 +77,7 @@
   <properties>
     <mavenFileManagementVersion>3.0.0</mavenFileManagementVersion>
     <mavenArchiverVersion>3.5.2</mavenArchiverVersion>
-    <mavenVersion>3.1.0</mavenVersion>
+    <mavenVersion>3.8.5</mavenVersion>
     <!-- TODO remove with Maven APi upgrade -->
     <!-- the same version as in Maven 3.1.0 -->
     <sisuVersion>0.0.0.M2a</sisuVersion>
