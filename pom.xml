@@ -121,11 +121,6 @@
       <artifactId>maven-plugin-annotations</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-archiver</artifactId>
-      <version>4.3.0</version>
-    </dependency>
 
     <!-- Test -->
     <dependency>
