@@ -76,8 +76,6 @@
 
   <properties>
     <javaVersion>8</javaVersion>
-    <mavenFileManagementVersion>3.0.0</mavenFileManagementVersion>
-    <mavenArchiverVersion>3.5.2</mavenArchiverVersion>
     <mavenVersion>3.2.5</mavenVersion>
     <project.build.outputTimestamp>2022-01-08T21:19:21Z</project.build.outputTimestamp>
   </properties>
@@ -110,12 +108,12 @@
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>file-management</artifactId>
-      <version>${mavenFileManagementVersion}</version>
+      <version>3.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-archiver</artifactId>
-      <version>${mavenArchiverVersion}</version>
+      <version>3.6.0</version>
     </dependency>
     <!-- dependencies to annotations -->
     <dependency>
@@ -138,7 +136,7 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-archiver</artifactId>
-      <version>4.2.5</version>
+      <version>4.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
