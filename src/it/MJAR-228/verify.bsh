@@ -50,10 +50,10 @@ try
         System.err.println( Attributes.Name.MAIN_CLASS.toString() + " not equals myproject.HelloWorld" );
         return false;
     }
-    if ( !"lib/junit-4.11.jar lib/hamcrest-core-1.3.jar".equals( manifest.get( Attributes.Name.CLASS_PATH ) ) )
+    if ( !"lib/junit-4.13.2.jar lib/hamcrest-core-1.3.jar".equals( manifest.get( Attributes.Name.CLASS_PATH ) ) )
     {
         System.err.println( Attributes.Name.CLASS_PATH.toString() + 
-          " not equals lib/junit-4.11.jar lib/hamcrest-core-1.3.jar" );
+          " not equals lib/junit-4.13.2.jar lib/hamcrest-core-1.3.jar" );
         return false;
     }
 
