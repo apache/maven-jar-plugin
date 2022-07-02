@@ -126,12 +126,6 @@
       <artifactId>plexus-archiver</artifactId>
       <version>4.3.0</version>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>3.4.2</version>
-      <scope>runtime</scope>
-    </dependency>
 
     <!-- Test -->
     <dependency>
