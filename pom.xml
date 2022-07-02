@@ -108,7 +108,7 @@
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>file-management</artifactId>
-      <version>3.0.1-SNAPSHOT</version>
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -121,18 +121,6 @@
       <artifactId>maven-plugin-annotations</artifactId>
       <scope>provided</scope>
     </dependency>
-    <!--
-      ! other dependencies contain references to older versions
-      ! so we define it here explicit to make sure we get the
-      ! correct version for plexus-utils.
-    -->
-    <!--
-     ! maven-shared-utils is pulled by file-management
-     ! Need to use a more recent version otherwise
-     ! the build will fail. This needed to be kept
-     ! here until a new version of file-management
-     ! has been made. 
-    -->
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-archiver</artifactId>
