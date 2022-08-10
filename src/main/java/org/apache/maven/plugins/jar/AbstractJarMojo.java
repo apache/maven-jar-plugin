@@ -322,14 +322,12 @@ public abstract class AbstractJarMojo
 
     private boolean projectHasAlreadySetAnArtifact()
     {
-        if ( getProject().getArtifact().getFile() != null )
-        {
-            return getProject().getArtifact().getFile().isFile();
-        }
-        else
+        if ( getProject().getArtifact().getFile() == null )
         {
             return false;
         }
+
+        return getProject().getArtifact().getFile().isFile();
     }
 
     /**
