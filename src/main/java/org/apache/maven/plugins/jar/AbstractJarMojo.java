@@ -335,13 +335,7 @@ public abstract class AbstractJarMojo
      */
     protected boolean hasClassifier()
     {
-        boolean result = false;
-        if ( getClassifier() != null && getClassifier().trim().length() > 0 )
-        {
-            result = true;
-        }
-
-        return result;
+        return getClassifier() != null && getClassifier().trim().length() > 0;
     }
 
     private String[] getIncludes()
