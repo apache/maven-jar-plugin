@@ -244,18 +244,11 @@ public abstract class AbstractJarMojo
             }
         }
 
+        String archiverName = containsModuleDescriptor ? "mjar" : "jar";
+
         MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy( "Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
-
-        if ( containsModuleDescriptor )
-        {
-            archiver.setArchiver( (JarArchiver) archivers.get( "mjar" ) );
-        }
-        else
-        {
-            archiver.setArchiver( (JarArchiver) archivers.get( "jar" ) );
-        }
-
+        archiver.setArchiver( (JarArchiver) archivers.get( archiverName ) );
         archiver.setOutputFile( jarFile );
 
         // configure for Reproducible Builds based on outputTimestamp value
