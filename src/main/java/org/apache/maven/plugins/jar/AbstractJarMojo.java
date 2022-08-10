@@ -196,16 +196,17 @@ public abstract class AbstractJarMojo
             throw new IllegalArgumentException( "finalName is not allowed to be null" );
         }
 
-        StringBuilder fileName = new StringBuilder( resultFinalName );
-
+        String fileName;
         if ( hasClassifier() )
         {
-            fileName.append( "-" ).append( classifier );
+            fileName = resultFinalName + "-" + classifier + ".jar";
+        }
+        else
+        {
+            fileName = resultFinalName + ".jar";
         }
 
-        fileName.append( ".jar" );
-
-        return new File( basedir, fileName.toString() );
+        return new File( basedir, fileName );
     }
 
     /**
