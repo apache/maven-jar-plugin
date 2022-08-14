@@ -196,16 +196,17 @@ public abstract class AbstractJarMojo
             throw new IllegalArgumentException( "finalName is not allowed to be null" );
         }
 
-        StringBuilder fileName = new StringBuilder( resultFinalName );
-
+        String fileName;
         if ( hasClassifier() )
         {
-            fileName.append( "-" ).append( classifier );
+            fileName = resultFinalName + "-" + classifier + ".jar";
+        }
+        else
+        {
+            fileName = resultFinalName + ".jar";
         }
 
-        fileName.append( ".jar" );
-
-        return new File( basedir, fileName.toString() );
+        return new File( basedir, fileName );
     }
 
     /**
@@ -243,18 +244,11 @@ public abstract class AbstractJarMojo
             }
         }
 
+        String archiverName = containsModuleDescriptor ? "mjar" : "jar";
+
         MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy( "Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
-
-        if ( containsModuleDescriptor )
-        {
-            archiver.setArchiver( (JarArchiver) archivers.get( "mjar" ) );
-        }
-        else
-        {
-            archiver.setArchiver( (JarArchiver) archivers.get( "jar" ) );
-        }
-
+        archiver.setArchiver( (JarArchiver) archivers.get( archiverName ) );
         archiver.setOutputFile( jarFile );
 
         // configure for Reproducible Builds based on outputTimestamp value
@@ -328,14 +322,12 @@ public abstract class AbstractJarMojo
 
     private boolean projectHasAlreadySetAnArtifact()
     {
-        if ( getProject().getArtifact().getFile() != null )
-        {
-            return getProject().getArtifact().getFile().isFile();
-        }
-        else
+        if ( getProject().getArtifact().getFile() == null )
         {
             return false;
         }
+
+        return getProject().getArtifact().getFile().isFile();
     }
 
     /**
@@ -343,13 +335,7 @@ public abstract class AbstractJarMojo
      */
     protected boolean hasClassifier()
     {
-        boolean result = false;
-        if ( getClassifier() != null && getClassifier().trim().length() > 0 )
-        {
-            result = true;
-        }
-
-        return result;
+        return getClassifier() != null && getClassifier().trim().length() > 0;
     }
 
     private String[] getIncludes()
