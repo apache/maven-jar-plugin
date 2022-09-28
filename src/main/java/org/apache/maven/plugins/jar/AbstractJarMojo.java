@@ -35,6 +35,7 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 
 /**
@@ -250,7 +251,15 @@ public abstract class AbstractJarMojo
         archiver.setCreatedBy( "Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
         archiver.setArchiver( (JarArchiver) archivers.get( archiverName ) );
         archiver.setOutputFile( jarFile );
+        archiver.getArchiver().setFilenameComparator( new Comparator<String>()
+        {
 
+            @Override
+            public int compare( String o1, String o2 ) 
+            {
+                return o1.compareTo( o2 );
+            }
+        } );
         // configure for Reproducible Builds based on outputTimestamp value
         archiver.configureReproducibleBuild( outputTimestamp );
 
