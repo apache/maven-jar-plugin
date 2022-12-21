@@ -34,6 +34,7 @@ import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -52,6 +53,8 @@ public abstract class AbstractJarMojo
     private static final String[] DEFAULT_INCLUDES = new String[] { "**/**" };
 
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
+
+    private static final String SEPARATOR = FileSystems.getDefault().getSeparator();
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -152,6 +155,15 @@ public abstract class AbstractJarMojo
     private String outputTimestamp;
 
     /**
+     * If the JAR contains the {@code META-INF/versions} directory it will be detected as a multi-release JAR file
+     * ("MRJAR"), adding the {@code Multi-Release: true} attribute to the main section of the JAR MANIFEST.MF.
+     *
+     * @since 3.3.1
+     */
+    @Parameter( property = "maven.jar.detectMultiReleaseJar", defaultValue = "true" )
+    private boolean detectMultiReleaseJar;
+
+    /**
      * Return the specific output directory to serve as the root for the archive.
      * @return get classes directory.
      */
@@ -225,24 +237,25 @@ public abstract class AbstractJarMojo
         jarContentFileSet.setIncludes( Arrays.asList( getIncludes() ) );
         jarContentFileSet.setExcludes( Arrays.asList( getExcludes() ) );
 
-        boolean containsModuleDescriptor = false;
         String[] includedFiles = fileSetManager.getIncludedFiles( jarContentFileSet );
-        for ( String includedFile : includedFiles )
+
+        if ( detectMultiReleaseJar && Arrays.stream( includedFiles ).anyMatch( p -> p.startsWith( "META-INF" + SEPARATOR
+            + "versions" + SEPARATOR ) ) )
         {
-            // May give false positives if the files is named as module descriptor
-            // but is not in the root of the archive or in the versioned area
-            // (and hence not actually a module descriptor).
-            // That is fine since the modular Jar archiver will gracefully
-            // handle such case.
-            // And also such case is unlikely to happen as file ending
-            // with "module-info.class" is unlikely to be included in Jar file
-            // unless it is a module descriptor.
-            if ( includedFile.endsWith( MODULE_DESCRIPTOR_FILE_NAME ) )
-            {
-                containsModuleDescriptor = true;
-                break;
-            }
+            getLog().debug( "Adding 'Multi-Release: true' manifest entry." );
+            archive.addManifestEntry( "Multi-Release", "true" );
         }
+
+        // May give false positives if the files is named as module descriptor
+        // but is not in the root of the archive or in the versioned area
+        // (and hence not actually a module descriptor).
+        // That is fine since the modular Jar archiver will gracefully
+        // handle such case.
+        // And also such case is unlikely to happen as file ending
+        // with "module-info.class" is unlikely to be included in Jar file
+        // unless it is a module descriptor.
+        boolean containsModuleDescriptor =
+            Arrays.stream( includedFiles ).anyMatch( p -> p.endsWith( MODULE_DESCRIPTOR_FILE_NAME ) );
 
         String archiverName = containsModuleDescriptor ? "mjar" : "jar";
 
