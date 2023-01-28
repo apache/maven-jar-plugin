@@ -34,6 +34,13 @@
         <configuration>
         </configuration>
       </plugin>
+      <!-- Use a fixed version of maven-compiler-plugin, this fails with versions [3.8.1, 3.10.1] -->
+      <!-- Fixed in https://issues.apache.org/jira/browse/MCOMPILER-525 (3.11.0) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
