@@ -89,7 +89,7 @@ public abstract class AbstractJarMojo
     private Map<String, Archiver> archivers;
 
     /**
-     * The {@link {MavenProject}.
+     * The {@link MavenProject}.
      */
     @Parameter( defaultValue = "${project}", readonly = true, required = true )
     private MavenProject project;
@@ -115,6 +115,7 @@ public abstract class AbstractJarMojo
      * @deprecated For version 3.0.0 this parameter is only defined here to break the build if you use it!
      */
     @Parameter( property = "jar.useDefaultManifestFile", defaultValue = "false" )
+    @Deprecated
     private boolean useDefaultManifestFile;
 
     /**
@@ -170,7 +171,7 @@ public abstract class AbstractJarMojo
     protected abstract File getClassesDirectory();
 
     /**
-     * @return the {@link #project}
+     * Return the {@link #project MavenProject}
      */
     protected final MavenProject getProject()
     {
@@ -208,15 +209,7 @@ public abstract class AbstractJarMojo
             throw new IllegalArgumentException( "finalName is not allowed to be null" );
         }
 
-        String fileName;
-        if ( hasClassifier() )
-        {
-            fileName = resultFinalName + "-" + classifier + ".jar";
-        }
-        else
-        {
-            fileName = resultFinalName + ".jar";
-        }
+        String fileName = resultFinalName + ( hasClassifier() ? "-" + classifier : "" ) + ".jar";
 
         return new File( basedir, fileName );
     }
@@ -299,6 +292,7 @@ public abstract class AbstractJarMojo
      * Generates the JAR.
      * @throws MojoExecutionException in case of an error.
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {
@@ -344,11 +338,11 @@ public abstract class AbstractJarMojo
     }
 
     /**
-     * @return true in case where the classifier is not {@code null} and contains something else than white spaces.
+     * Return true in case where the classifier is not {@code null} and contains something else than white spaces.
      */
     protected boolean hasClassifier()
     {
-        return getClassifier() != null && getClassifier().trim().length() > 0;
+        return getClassifier() != null && !getClassifier().trim().isEmpty();
     }
 
     private String[] getIncludes()

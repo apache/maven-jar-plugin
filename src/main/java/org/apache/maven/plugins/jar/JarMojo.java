@@ -55,6 +55,7 @@ public class JarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String getClassifier()
     {
         return classifier;
@@ -63,6 +64,7 @@ public class JarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String getType()
     {
         return "jar";
@@ -71,6 +73,7 @@ public class JarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     protected File getClassesDirectory()
     {
         return classesDirectory;

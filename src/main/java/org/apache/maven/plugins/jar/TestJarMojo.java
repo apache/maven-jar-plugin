@@ -61,6 +61,7 @@ public class TestJarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String getClassifier()
     {
         return classifier;
@@ -69,6 +70,7 @@ public class TestJarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String getType()
     {
         return "test-jar";
@@ -77,6 +79,7 @@ public class TestJarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     protected File getClassesDirectory()
     {
         return testClassesDirectory;
@@ -85,6 +88,7 @@ public class TestJarMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {

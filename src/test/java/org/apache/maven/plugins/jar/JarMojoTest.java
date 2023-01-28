@@ -22,7 +22,6 @@ package org.apache.maven.plugins.jar;
 import java.io.File;
 
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugins.jar.JarMojo;
 
 /**
  * Test for {@link JarMojo}
