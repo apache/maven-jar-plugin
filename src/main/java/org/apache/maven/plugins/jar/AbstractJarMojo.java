@@ -1,5 +1,3 @@
-package org.apache.maven.plugins.jar;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.plugins.jar;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,12 @@ package org.apache.maven.plugins.jar;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.jar;
+
+import java.io.File;
+import java.nio.file.FileSystems;
+import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
@@ -33,24 +37,17 @@ import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
-import java.io.File;
-import java.nio.file.FileSystems;
-import java.util.Arrays;
-import java.util.Map;
-
 /**
  * Base class for creating a jar from project classes.
  *
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @version $Id$
  */
-public abstract class AbstractJarMojo
-    extends AbstractMojo
-{
+public abstract class AbstractJarMojo extends AbstractMojo {
 
-    private static final String[] DEFAULT_EXCLUDES = new String[] { "**/package.html" };
+    private static final String[] DEFAULT_EXCLUDES = new String[] {"**/package.html"};
 
-    private static final String[] DEFAULT_INCLUDES = new String[] { "**/**" };
+    private static final String[] DEFAULT_INCLUDES = new String[] {"**/**"};
 
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
@@ -73,13 +70,13 @@ public abstract class AbstractJarMojo
     /**
      * Directory containing the generated JAR.
      */
-    @Parameter( defaultValue = "${project.build.directory}", required = true )
+    @Parameter(defaultValue = "${project.build.directory}", required = true)
     private File outputDirectory;
 
     /**
      * Name of the generated JAR.
      */
-    @Parameter( defaultValue = "${project.build.finalName}", readonly = true )
+    @Parameter(defaultValue = "${project.build.finalName}", readonly = true)
     private String finalName;
 
     /**
@@ -89,15 +86,15 @@ public abstract class AbstractJarMojo
     private Map<String, Archiver> archivers;
 
     /**
-     * The {@link {MavenProject}.
+     * The {@link MavenProject}.
      */
-    @Parameter( defaultValue = "${project}", readonly = true, required = true )
+    @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
     /**
      * The {@link MavenSession}.
      */
-    @Parameter( defaultValue = "${session}", readonly = true, required = true )
+    @Parameter(defaultValue = "${session}", readonly = true, required = true)
     private MavenSession session;
 
     /**
@@ -111,10 +108,11 @@ public abstract class AbstractJarMojo
      * Using this property will fail your build cause it has been removed from the plugin configuration. See the
      * <a href="https://maven.apache.org/plugins/maven-jar-plugin/">Major Version Upgrade to version 3.0.0</a> for the
      * plugin.
-     * 
+     *
      * @deprecated For version 3.0.0 this parameter is only defined here to break the build if you use it!
      */
-    @Parameter( property = "jar.useDefaultManifestFile", defaultValue = "false" )
+    @Parameter(property = "jar.useDefaultManifestFile", defaultValue = "false")
+    @Deprecated
     private boolean useDefaultManifestFile;
 
     /**
@@ -134,13 +132,13 @@ public abstract class AbstractJarMojo
      * Starting with <b>3.0.0</b> the property has been renamed from <code>jar.forceCreation</code> to
      * <code>maven.jar.forceCreation</code>.
      */
-    @Parameter( property = "maven.jar.forceCreation", defaultValue = "false" )
+    @Parameter(property = "maven.jar.forceCreation", defaultValue = "false")
     private boolean forceCreation;
 
     /**
      * Skip creating empty archives.
      */
-    @Parameter( defaultValue = "false" )
+    @Parameter(defaultValue = "false")
     private boolean skipIfEmpty;
 
     /**
@@ -151,16 +149,16 @@ public abstract class AbstractJarMojo
      *
      * @since 3.2.0
      */
-    @Parameter( defaultValue = "${project.build.outputTimestamp}" )
+    @Parameter(defaultValue = "${project.build.outputTimestamp}")
     private String outputTimestamp;
 
     /**
      * If the JAR contains the {@code META-INF/versions} directory it will be detected as a multi-release JAR file
      * ("MRJAR"), adding the {@code Multi-Release: true} attribute to the main section of the JAR MANIFEST.MF.
      *
-     * @since 3.3.1
+     * @since 3.4.0
      */
-    @Parameter( property = "maven.jar.detectMultiReleaseJar", defaultValue = "true" )
+    @Parameter(property = "maven.jar.detectMultiReleaseJar", defaultValue = "true")
     private boolean detectMultiReleaseJar;
 
     /**
@@ -170,10 +168,11 @@ public abstract class AbstractJarMojo
     protected abstract File getClassesDirectory();
 
     /**
-     * @return the {@link #project}
+     * Return the {@link #project MavenProject}
+     *
+     * @return the MavenProject.
      */
-    protected final MavenProject getProject()
-    {
+    protected final MavenProject getProject() {
         return project;
     }
 
@@ -197,28 +196,17 @@ public abstract class AbstractJarMojo
      * @param classifier an optional classifier
      * @return the file to generate
      */
-    protected File getJarFile( File basedir, String resultFinalName, String classifier )
-    {
-        if ( basedir == null )
-        {
-            throw new IllegalArgumentException( "basedir is not allowed to be null" );
+    protected File getJarFile(File basedir, String resultFinalName, String classifier) {
+        if (basedir == null) {
+            throw new IllegalArgumentException("basedir is not allowed to be null");
         }
-        if ( resultFinalName == null )
-        {
-            throw new IllegalArgumentException( "finalName is not allowed to be null" );
+        if (resultFinalName == null) {
+            throw new IllegalArgumentException("finalName is not allowed to be null");
         }
 
-        String fileName;
-        if ( hasClassifier() )
-        {
-            fileName = resultFinalName + "-" + classifier + ".jar";
-        }
-        else
-        {
-            fileName = resultFinalName + ".jar";
-        }
+        String fileName = resultFinalName + (hasClassifier() ? "-" + classifier : "") + ".jar";
 
-        return new File( basedir, fileName );
+        return new File(basedir, fileName);
     }
 
     /**
@@ -226,24 +214,22 @@ public abstract class AbstractJarMojo
      * @return The instance of File for the created archive file.
      * @throws MojoExecutionException in case of an error.
      */
-    public File createArchive()
-        throws MojoExecutionException
-    {
-        File jarFile = getJarFile( outputDirectory, finalName, getClassifier() );
+    public File createArchive() throws MojoExecutionException {
+        File jarFile = getJarFile(outputDirectory, finalName, getClassifier());
 
         FileSetManager fileSetManager = new FileSetManager();
         FileSet jarContentFileSet = new FileSet();
-        jarContentFileSet.setDirectory( getClassesDirectory().getAbsolutePath() );
-        jarContentFileSet.setIncludes( Arrays.asList( getIncludes() ) );
-        jarContentFileSet.setExcludes( Arrays.asList( getExcludes() ) );
+        jarContentFileSet.setDirectory(getClassesDirectory().getAbsolutePath());
+        jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
+        jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
 
-        String[] includedFiles = fileSetManager.getIncludedFiles( jarContentFileSet );
+        String[] includedFiles = fileSetManager.getIncludedFiles(jarContentFileSet);
 
-        if ( detectMultiReleaseJar && Arrays.stream( includedFiles ).anyMatch( p -> p.startsWith( "META-INF" + SEPARATOR
-            + "versions" + SEPARATOR ) ) )
-        {
-            getLog().debug( "Adding 'Multi-Release: true' manifest entry." );
-            archive.addManifestEntry( "Multi-Release", "true" );
+        if (detectMultiReleaseJar
+                && Arrays.stream(includedFiles)
+                        .anyMatch(p -> p.startsWith("META-INF" + SEPARATOR + "versions" + SEPARATOR))) {
+            getLog().debug("Adding 'Multi-Release: true' manifest entry.");
+            archive.addManifestEntry("Multi-Release", "true");
         }
 
         // May give false positives if the files is named as module descriptor
@@ -255,43 +241,36 @@ public abstract class AbstractJarMojo
         // with "module-info.class" is unlikely to be included in Jar file
         // unless it is a module descriptor.
         boolean containsModuleDescriptor =
-            Arrays.stream( includedFiles ).anyMatch( p -> p.endsWith( MODULE_DESCRIPTOR_FILE_NAME ) );
+                Arrays.stream(includedFiles).anyMatch(p -> p.endsWith(MODULE_DESCRIPTOR_FILE_NAME));
 
         String archiverName = containsModuleDescriptor ? "mjar" : "jar";
 
         MavenArchiver archiver = new MavenArchiver();
-        archiver.setCreatedBy( "Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin" );
-        archiver.setArchiver( (JarArchiver) archivers.get( archiverName ) );
-        archiver.setOutputFile( jarFile );
+        archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
+        archiver.setArchiver((JarArchiver) archivers.get(archiverName));
+        archiver.setOutputFile(jarFile);
 
         // configure for Reproducible Builds based on outputTimestamp value
-        archiver.configureReproducibleBuild( outputTimestamp );
+        archiver.configureReproducibleBuild(outputTimestamp);
 
-        archive.setForced( forceCreation );
+        archive.setForced(forceCreation);
 
-        try
-        {
+        try {
             File contentDirectory = getClassesDirectory();
-            if ( !contentDirectory.exists() )
-            {
-                if ( !forceCreation )
-                {
-                    getLog().warn( "JAR will be empty - no content was marked for inclusion!" );
+            if (!contentDirectory.exists()) {
+                if (!forceCreation) {
+                    getLog().warn("JAR will be empty - no content was marked for inclusion!");
                 }
-            }
-            else
-            {
-                archiver.getArchiver().addDirectory( contentDirectory, getIncludes(), getExcludes() );
+            } else {
+                archiver.getArchiver().addDirectory(contentDirectory, getIncludes(), getExcludes());
             }
 
-            archiver.createArchive( session, project, archive );
+            archiver.createArchive(session, project, archive);
 
             return jarFile;
-        }
-        catch ( Exception e )
-        {
+        } catch (Exception e) {
             // TODO: improve error handling
-            throw new MojoExecutionException( "Error assembling JAR", e );
+            throw new MojoExecutionException("Error assembling JAR", e);
         }
     }
 
@@ -299,44 +278,34 @@ public abstract class AbstractJarMojo
      * Generates the JAR.
      * @throws MojoExecutionException in case of an error.
      */
-    public void execute()
-        throws MojoExecutionException
-    {
-        if ( useDefaultManifestFile )
-        {
-            throw new MojoExecutionException( "You are using 'useDefaultManifestFile' which has been removed"
-                + " from the maven-jar-plugin. "
-                + "Please see the >>Major Version Upgrade to version 3.0.0<< on the plugin site." );
+    @Override
+    public void execute() throws MojoExecutionException {
+        if (useDefaultManifestFile) {
+            throw new MojoExecutionException("You are using 'useDefaultManifestFile' which has been removed"
+                    + " from the maven-jar-plugin. "
+                    + "Please see the >>Major Version Upgrade to version 3.0.0<< on the plugin site.");
         }
 
-        if ( skipIfEmpty && ( !getClassesDirectory().exists() || getClassesDirectory().list().length < 1 ) )
-        {
-            getLog().info( "Skipping packaging of the " + getType() );
-        }
-        else
-        {
+        if (skipIfEmpty
+                && (!getClassesDirectory().exists() || getClassesDirectory().list().length < 1)) {
+            getLog().info("Skipping packaging of the " + getType());
+        } else {
             File jarFile = createArchive();
 
-            if ( hasClassifier() )
-            {
-                projectHelper.attachArtifact( getProject(), getType(), getClassifier(), jarFile );
-            }
-            else
-            {
-                if ( projectHasAlreadySetAnArtifact() )
-                {
-                    throw new MojoExecutionException( "You have to use a classifier "
-                        + "to attach supplemental artifacts to the project instead of replacing them." );
+            if (hasClassifier()) {
+                projectHelper.attachArtifact(getProject(), getType(), getClassifier(), jarFile);
+            } else {
+                if (projectHasAlreadySetAnArtifact()) {
+                    throw new MojoExecutionException("You have to use a classifier "
+                            + "to attach supplemental artifacts to the project instead of replacing them.");
                 }
-                getProject().getArtifact().setFile( jarFile );
+                getProject().getArtifact().setFile(jarFile);
             }
         }
     }
 
-    private boolean projectHasAlreadySetAnArtifact()
-    {
-        if ( getProject().getArtifact().getFile() == null )
-        {
+    private boolean projectHasAlreadySetAnArtifact() {
+        if (getProject().getArtifact().getFile() == null) {
             return false;
         }
 
@@ -344,26 +313,23 @@ public abstract class AbstractJarMojo
     }
 
     /**
-     * @return true in case where the classifier is not {@code null} and contains something else than white spaces.
+     * Return {@code true} in case where the classifier is not {@code null} and contains something else than white spaces.
+     *
+     * @return {@code true} if the classifier is set.
      */
-    protected boolean hasClassifier()
-    {
-        return getClassifier() != null && getClassifier().trim().length() > 0;
+    protected boolean hasClassifier() {
+        return getClassifier() != null && !getClassifier().trim().isEmpty();
     }
 
-    private String[] getIncludes()
-    {
-        if ( includes != null && includes.length > 0 )
-        {
+    private String[] getIncludes() {
+        if (includes != null && includes.length > 0) {
             return includes;
         }
         return DEFAULT_INCLUDES;
     }
 
-    private String[] getExcludes()
-    {
-        if ( excludes != null && excludes.length > 0 )
-        {
+    private String[] getExcludes() {
+        if (excludes != null && excludes.length > 0) {
             return excludes;
         }
         return DEFAULT_EXCLUDES;

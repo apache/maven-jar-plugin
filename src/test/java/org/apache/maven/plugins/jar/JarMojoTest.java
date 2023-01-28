@@ -1,5 +1,3 @@
-package org.apache.maven.plugins.jar;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.plugins.jar;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,35 +16,30 @@ package org.apache.maven.plugins.jar;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.jar;
 
 import java.io.File;
 
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugins.jar.JarMojo;
 
 /**
  * Test for {@link JarMojo}
  *
  * @version $Id$
  */
-public class JarMojoTest
-    extends AbstractMojoTestCase
-{
-    private File testPom = new File( getBasedir(), "src/test/resources/unit/jar-basic-test/pom.xml" );
+public class JarMojoTest extends AbstractMojoTestCase {
+    private File testPom = new File(getBasedir(), "src/test/resources/unit/jar-basic-test/pom.xml");
 
     /**
      * Tests the discovery and configuration of the mojo.
      *
      * @throws Exception in case of an error
      */
-    public void testJarTestEnvironment()
-        throws Exception
-    {
-        JarMojo mojo = (JarMojo) lookupMojo( "jar", testPom );
+    public void testJarTestEnvironment() throws Exception {
+        JarMojo mojo = (JarMojo) lookupMojo("jar", testPom);
 
-        assertNotNull( mojo );
+        assertNotNull(mojo);
 
-        assertEquals( "foo", mojo.getProject().getGroupId() );
+        assertEquals("foo", mojo.getProject().getGroupId());
     }
-
 }
