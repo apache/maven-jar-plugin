@@ -21,7 +21,7 @@
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
-import org.codehaus.plexus.util.*;
+import org.apache.commons.io.*;
 
 boolean result = true;
 
@@ -51,7 +51,7 @@ try
             // Only compare files
             if ( entry.getName().equals( "META-INF/MANIFEST.MF" ) )
             {
-            	String manifest = IOUtil.toString( jar.getInputStream ( entry ) );
+            	String manifest = IOUtils.toString( jar.getInputStream ( entry ) );
             	int index = manifest.indexOf( "Class-Path: config/" );
             	if ( index <= 0 )
             	{	
