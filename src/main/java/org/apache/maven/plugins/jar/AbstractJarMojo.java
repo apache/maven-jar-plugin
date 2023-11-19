@@ -38,6 +38,7 @@ import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.apache.maven.toolchain.ToolchainManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.util.DefaultFileSet;
 
 /**
  * Base class for creating a jar from project classes.
@@ -170,6 +171,36 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private boolean detectMultiReleaseJar;
 
     /**
+     * If set to {@code false}, the files that by default are excluded from the resulting archive,
+     * like {@code .gitignore}, {@code .cvsignore} etc. will be included.
+     * This means all files like the following will be included.
+     * <ul>
+     * <li>Misc: &#42;&#42;/&#42;~, &#42;&#42;/#&#42;#, &#42;&#42;/.#&#42;, &#42;&#42;/%&#42;%, &#42;&#42;/._&#42;</li>
+     * <li>CVS: &#42;&#42;/CVS, &#42;&#42;/CVS/&#42;&#42;, &#42;&#42;/.cvsignore</li>
+     * <li>RCS: &#42;&#42;/RCS, &#42;&#42;/RCS/&#42;&#42;</li>
+     * <li>SCCS: &#42;&#42;/SCCS, &#42;&#42;/SCCS/&#42;&#42;</li>
+     * <li>VSSercer: &#42;&#42;/vssver.scc</li>
+     * <li>MKS: &#42;&#42;/project.pj</li>
+     * <li>SVN: &#42;&#42;/.svn, &#42;&#42;/.svn/&#42;&#42;</li>
+     * <li>GNU: &#42;&#42;/.arch-ids, &#42;&#42;/.arch-ids/&#42;&#42;</li>
+     * <li>Bazaar: &#42;&#42;/.bzr, &#42;&#42;/.bzr/&#42;&#42;</li>
+     * <li>SurroundSCM: &#42;&#42;/.MySCMServerInfo</li>
+     * <li>Mac: &#42;&#42;/.DS_Store</li>
+     * <li>Serena Dimension: &#42;&#42;/.metadata, &#42;&#42;/.metadata/&#42;&#42;</li>
+     * <li>Mercurial: &#42;&#42;/.hg, &#42;&#42;/.hg/&#42;&#42;</li>
+     * <li>Git: &#42;&#42;/.git, &#42;&#42;/.git/&#42;&#42;</li>
+     * <li>Bitkeeper: &#42;&#42;/BitKeeper, &#42;&#42;/BitKeeper/&#42;&#42;, &#42;&#42;/ChangeSet,
+     * &#42;&#42;/ChangeSet/&#42;&#42;</li>
+     * <li>Darcs: &#42;&#42;/_darcs, &#42;&#42;/_darcs/&#42;&#42;, &#42;&#42;/.darcsrepo,
+     * &#42;&#42;/.darcsrepo/&#42;&#42;&#42;&#42;/-darcs-backup&#42;, &#42;&#42;/.darcs-temp-mail
+     * </ul>
+     *
+     * @since 3.4.0
+     */
+    @Parameter(defaultValue = "true")
+    private boolean addDefaultExcludes;
+
+    /**
      * Return the specific output directory to serve as the root for the archive.
      * @return get classes directory.
      */
@@ -230,6 +261,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         jarContentFileSet.setDirectory(getClassesDirectory().getAbsolutePath());
         jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
         jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
+        jarContentFileSet.setUseDefaultExcludes(addDefaultExcludes);
 
         String[] includedFiles = fileSetManager.getIncludedFiles(jarContentFileSet);
 
@@ -281,7 +313,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
                     getLog().warn("JAR will be empty - no content was marked for inclusion!");
                 }
             } else {
-                archiver.getArchiver().addDirectory(contentDirectory, getIncludes(), getExcludes());
+                archiver.getArchiver().addFileSet(getFileSet(contentDirectory));
             }
 
             archiver.createArchive(session, project, archive);
@@ -352,5 +384,14 @@ public abstract class AbstractJarMojo extends AbstractMojo {
             return excludes;
         }
         return DEFAULT_EXCLUDES;
+    }
+
+    private org.codehaus.plexus.archiver.FileSet getFileSet(File contentDirectory) {
+        DefaultFileSet fileSet = DefaultFileSet.fileSet(contentDirectory)
+                .includeExclude(getIncludes(), getExcludes())
+                .includeEmptyDirs(true);
+
+        fileSet.setUsingDefaultExcludes(false);
+        return fileSet;
     }
 }
