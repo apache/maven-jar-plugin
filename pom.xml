@@ -74,7 +74,7 @@
 
   <properties>
     <javaVersion>8</javaVersion>
-    <mavenVersion>4.0.0-alpha-11-SNAPSHOT</mavenVersion>
+    <mavenVersion>4.0.0-alpha-12</mavenVersion>
     <mavenArchiverVersion>4.0.0-SNAPSHOT</mavenArchiverVersion>
     <project.build.outputTimestamp>2022-09-12T15:53:21Z</project.build.outputTimestamp>
   </properties>
