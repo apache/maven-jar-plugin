@@ -26,10 +26,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import jakarta.inject.Inject;
 import org.apache.maven.api.Artifact;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
+import org.apache.maven.api.di.Inject;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Parameter;
@@ -319,7 +319,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
                     throw new MojoException("You have to use a classifier "
                             + "to attach supplemental artifacts to the project instead of replacing them.");
                 }
-                artifact = project.getArtifact();
+                artifact = project.getMainArtifact().get();
             }
             projectManager.attachArtifact(project, artifact, jarFile);
         }

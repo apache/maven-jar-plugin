@@ -51,8 +51,9 @@ try
     }
     if ( !"lib/junit-4.13.2.jar lib/hamcrest-core-1.3.jar".equals( manifest.get( Attributes.Name.CLASS_PATH ) ) )
     {
-        System.err.println( Attributes.Name.CLASS_PATH.toString() + 
-          " not equals lib/junit-4.13.2.jar lib/hamcrest-core-1.3.jar" );
+        System.err.println( Attributes.Name.CLASS_PATH.toString() +
+          " equals '" + manifest.get( Attributes.Name.CLASS_PATH ) + "' " +
+          " but should be 'lib/junit-4.13.2.jar lib/hamcrest-core-1.3.jar'" );
         return false;
     }
 
