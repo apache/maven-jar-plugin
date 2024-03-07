@@ -19,8 +19,10 @@
 package org.apache.maven.plugins.jar;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
@@ -34,8 +36,14 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
+import org.apache.maven.toolchain.Toolchain;
+import org.apache.maven.toolchain.ToolchainManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.util.cli.CommandLineException;
+import org.codehaus.plexus.util.cli.CommandLineUtils;
+import org.codehaus.plexus.util.cli.Commandline;
+import org.codehaus.plexus.util.cli.StreamConsumer;
 
 /**
  * Base class for creating a jar from project classes.
@@ -52,6 +60,9 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
     private static final String SEPARATOR = FileSystems.getDefault().getSeparator();
+
+    @Component
+    ToolchainManager toolchainManager;
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -249,6 +260,33 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
         archiver.setArchiver((JarArchiver) archivers.get(archiverName));
         archiver.setOutputFile(jarFile);
+
+        Toolchain toolchain = toolchainManager.getToolchainFromBuildContext("jdk", session);
+        if (toolchain != null) {
+            String javac = toolchain.findTool("javac");
+            String version = "unknown";
+            try {
+                Commandline cl = new Commandline(javac);
+                cl.createArg().setValue("-version");
+                CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
+                CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
+                CommandLineUtils.executeCommandLine(cl, out, err);
+                version = out.getOutput();
+                if (version.startsWith("javac ")) {
+                    version = version.substring(6);
+                }
+                if (version.startsWith("1.")) {
+                    version = version.substring(0, 3);
+                } else {
+                    version = version.substring(0, 2);
+                }
+            } catch (CommandLineException e) {
+                throw new RuntimeException(e);
+            }
+            // TODO cache in MavenSession for reuse?
+            archive.addManifestEntry("Build-Jdk-Spec", version);
+            archive.addManifestEntry("Build-Tool-Jdk-Spec", System.getProperty("java.specification.version"));
+        }
 
         // configure for Reproducible Builds based on outputTimestamp value
         archiver.configureReproducibleBuild(outputTimestamp);
