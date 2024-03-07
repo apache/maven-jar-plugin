@@ -135,6 +135,12 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     @Parameter(property = "maven.jar.forceCreation", defaultValue = "false")
     private boolean forceCreation;
 
+     /**
+     * Skip creating archives.
+     */
+    @Parameter(property = "maven.jar.skipJar", defaultValue = "false")
+    private boolean skipJar;
+    
     /**
      * Skip creating empty archives.
      */
@@ -286,6 +292,10 @@ public abstract class AbstractJarMojo extends AbstractMojo {
                     + "Please see the >>Major Version Upgrade to version 3.0.0<< on the plugin site.");
         }
 
+        if (skipJar) {
+             getLog().info("Skipping packaging ");
+        }
+        
         if (skipIfEmpty
                 && (!getClassesDirectory().exists() || getClassesDirectory().list().length < 1)) {
             getLog().info("Skipping packaging of the " + getType());
