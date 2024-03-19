@@ -22,6 +22,7 @@ import java.io.File;
 import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
@@ -34,6 +35,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
+import org.apache.maven.toolchain.ToolchainManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
@@ -52,6 +54,12 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
     private static final String SEPARATOR = FileSystems.getDefault().getSeparator();
+
+    @Component
+    private ToolchainsJdkSpecification toolchainsJdkSpecification;
+
+    @Component
+    private ToolchainManager toolchainManager;
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -249,6 +257,17 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
         archiver.setArchiver((JarArchiver) archivers.get(archiverName));
         archiver.setOutputFile(jarFile);
+
+        Optional.ofNullable(toolchainManager.getToolchainFromBuildContext("jdk", session))
+                .ifPresent(toolchain -> toolchainsJdkSpecification
+                        .getJDKSpecification(toolchain)
+                        .ifPresent(jdkSpec -> {
+                            archive.addManifestEntry("Build-Jdk-Spec", jdkSpec);
+                            archive.addManifestEntry(
+                                    "Build-Tool-Jdk-Spec", System.getProperty("java.specification.version"));
+                            archiver.setBuildJdkSpecDefaultEntry(false);
+                            getLog().info("Set Build-Jdk-Spec based on toolchain in maven-jar-plugin " + toolchain);
+                        }));
 
         // configure for Reproducible Builds based on outputTimestamp value
         archiver.configureReproducibleBuild(outputTimestamp);
