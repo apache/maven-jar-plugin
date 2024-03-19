@@ -16,30 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.plugins.jar;
 
-import org.apache.maven.plugin.testing.junit5.InjectMojo;
-import org.apache.maven.plugin.testing.junit5.MojoTest;
-import org.junit.jupiter.api.Test;
+import java.util.jar.JarFile
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+def mrjar = new JarFile(new File(basedir, 'target/mjar-62-1.0-SNAPSHOT.jar'))
+def manifest = mrjar.manifest.mainAttributes
 
-/**
- * Test for {@link JarMojo}
- *
- * @version $Id$
- */
-@MojoTest
-class JarMojoTest {
-
-    /**
-     * Tests the discovery and configuration of the mojo.
-     */
-    @Test
-    @InjectMojo(goal = "jar", pom = "classpath:/unit/jar-basic-test/pom.xml")
-    void testJarTestEnvironment(JarMojo mojo) {
-        assertNotNull(mojo);
-        assertEquals("foo", mojo.getProject().getGroupId());
-    }
-}
+assert manifest.getValue("Build-Jdk-Spec") == "17"
+assert manifest.getValue("Build-Tool-Jdk-Spec") == System.getProperty("java.specification.version")

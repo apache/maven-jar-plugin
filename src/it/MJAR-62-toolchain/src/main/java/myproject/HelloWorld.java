@@ -1,3 +1,5 @@
+package myproject;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -7,7 +9,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,30 +18,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.plugins.jar;
-
-import org.apache.maven.plugin.testing.junit5.InjectMojo;
-import org.apache.maven.plugin.testing.junit5.MojoTest;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Test for {@link JarMojo}
- *
- * @version $Id$
+ * The classic Hello World App.
  */
-@MojoTest
-class JarMojoTest {
+public class HelloWorld {
 
-    /**
-     * Tests the discovery and configuration of the mojo.
+  /**
+     * Main method.
+     *
+     * @param args Not used
      */
-    @Test
-    @InjectMojo(goal = "jar", pom = "classpath:/unit/jar-basic-test/pom.xml")
-    void testJarTestEnvironment(JarMojo mojo) {
-        assertNotNull(mojo);
-        assertEquals("foo", mojo.getProject().getGroupId());
-    }
+    public static void main( String[] args )
+    {
+        System.out.println( "Hi!" );
+    } 
 }
