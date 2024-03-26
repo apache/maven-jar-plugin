@@ -74,7 +74,7 @@
 
   <properties>
     <javaVersion>8</javaVersion>
-    <mavenVersion>3.2.5</mavenVersion>
+    <mavenVersion>3.6.3</mavenVersion>
     <mavenArchiverVersion>3.6.1</mavenArchiverVersion>
     <project.build.outputTimestamp>2022-09-12T15:53:21Z</project.build.outputTimestamp>
   </properties>
@@ -184,6 +184,29 @@
               <exclude>src/it/mjar-71-01/src/main/resources/META-INF/MANIFEST.MF</exclude>
               <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
             </excludes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-report-plugin</artifactId>
+          <configuration>
+            <requirementsHistories>
+              <requirementsHistory>
+                <version>3.3.0</version>
+                <maven>3.2.5</maven>
+                <jdk>1.8</jdk>
+              </requirementsHistory>
+              <requirementsHistory>
+                <version>3.2.1 - 3.2.2</version>
+                <maven>3.1.0</maven>
+                <jdk>1.7</jdk>
+              </requirementsHistory>
+              <requirementsHistory>
+                <version>3.0.0 - 3.2.0</version>
+                <maven>3.0</maven>
+                <jdk>1.7</jdk>
+              </requirementsHistory>
+            </requirementsHistories>
           </configuration>
         </plugin>
       </plugins>
