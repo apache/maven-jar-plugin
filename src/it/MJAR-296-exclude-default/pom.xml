@@ -23,9 +23,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>mjar-296-suppress-default-excludes</artifactId>
+  <artifactId>mjar-296-exclude-default</artifactId>
   <name>mjar-296-suppress-default-excludes</name>
-  <description>Verifies that the resulting jar includes files excluded by default</description>
+  <description>Verifies that the resulting jar not includes files excluded by default</description>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 
@@ -35,14 +35,22 @@
   </properties>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <configuration>
+            <addDefaultExcludes>false</addDefaultExcludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>@project.version@</version>
-        <configuration>
-          <addDefaultExcludes>false</addDefaultExcludes>
-        </configuration>
       </plugin>
     </plugins>
   </build>

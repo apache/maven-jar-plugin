@@ -195,6 +195,8 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      * &#42;&#42;/.darcsrepo/&#42;&#42;&#42;&#42;/-darcs-backup&#42;, &#42;&#42;/.darcs-temp-mail
      * </ul>
      *
+     * @see <a
+     *         href="https://github.com/codehaus-plexus/plexus-utils/blob/master/src/main/java/org/codehaus/plexus/util/AbstractScanner.java">DEFAULTEXCLUDES</a>
      * @since 3.4.0
      */
     @Parameter(defaultValue = "true")
@@ -261,7 +263,6 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         jarContentFileSet.setDirectory(getClassesDirectory().getAbsolutePath());
         jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
         jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
-        jarContentFileSet.setUseDefaultExcludes(addDefaultExcludes);
 
         String[] includedFiles = fileSetManager.getIncludedFiles(jarContentFileSet);
 
@@ -388,10 +389,11 @@ public abstract class AbstractJarMojo extends AbstractMojo {
 
     private org.codehaus.plexus.archiver.FileSet getFileSet(File contentDirectory) {
         DefaultFileSet fileSet = DefaultFileSet.fileSet(contentDirectory)
+                .prefixed("")
                 .includeExclude(getIncludes(), getExcludes())
                 .includeEmptyDirs(true);
 
-        fileSet.setUsingDefaultExcludes(false);
+        fileSet.setUsingDefaultExcludes(addDefaultExcludes);
         return fileSet;
     }
 }
