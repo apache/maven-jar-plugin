@@ -40,6 +40,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
+          <version>@version.maven-resources-plugin@</version>
           <configuration>
             <addDefaultExcludes>false</addDefaultExcludes>
           </configuration>
