@@ -67,28 +67,28 @@
             <!-- START SNIPPET: jar-lifecycle -->
             <phases>
               <process-resources>
-                org.apache.maven.plugins:maven-resources-plugin:3.0.2:resources
+                org.apache.maven.plugins:maven-resources-plugin:${version.maven-resources-plugin}:resources
               </process-resources>
               <compile>
-                org.apache.maven.plugins:maven-compiler-plugin:3.5.1:compile
+                org.apache.maven.plugins:maven-compiler-plugin:${version.maven-compiler-plugin}:compile
               </compile>
               <process-test-resources>
-                org.apache.maven.plugins:maven-resources-plugin:3.0.2:testResources
+                org.apache.maven.plugins:maven-resources-plugin:${version.maven-resources-plugin}:testResources
               </process-test-resources>
               <test-compile>
-                org.apache.maven.plugins:maven-compiler-plugin:3.5.1:testCompile
+                org.apache.maven.plugins:maven-compiler-plugin:${version.maven-compiler-plugin}:testCompile
               </test-compile>
               <test>
-                org.apache.maven.plugins:maven-surefire-plugin:2.19.1:test
+                org.apache.maven.plugins:maven-surefire-plugin:${version.maven-surefire}:test
               </test>
               <package>
                 org.apache.maven.plugins:maven-jar-plugin:${project.version}:jar
               </package>
               <install>
-                org.apache.maven.plugins:maven-install-plugin:2.5.2:install
+                org.apache.maven.plugins:maven-install-plugin:${version.maven-install-plugin}:install
               </install>
               <deploy>
-                org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy
+                org.apache.maven.plugins:maven-deploy-plugin:${version.maven-deploy-plugin}:deploy
               </deploy>
             </phases>
             <!-- END SNIPPET: jar-lifecycle -->
