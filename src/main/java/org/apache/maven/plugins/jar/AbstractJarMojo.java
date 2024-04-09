@@ -171,7 +171,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private boolean detectMultiReleaseJar;
 
     /**
-     * If set to {@code false}, the files that by default are excluded from the resulting archive,
+     * If set to {@code false}, the files and directories that by default are excluded from the resulting archive,
      * like {@code .gitignore}, {@code .cvsignore} etc. will be included.
      * This means all files like the following will be included.
      * <ul>
@@ -195,8 +195,8 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      * &#42;&#42;/.darcsrepo/&#42;&#42;&#42;&#42;/-darcs-backup&#42;, &#42;&#42;/.darcs-temp-mail
      * </ul>
      *
-     * @see <a
-     *         href="https://github.com/codehaus-plexus/plexus-utils/blob/master/src/main/java/org/codehaus/plexus/util/AbstractScanner.java">DEFAULTEXCLUDES</a>
+     * @see <a href="https://codehaus-plexus.github.io/plexus-utils/apidocs/org/codehaus/plexus/util/AbstractScanner.html#DEFAULTEXCLUDES">DEFAULTEXCLUDES</a>
+     *
      * @since 3.4.0
      */
     @Parameter(defaultValue = "true")

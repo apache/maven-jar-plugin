@@ -20,8 +20,11 @@
 import java.util.jar.*;
 
 def target = new File(basedir, "target")
-def artifact = new File(target, "mjar-296-exclude-default-1.0-SNAPSHOT.jar")
 
+def cvsignore = new File(target, "classes/.cvsignore")
+assert cvsignore.exists()
+
+def artifact = new File(target, "mjar-296-exclude-default-1.0-SNAPSHOT.jar")
 assert artifact.exists()
 
 def jar = new JarFile(artifact)
