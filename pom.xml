@@ -28,7 +28,7 @@
   </parent>
 
   <artifactId>maven-jar-plugin</artifactId>
-  <version>3.4.0</version>
+  <version>3.4.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven JAR Plugin</name>
@@ -54,7 +54,7 @@
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-jar-plugin.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-jar-plugin.git</developerConnection>
-    <tag>maven-jar-plugin-3.4.0</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/apache/maven-jar-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -76,7 +76,7 @@
     <javaVersion>8</javaVersion>
     <mavenVersion>3.6.3</mavenVersion>
     <mavenArchiverVersion>3.6.2</mavenArchiverVersion>
-    <project.build.outputTimestamp>2024-04-09T21:17:42Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2024-04-09T21:17:54Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
