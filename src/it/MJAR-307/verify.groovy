@@ -23,10 +23,3 @@ def target = new File( basedir, "target" );
 def jarFile = new File( target, "mjar-307-1.0.jar" );
 
 assert jarFile.exists()
-
-def jar = new JarFile(jarFile)
-assert  jar.getEntry("META-INF/INDEX.LIST") != null
-
-def manifest = jar.getManifest().getMainAttributes()
-assert manifest.getValue("Implementation-Build") == "123"
-assert manifest.getValue("Sealed") == "sealed"

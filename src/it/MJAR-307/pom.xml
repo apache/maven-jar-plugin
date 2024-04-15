@@ -27,9 +27,9 @@ under the License.
   <version>1.0</version>
   <name>it-mjar-307</name>
 
+  <description>Wrong version of commons-io cause a ClassNotFoundException: org.apache.commons.io.file.attribute.FileTimes</description>
+
   <properties>
-    <build.number>123</build.number>
-    <build.sealed>sealed</build.sealed>
     <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
     <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
   </properties>
@@ -40,18 +40,6 @@ under the License.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>@project.version@</version>
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-            <manifestEntries>
-              <Implementation-Build>${build.number}</Implementation-Build>
-              <Sealed>${build.sealed}</Sealed>
-            </manifestEntries>
-          </archive>
-        </configuration>
       </plugin>
     </plugins>
   </build>
