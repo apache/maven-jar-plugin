@@ -30,6 +30,8 @@ under the License.
   <properties>
     <build.number>123</build.number>
     <build.sealed>sealed</build.sealed>
+    <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
+    <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
   </properties>
 
   <build>
