@@ -21,7 +21,10 @@ package org.apache.maven.plugins.jar;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,9 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.maven.toolchain.Toolchain;
-import org.codehaus.plexus.util.cli.CommandLineException;
-import org.codehaus.plexus.util.cli.CommandLineUtils;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,15 +70,12 @@ class ToolchainsJdkSpecification {
 
     private String getSpecForPath(Path path) {
         try {
-            Commandline cl = new Commandline(path.toString());
-            cl.createArg().setValue("-version");
-            CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
-            CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
-            CommandLineUtils.executeCommandLine(cl, out, err);
-            String version = out.getOutput().trim();
-            if (version.isEmpty()) {
-                version = err.getOutput().trim();
-            }
+            ProcessBuilder processBuilder = new ProcessBuilder(path.toString(), "-version");
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+            String version = readOutput(process.getInputStream()).trim();
+            process.waitFor();
+
             if (version.startsWith("javac ")) {
                 version = version.substring(6);
                 if (version.startsWith("1.")) {
@@ -88,12 +85,26 @@ class ToolchainsJdkSpecification {
                 }
                 return version;
             } else {
-                logger.warn("Unrecognized output form " + path + " -version - " + version);
-                return null;
+                logger.warn("Unrecognized output from {}: {}", processBuilder.command(), version);
             }
-        } catch (CommandLineException | IndexOutOfBoundsException e) {
-            logger.warn("Failed to execute: " + path + " - " + e.getMessage());
-            return null;
+        } catch (IndexOutOfBoundsException | IOException e) {
+            logger.warn("Failed to execute: {} - {}", path, e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+        return null;
+    }
+
+    private String readOutput(InputStream inputstream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputstream));
+
+        StringBuilder output = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            output.append(line + System.lineSeparator());
+        }
+
+        return output.toString();
     }
 }
