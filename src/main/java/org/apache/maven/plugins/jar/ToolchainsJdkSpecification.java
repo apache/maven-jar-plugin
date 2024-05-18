@@ -70,7 +70,8 @@ class ToolchainsJdkSpecification {
 
     private String getSpecForPath(Path path) {
         try {
-            Commandline cl = new Commandline(path.toString());
+            Commandline cl = new Commandline();
+            cl.setExecutable(path.toString());
             cl.createArg().setValue("-version");
             CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
             CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
