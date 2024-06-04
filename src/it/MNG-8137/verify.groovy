@@ -18,4 +18,4 @@
  */
 
 String log = new File(basedir, 'build.log').text
-assert log.contains('[WARNING] Language of project is \'none\', this is most probably not what you want')
+assert log.contains('[WARNING] The project packaging language is NOT \'java\'; this is most probably not what you want')

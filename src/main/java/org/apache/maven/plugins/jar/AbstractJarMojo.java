@@ -22,12 +22,11 @@ import java.io.File;
 import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
-import org.apache.maven.artifact.handler.ArtifactHandler;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -132,8 +131,8 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     @Component
     private MavenProjectHelper projectHelper;
 
-    @Component(hint = "pom")
-    private ArtifactHandler pomArtifactHandler;
+    @Component
+    private ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * Require the jar plugin to build a new JAR even if none of the contents appear to have changed. By default, this
@@ -356,11 +355,13 @@ public abstract class AbstractJarMojo extends AbstractMojo {
                     throw new MojoExecutionException("You have to use a classifier "
                             + "to attach supplemental artifacts to the project instead of replacing them.");
                 }
-                if (Objects.equals(
-                        pomArtifactHandler.getLanguage(),
-                        getProject().getArtifact().getArtifactHandler().getLanguage())) {
-                    getLog().warn("Language of project is '" + pomArtifactHandler.getLanguage()
-                            + "', this is most probably not what you want");
+
+                if (!"java"
+                        .equals(artifactHandlerManager
+                                .getArtifactHandler(getProject().getPackaging())
+                                .getLanguage())) {
+                    getLog().warn(
+                                    "The project packaging language is NOT 'java'; this is most probably not what you want");
                 }
                 getProject().getArtifact().setFile(jarFile);
             }
