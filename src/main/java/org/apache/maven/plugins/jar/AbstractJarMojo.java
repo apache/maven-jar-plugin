@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -129,6 +130,9 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      */
     @Component
     private MavenProjectHelper projectHelper;
+
+    @Component
+    private ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * Require the jar plugin to build a new JAR even if none of the contents appear to have changed. By default, this
@@ -350,6 +354,14 @@ public abstract class AbstractJarMojo extends AbstractMojo {
                 if (projectHasAlreadySetAnArtifact()) {
                     throw new MojoExecutionException("You have to use a classifier "
                             + "to attach supplemental artifacts to the project instead of replacing them.");
+                }
+
+                if (!"java"
+                        .equals(artifactHandlerManager
+                                .getArtifactHandler(getProject().getPackaging())
+                                .getLanguage())) {
+                    getLog().warn(
+                                    "The project packaging language is NOT 'java'; this is most probably not what you want");
                 }
                 getProject().getArtifact().setFile(jarFile);
             }
