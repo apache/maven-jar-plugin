@@ -18,12 +18,10 @@
  */
 package org.apache.maven.plugins.jar;
 
-import java.io.File;
+import java.nio.file.Path;
 
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
 
 /**
  * Build a JAR from the current project.
@@ -31,18 +29,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @version $Id$
  */
-@Mojo(
-        name = "jar",
-        defaultPhase = LifecyclePhase.PACKAGE,
-        requiresProject = true,
-        threadSafe = true,
-        requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "jar", defaultPhase = "package")
 public class JarMojo extends AbstractJarMojo {
     /**
      * Directory containing the classes and resource files that should be packaged into the JAR.
      */
     @Parameter(defaultValue = "${project.build.outputDirectory}", required = true)
-    private File classesDirectory;
+    private Path classesDirectory;
 
     /**
      * Classifier to add to the artifact generated. If given, the artifact will be attached
@@ -73,7 +66,7 @@ public class JarMojo extends AbstractJarMojo {
      * {@inheritDoc}
      */
     @Override
-    protected File getClassesDirectory() {
+    protected Path getClassesDirectory() {
         return classesDirectory;
     }
 }

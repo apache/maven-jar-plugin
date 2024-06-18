@@ -18,8 +18,9 @@
  */
 package org.apache.maven.plugins.jar;
 
-import org.apache.maven.plugin.testing.junit5.InjectMojo;
-import org.apache.maven.plugin.testing.junit5.MojoTest;
+import org.apache.maven.api.plugin.testing.Basedir;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,15 +32,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @version $Id$
  */
 @MojoTest
-class JarMojoTest {
+public class JarMojoTest {
 
     /**
      * Tests the discovery and configuration of the mojo.
+     *
+     * @throws Exception in case of an error
      */
     @Test
-    @InjectMojo(goal = "jar", pom = "classpath:/unit/jar-basic-test/pom.xml")
-    void testJarTestEnvironment(JarMojo mojo) {
+    @Basedir("${basedir}/src/test/resources/unit/jar-basic-test")
+    @InjectMojo(goal = "jar")
+    public void testJarTestEnvironment(JarMojo mojo) throws Exception {
         assertNotNull(mojo);
+
         assertEquals("foo", mojo.getProject().getGroupId());
     }
 }
