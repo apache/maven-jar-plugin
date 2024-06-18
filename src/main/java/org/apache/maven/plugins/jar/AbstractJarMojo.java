@@ -18,27 +18,29 @@
  */
 package org.apache.maven.plugins.jar;
 
-import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.apache.maven.api.Artifact;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
+import org.apache.maven.api.di.Inject;
+import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Parameter;
+import org.apache.maven.api.services.ProjectManager;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.archiver.MavenArchiverException;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
-import org.apache.maven.toolchain.ToolchainManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
-import org.codehaus.plexus.archiver.util.DefaultFileSet;
 
 /**
  * Base class for creating a jar from project classes.
@@ -46,7 +48,7 @@ import org.codehaus.plexus.archiver.util.DefaultFileSet;
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @version $Id$
  */
-public abstract class AbstractJarMojo extends AbstractMojo {
+public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Mojo {
 
     private static final String[] DEFAULT_EXCLUDES = new String[] {"**/package.html"};
 
@@ -55,12 +57,6 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
     private static final String SEPARATOR = FileSystems.getDefault().getSeparator();
-
-    @Component
-    private ToolchainsJdkSpecification toolchainsJdkSpecification;
-
-    @Component
-    private ToolchainManager toolchainManager;
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -80,7 +76,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      * Directory containing the generated JAR.
      */
     @Parameter(defaultValue = "${project.build.directory}", required = true)
-    private File outputDirectory;
+    private Path outputDirectory;
 
     /**
      * Name of the generated JAR.
@@ -91,20 +87,20 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     /**
      * The Jar archiver.
      */
-    @Component
+    @Inject
     private Map<String, Archiver> archivers;
 
     /**
-     * The {@link MavenProject}.
+     * The {@link Project}.
      */
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
-    private MavenProject project;
+    @Inject
+    private Project project;
 
     /**
-     * The {@link MavenSession}.
+     * The {@link Session}.
      */
-    @Parameter(defaultValue = "${session}", readonly = true, required = true)
-    private MavenSession session;
+    @Inject
+    private Session session;
 
     /**
      * The archive configuration to use. See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven
@@ -127,8 +123,8 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     /**
      *
      */
-    @Component
-    private MavenProjectHelper projectHelper;
+    @Inject
+    private ProjectManager projectManager;
 
     /**
      * Require the jar plugin to build a new JAR even if none of the contents appear to have changed. By default, this
@@ -171,50 +167,28 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private boolean detectMultiReleaseJar;
 
     /**
-     * If set to {@code false}, the files and directories that by default are excluded from the resulting archive,
-     * like {@code .gitignore}, {@code .cvsignore} etc. will be included.
-     * This means all files like the following will be included.
-     * <ul>
-     * <li>Misc: &#42;&#42;/&#42;~, &#42;&#42;/#&#42;#, &#42;&#42;/.#&#42;, &#42;&#42;/%&#42;%, &#42;&#42;/._&#42;</li>
-     * <li>CVS: &#42;&#42;/CVS, &#42;&#42;/CVS/&#42;&#42;, &#42;&#42;/.cvsignore</li>
-     * <li>RCS: &#42;&#42;/RCS, &#42;&#42;/RCS/&#42;&#42;</li>
-     * <li>SCCS: &#42;&#42;/SCCS, &#42;&#42;/SCCS/&#42;&#42;</li>
-     * <li>VSSercer: &#42;&#42;/vssver.scc</li>
-     * <li>MKS: &#42;&#42;/project.pj</li>
-     * <li>SVN: &#42;&#42;/.svn, &#42;&#42;/.svn/&#42;&#42;</li>
-     * <li>GNU: &#42;&#42;/.arch-ids, &#42;&#42;/.arch-ids/&#42;&#42;</li>
-     * <li>Bazaar: &#42;&#42;/.bzr, &#42;&#42;/.bzr/&#42;&#42;</li>
-     * <li>SurroundSCM: &#42;&#42;/.MySCMServerInfo</li>
-     * <li>Mac: &#42;&#42;/.DS_Store</li>
-     * <li>Serena Dimension: &#42;&#42;/.metadata, &#42;&#42;/.metadata/&#42;&#42;</li>
-     * <li>Mercurial: &#42;&#42;/.hg, &#42;&#42;/.hg/&#42;&#42;</li>
-     * <li>Git: &#42;&#42;/.git, &#42;&#42;/.git/&#42;&#42;</li>
-     * <li>Bitkeeper: &#42;&#42;/BitKeeper, &#42;&#42;/BitKeeper/&#42;&#42;, &#42;&#42;/ChangeSet,
-     * &#42;&#42;/ChangeSet/&#42;&#42;</li>
-     * <li>Darcs: &#42;&#42;/_darcs, &#42;&#42;/_darcs/&#42;&#42;, &#42;&#42;/.darcsrepo,
-     * &#42;&#42;/.darcsrepo/&#42;&#42;&#42;&#42;/-darcs-backup&#42;, &#42;&#42;/.darcs-temp-mail
-     * </ul>
-     *
-     * @see <a href="https://codehaus-plexus.github.io/plexus-utils/apidocs/org/codehaus/plexus/util/AbstractScanner.html#DEFAULTEXCLUDES">DEFAULTEXCLUDES</a>
-     *
-     * @since 3.4.0
+     * The mojo logger
      */
-    @Parameter(defaultValue = "true")
-    private boolean addDefaultExcludes;
+    @Inject
+    private Log log;
 
     /**
      * Return the specific output directory to serve as the root for the archive.
      * @return get classes directory.
      */
-    protected abstract File getClassesDirectory();
+    protected abstract Path getClassesDirectory();
 
     /**
      * Return the {@link #project MavenProject}
      *
      * @return the MavenProject.
      */
-    protected final MavenProject getProject() {
+    protected final Project getProject() {
         return project;
+    }
+
+    protected final Log getLog() {
+        return log;
     }
 
     /**
@@ -237,7 +211,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      * @param classifier an optional classifier
      * @return the file to generate
      */
-    protected File getJarFile(File basedir, String resultFinalName, String classifier) {
+    protected Path getJarFile(Path basedir, String resultFinalName, String classifier) {
         if (basedir == null) {
             throw new IllegalArgumentException("basedir is not allowed to be null");
         }
@@ -247,20 +221,20 @@ public abstract class AbstractJarMojo extends AbstractMojo {
 
         String fileName = resultFinalName + (hasClassifier() ? "-" + classifier : "") + ".jar";
 
-        return new File(basedir, fileName);
+        return basedir.resolve(fileName);
     }
 
     /**
      * Generates the JAR.
      * @return The instance of File for the created archive file.
-     * @throws MojoExecutionException in case of an error.
+     * @throws MojoException in case of an error.
      */
-    public File createArchive() throws MojoExecutionException {
-        File jarFile = getJarFile(outputDirectory, finalName, getClassifier());
+    public Path createArchive() throws MojoException {
+        Path jarFile = getJarFile(outputDirectory, finalName, getClassifier());
 
         FileSetManager fileSetManager = new FileSetManager();
         FileSet jarContentFileSet = new FileSet();
-        jarContentFileSet.setDirectory(getClassesDirectory().getAbsolutePath());
+        jarContentFileSet.setDirectory(getClassesDirectory().toAbsolutePath().toString());
         jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
         jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
 
@@ -289,18 +263,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
         archiver.setArchiver((JarArchiver) archivers.get(archiverName));
-        archiver.setOutputFile(jarFile);
-
-        Optional.ofNullable(toolchainManager.getToolchainFromBuildContext("jdk", session))
-                .ifPresent(toolchain -> toolchainsJdkSpecification
-                        .getJDKSpecification(toolchain)
-                        .ifPresent(jdkSpec -> {
-                            archive.addManifestEntry("Build-Jdk-Spec", jdkSpec);
-                            archive.addManifestEntry(
-                                    "Build-Tool-Jdk-Spec", System.getProperty("java.specification.version"));
-                            archiver.setBuildJdkSpecDefaultEntry(false);
-                            getLog().info("Set Build-Jdk-Spec based on toolchain in maven-jar-plugin " + toolchain);
-                        }));
+        archiver.setOutputFile(jarFile.toFile());
 
         // configure for Reproducible Builds based on outputTimestamp value
         archiver.configureReproducibleBuild(outputTimestamp);
@@ -308,13 +271,13 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         archive.setForced(forceCreation);
 
         try {
-            File contentDirectory = getClassesDirectory();
-            if (!contentDirectory.exists()) {
+            Path contentDirectory = getClassesDirectory();
+            if (!Files.exists(contentDirectory)) {
                 if (!forceCreation) {
                     getLog().warn("JAR will be empty - no content was marked for inclusion!");
                 }
             } else {
-                archiver.getArchiver().addFileSet(getFileSet(contentDirectory));
+                archiver.getArchiver().addDirectory(contentDirectory.toFile(), getIncludes(), getExcludes());
             }
 
             archiver.createArchive(session, project, archive);
@@ -322,46 +285,60 @@ public abstract class AbstractJarMojo extends AbstractMojo {
             return jarFile;
         } catch (Exception e) {
             // TODO: improve error handling
-            throw new MojoExecutionException("Error assembling JAR", e);
+            throw new MojoException("Error assembling JAR", e);
         }
     }
 
     /**
      * Generates the JAR.
-     * @throws MojoExecutionException in case of an error.
+     * @throws MojoException in case of an error.
      */
     @Override
-    public void execute() throws MojoExecutionException {
+    public void execute() throws MojoException {
         if (useDefaultManifestFile) {
-            throw new MojoExecutionException("You are using 'useDefaultManifestFile' which has been removed"
+            throw new MojoException("You are using 'useDefaultManifestFile' which has been removed"
                     + " from the maven-jar-plugin. "
                     + "Please see the >>Major Version Upgrade to version 3.0.0<< on the plugin site.");
         }
 
-        if (skipIfEmpty
-                && (!getClassesDirectory().exists() || getClassesDirectory().list().length < 1)) {
+        if (skipIfEmpty && isEmpty(getClassesDirectory())) {
             getLog().info("Skipping packaging of the " + getType());
         } else {
-            File jarFile = createArchive();
-
+            Path jarFile = createArchive();
+            Artifact artifact;
             if (hasClassifier()) {
-                projectHelper.attachArtifact(getProject(), getType(), getClassifier(), jarFile);
+                artifact = session.createArtifact(
+                        project.getGroupId(),
+                        project.getArtifactId(),
+                        project.getVersion(),
+                        getClassifier(),
+                        null,
+                        getType());
             } else {
                 if (projectHasAlreadySetAnArtifact()) {
-                    throw new MojoExecutionException("You have to use a classifier "
+                    throw new MojoException("You have to use a classifier "
                             + "to attach supplemental artifacts to the project instead of replacing them.");
                 }
-                getProject().getArtifact().setFile(jarFile);
+                artifact = project.getMainArtifact().get();
             }
+            projectManager.attachArtifact(project, artifact, jarFile);
+        }
+    }
+
+    private boolean isEmpty(Path directory) {
+        if (!Files.isDirectory(directory)) {
+            return true;
+        }
+        try (Stream<Path> children = Files.list(directory)) {
+            return !children.findAny().isPresent();
+        } catch (IOException e) {
+            throw new MavenArchiverException("Unable to access directory", e);
         }
     }
 
     private boolean projectHasAlreadySetAnArtifact() {
-        if (getProject().getArtifact().getFile() == null) {
-            return false;
-        }
-
-        return getProject().getArtifact().getFile().isFile();
+        Path path = projectManager.getPath(project).orElse(null);
+        return path != null && Files.isRegularFile(path);
     }
 
     /**
@@ -385,15 +362,5 @@ public abstract class AbstractJarMojo extends AbstractMojo {
             return excludes;
         }
         return DEFAULT_EXCLUDES;
-    }
-
-    private org.codehaus.plexus.archiver.FileSet getFileSet(File contentDirectory) {
-        DefaultFileSet fileSet = DefaultFileSet.fileSet(contentDirectory)
-                .prefixed("")
-                .includeExclude(getIncludes(), getExcludes())
-                .includeEmptyDirs(true);
-
-        fileSet.setUsingDefaultExcludes(addDefaultExcludes);
-        return fileSet;
     }
 }

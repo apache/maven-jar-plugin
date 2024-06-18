@@ -18,16 +18,13 @@ specific language governing permissions and limitations
 under the License.
 -->
 <project>
+  <groupId>foo</groupId>
+  <artifactId>bar</artifactId>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <project implementation="org.apache.maven.plugin.testing.stubs.MavenProjectStub">
-            <groupId implementation="java.lang.String">foo</groupId>
-            <artifactId implementation="java.lang.String">bar</artifactId>
-          </project>
-        </configuration>
+        <configuration />
       </plugin>
     </plugins>
   </build>

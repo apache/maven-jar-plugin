@@ -1,7 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,10 +16,33 @@ import java.nio.file.Paths
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.jar;
 
-// excluded files are not copied by m-invoker-p - so we need create one
-def resDir = basedir.toPath().resolve("src/main/resources")
-Files.createDirectories(resDir)
-Files.createFile(resDir.resolve(".cvsignore"))
+import org.apache.maven.api.Session;
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Provides;
+import org.apache.maven.api.services.ProjectManager;
+import org.codehaus.plexus.archiver.Archiver;
+import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.jar.JarToolModularJarArchiver;
 
-return true
+@Named
+class Providers {
+
+    @Named("jar")
+    @Provides
+    static Archiver jarArchiver() {
+        return new JarArchiver();
+    }
+
+    @Named("mjar")
+    @Provides
+    static Archiver mjarArchiver() {
+        return new JarToolModularJarArchiver();
+    }
+
+    @Provides
+    static ProjectManager projectManager(Session session) {
+        return session.getService(ProjectManager.class);
+    }
+}

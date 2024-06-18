@@ -18,13 +18,11 @@
  */
 package org.apache.maven.plugins.jar;
 
-import java.io.File;
+import java.nio.file.Path;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
 
 /**
  * Build a JAR of the test classes for the current project.
@@ -33,12 +31,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @version $Id$
  */
 // CHECKSTYLE_OFF: LineLength
-@Mojo(
-        name = "test-jar",
-        defaultPhase = LifecyclePhase.PACKAGE,
-        requiresProject = true,
-        threadSafe = true,
-        requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "test-jar", defaultPhase = "package")
 // CHECKSTYLE_ON: LineLength
 public class TestJarMojo extends AbstractJarMojo {
 
@@ -53,7 +46,7 @@ public class TestJarMojo extends AbstractJarMojo {
      * Directory containing the test classes and resource files that should be packaged into the JAR.
      */
     @Parameter(defaultValue = "${project.build.testOutputDirectory}", required = true)
-    private File testClassesDirectory;
+    private Path testClassesDirectory;
 
     /**
      * Classifier to use for {@code test-jar}.
@@ -81,7 +74,7 @@ public class TestJarMojo extends AbstractJarMojo {
      * {@inheritDoc}
      */
     @Override
-    protected File getClassesDirectory() {
+    protected Path getClassesDirectory() {
         return testClassesDirectory;
     }
 
@@ -89,7 +82,7 @@ public class TestJarMojo extends AbstractJarMojo {
      * {@inheritDoc}
      */
     @Override
-    public void execute() throws MojoExecutionException {
+    public void execute() throws MojoException {
         if (skip) {
             getLog().info("Skipping packaging of the test-jar");
         } else {
