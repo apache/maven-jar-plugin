@@ -21,9 +21,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>manifest-content</artifactId>
-  <name>manifest-content-it</name>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>manifest-content-it</name>
   <organization>
     <name>jar plugin it</name>
   </organization>

@@ -17,18 +17,15 @@
   specific language governing permissions and limitations
   under the License.
 -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>maven-jar-plugin-test-project-004</artifactId>
   <version>99.0</version>
-  <name>Maven</name>
   <packaging>jar</packaging>
-  <url>http://maven.apache.org</url>
+  <name>Maven</name>
   <description>testMultipleJars</description>
+  <url>http://maven.apache.org</url>
   <build>
     <plugins>
       <plugin>
@@ -37,10 +34,10 @@
         <version>@project.version@</version>
         <executions>
           <execution>
-            <phase>package</phase>
             <goals>
               <goal>jar</goal>
             </goals>
+            <phase>package</phase>
             <configuration>
               <classifier>service</classifier>
               <includes>

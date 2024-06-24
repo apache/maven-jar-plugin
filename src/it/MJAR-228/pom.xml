@@ -21,9 +21,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>mjar228</artifactId>
-  <name>MJAR-228</name>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>MJAR-228</name>
   <organization>
     <name>jar plugin it</name>
   </organization>

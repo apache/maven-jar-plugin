@@ -16,14 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+public class TestCompile1 {
 
-public class TestCompile1
-{
-
-    public TestCompile1()
-    {
+    public TestCompile1() {
 
         System.out.println("Woo Hoo!");
     }
-
 }
