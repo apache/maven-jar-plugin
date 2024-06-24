@@ -21,9 +21,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>mjar260-valid-automatic-module-name</artifactId>
-  <name>MJAR-260-valid-automatic-module-name</name>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>MJAR-260-valid-automatic-module-name</name>
   <organization>
     <name>jar plugin it</name>
   </organization>

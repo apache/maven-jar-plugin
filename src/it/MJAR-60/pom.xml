@@ -21,9 +21,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>MJAR-60</artifactId>
-  <name>MJAR-60</name>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>MJAR-60</name>
 
   <build>
     <plugins>

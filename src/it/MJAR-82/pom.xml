@@ -21,9 +21,31 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>MJAR-82</artifactId>
-  <name>MJAR-82</name>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>MJAR-82</name>
+  <dependencies>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.4.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-component-api</artifactId>
+      <version>1.0-alpha-15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-container-default</artifactId>
+      <version>1.0-alpha-15</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -48,26 +70,4 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.4.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-component-api</artifactId>   
-      <version>1.0-alpha-15</version>   
-    </dependency>     
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-container-default</artifactId>   
-      <version>1.0-alpha-15</version>   
-    </dependency>   
-  </dependencies>
 </project>

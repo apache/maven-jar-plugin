@@ -21,9 +21,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>MJAR-70-no-recreation</artifactId>
-  <name>MJAR-70-no-recreation</name>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>MJAR-70-no-recreation</name>
 
   <build>
     <plugins>
@@ -31,8 +31,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>@project.version@</version>
-        <configuration>
-        </configuration>
+        <configuration />
       </plugin>
       <!-- Use a fixed version of maven-compiler-plugin, this fails with versions [3.8.1, 3.10.1] -->
       <!-- Fixed in https://issues.apache.org/jira/browse/MCOMPILER-525 (3.11.0) -->
@@ -48,16 +47,14 @@
         <executions>
           <execution>
             <id>touch</id>
-            <phase>integration-test</phase>
             <goals>
               <goal>run</goal>
             </goals>
+            <phase>integration-test</phase>
             <configuration>
               <tasks>
                 <!-- Save the JAR and especially its timestamp for evaluation by the post-build hook script -->
-                <copy file="target/MJAR-70-no-recreation-1.0-SNAPSHOT.jar"
-                      tofile="target/reference.jar"
-                      preservelastmodified="true" overwrite="true"/>
+                <copy file="target/MJAR-70-no-recreation-1.0-SNAPSHOT.jar" overwrite="true" preservelastmodified="true" tofile="target/reference.jar" />
               </tasks>
             </configuration>
           </execution>
