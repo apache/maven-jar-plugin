@@ -76,7 +76,7 @@
     <javaVersion>17</javaVersion>
     <mavenVersion>4.0.0-beta-3</mavenVersion>
 
-    <guiceVersion>6.0.0</guiceVersion>
+    <guiceVersion>7.0.0</guiceVersion>
     <junitVersion>5.10.1</junitVersion>
     <mavenPluginPluginVersion>4.0.0-SNAPSHOT</mavenPluginPluginVersion>
     <mavenArchiverVersion>4.0.0-SNAPSHOT</mavenArchiverVersion>
