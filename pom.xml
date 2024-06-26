@@ -78,10 +78,10 @@
 
     <guiceVersion>6.0.0</guiceVersion>
     <junitVersion>5.10.2</junitVersion>
-    <mavenPluginPluginVersion>4.0.0-SNAPSHOT</mavenPluginPluginVersion>
-    <mavenArchiverVersion>4.0.0-SNAPSHOT</mavenArchiverVersion>
+    <mavenArchiverVersion>4.0.0-beta-1</mavenArchiverVersion>
     <mavenFileManagementVersion>3.1.0</mavenFileManagementVersion>
-    <mavenPluginTestingVersion>4.0.0-alpha-3-SNAPSHOT</mavenPluginTestingVersion>
+    <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
+    <mavenPluginTestingVersion>4.0.0-beta-1</mavenPluginTestingVersion>
     <plexusArchiverVersion>4.9.2</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
