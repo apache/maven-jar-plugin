@@ -151,6 +151,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * (e.g. in UTC such as '2011-12-03T10:15:30Z' or with an offset '2019-10-05T20:37:42+06:00'),
      * or as an int representing seconds since the epoch
      * (like <a href="https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>).
+     * Use the special constant value {@code "REPRODUCIBLE_BUILD_STATIC_DATE"} to set the default time i.e. 1980-02-01T00:00:00Z.
      *
      * @since 3.2.0
      */
