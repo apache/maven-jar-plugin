@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.maven.api.Artifact;
+import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
 import org.apache.maven.api.di.Inject;
@@ -34,9 +34,9 @@ import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Parameter;
 import org.apache.maven.api.services.ProjectManager;
-import org.apache.maven.archiver.MavenArchiveConfiguration;
-import org.apache.maven.archiver.MavenArchiver;
-import org.apache.maven.archiver.MavenArchiverException;
+import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
+import org.apache.maven.shared.archiver.MavenArchiver;
+import org.apache.maven.shared.archiver.MavenArchiverException;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.codehaus.plexus.archiver.Archiver;
@@ -305,9 +305,9 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             getLog().info("Skipping packaging of the " + getType());
         } else {
             Path jarFile = createArchive();
-            Artifact artifact;
+            ProducedArtifact artifact;
             if (hasClassifier()) {
-                artifact = session.createArtifact(
+                artifact = session.createProducedArtifact(
                         project.getGroupId(),
                         project.getArtifactId(),
                         project.getVersion(),

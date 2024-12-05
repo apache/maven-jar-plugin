@@ -74,14 +74,14 @@
 
   <properties>
     <javaVersion>17</javaVersion>
-    <mavenVersion>4.0.0-beta-3</mavenVersion>
+    <mavenVersion>4.0.0-beta-5</mavenVersion>
 
     <guiceVersion>6.0.0</guiceVersion>
     <junitVersion>5.10.2</junitVersion>
-    <mavenArchiverVersion>4.0.0-beta-1</mavenArchiverVersion>
+    <mavenArchiverVersion>4.0.0-beta-3</mavenArchiverVersion>
     <mavenFileManagementVersion>3.1.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
-    <mavenPluginTestingVersion>4.0.0-beta-1</mavenPluginTestingVersion>
+    <mavenPluginTestingVersion>4.0.0-beta-2</mavenPluginTestingVersion>
     <plexusArchiverVersion>4.10.0</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
@@ -137,7 +137,7 @@
       <version>${mavenFileManagementVersion}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven</groupId>
+      <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-archiver</artifactId>
       <version>${mavenArchiverVersion}</version>
     </dependency>
