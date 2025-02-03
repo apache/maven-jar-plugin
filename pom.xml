@@ -74,14 +74,14 @@
 
   <properties>
     <javaVersion>17</javaVersion>
-    <mavenVersion>4.0.0-beta-5</mavenVersion>
+    <mavenVersion>4.0.0-rc-2</mavenVersion>
 
     <guiceVersion>6.0.0</guiceVersion>
     <junitVersion>5.10.2</junitVersion>
     <mavenArchiverVersion>4.0.0-beta-3</mavenArchiverVersion>
     <mavenFileManagementVersion>3.1.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
-    <mavenPluginTestingVersion>4.0.0-beta-2</mavenPluginTestingVersion>
+    <mavenPluginTestingVersion>4.0.0-beta-3</mavenPluginTestingVersion>
     <plexusArchiverVersion>4.10.0</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
@@ -121,7 +121,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-api-meta</artifactId>
+      <artifactId>maven-api-annotations</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
