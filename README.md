@@ -61,7 +61,6 @@ There are some guidelines which will make applying PRs easier for us:
 + Make sure you have added the necessary tests (JUnit/IT) for your changes.
 + Run all the tests with `mvn -Prun-its verify` to assure nothing else was accidentally broken.
 + Submit a pull request to the repository in the Apache organization.
-+ Update your JIRA ticket and include a link to the pull request in the ticket.
 
 If you plan to contribute on a regular basis, please consider filing a [contributor license agreement][cla].
 
