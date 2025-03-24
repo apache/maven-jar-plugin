@@ -79,16 +79,6 @@
     <project.build.outputTimestamp>2024-06-16T12:09:50Z</project.build.outputTimestamp>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.16.1</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <!-- Maven Core -->
     <dependency>
@@ -146,6 +136,13 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.36</version>
+    </dependency>
+
+    <!-- we need for Maven rc-3, looks like dependencyManagement is not taken into account -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.16.1</version>
     </dependency>
 
     <!-- Test -->
