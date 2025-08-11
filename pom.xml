@@ -78,7 +78,7 @@
 
     <guiceVersion>6.0.0</guiceVersion>
     <junitVersion>5.13.4</junitVersion>
-    <mavenArchiverVersion>4.0.0-beta-3</mavenArchiverVersion>
+    <mavenArchiverVersion>4.0.0-beta-4</mavenArchiverVersion>
     <mavenFileManagementVersion>3.2.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
     <mavenPluginTestingVersion>4.0.0-beta-3</mavenPluginTestingVersion>
