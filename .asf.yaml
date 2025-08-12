@@ -30,7 +30,11 @@ github:
     rebase: true
   autolink_jira:
     - MJAR
-  del_branch_on_merge: true
+  protected_branches:
+    master: { }
+    maven-jar-plugin-3: {}
+  pull_requests:
+    del_branch_on_merge: true
   features:
     issues: true
 notifications:
