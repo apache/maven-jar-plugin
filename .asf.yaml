@@ -32,7 +32,7 @@ github:
     - MJAR
   protected_branches:
     master: { }
-    maven-jar-plugin-3: {}
+    maven-jar-plugin-3.x: {}
   pull_requests:
     del_branch_on_merge: true
   features:
