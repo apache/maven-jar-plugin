@@ -31,7 +31,7 @@ under the License.
 
   <properties>
     <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
-    <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-11-19T13:25:58Z</project.build.outputTimestamp>
   </properties>
 
   <build>
