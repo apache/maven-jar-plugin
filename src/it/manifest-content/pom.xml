@@ -27,6 +27,9 @@
   <organization>
     <name>jar plugin it</name>
   </organization>
+  <properties>
+    <maven.compiler.release>11</maven.compiler.release>
+  </properties>
   <build>
     <plugins>
       <plugin>
