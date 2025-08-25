@@ -47,7 +47,7 @@ System.out.println( "Actual timestamp   : " + actualTimestamp );
 
 if ( referenceTimestamp != actualTimestamp)
 {
-		throw new Exception( "Timestamps don't match, JAR was recreated although contents has not changed" );
+    throw new Exception( "Timestamps don't match, JAR was recreated although contents has not changed" );
 }
 
 return true;
