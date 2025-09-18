@@ -71,7 +71,7 @@ class ToolchainsJdkSpecification {
     private String getSpecForPath(Path path) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(path.toString(), "-version");
-            processBuilder.redirectErrorStream(true);
+            processBuilder.redirectErrorStream(false);
             Process process = processBuilder.start();
             String version = readOutput(process.getInputStream()).trim();
             process.waitFor();
