@@ -76,6 +76,9 @@
     <javaVersion>8</javaVersion>
     <mavenVersion>3.9.11</mavenVersion>
     <mavenArchiverVersion>3.6.4</mavenArchiverVersion>
+
+    <!-- for JDK 25 -->
+    <version.maven-invoker-plugin>3.9.1</version.maven-invoker-plugin>
     <project.build.outputTimestamp>2024-06-16T12:09:50Z</project.build.outputTimestamp>
   </properties>
 
