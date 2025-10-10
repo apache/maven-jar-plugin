@@ -78,11 +78,11 @@
 
     <guiceVersion>6.0.0</guiceVersion>
     <junitVersion>5.13.4</junitVersion>
-    <mavenArchiverVersion>4.0.0-beta-4</mavenArchiverVersion>
+    <mavenArchiverVersion>4.0.0-beta-5</mavenArchiverVersion>
     <mavenFileManagementVersion>3.2.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
     <mavenPluginTestingVersion>4.0.0-beta-3</mavenPluginTestingVersion>
-    <plexusArchiverVersion>4.10.1</plexusArchiverVersion>
+    <plexusArchiverVersion>4.10.2</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
     <version.plexus-xml>4.0.3</version.plexus-xml>
