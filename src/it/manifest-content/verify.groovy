@@ -25,7 +25,6 @@ import java.util.zip.*;
 
 boolean result = true;
 
-
 try
 {
     File target = new File( basedir, "target" );
@@ -104,6 +103,11 @@ try
         return false;
     }
 
+    if ( !"11".equals( manifest.getValue( "Java-Version" ) ) )
+    {
+        System.err.println( "Java-Version not equals 11" );
+        return false;
+    }
 }
 catch( Throwable e )
 {
