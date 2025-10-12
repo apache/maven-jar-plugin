@@ -18,12 +18,14 @@
  */
 package org.apache.maven.plugins.jar;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
+import java.util.jar.Attributes;
 import java.util.stream.Stream;
 
 import org.apache.maven.api.ProducedArtifact;
@@ -43,10 +45,9 @@ import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 /**
- * Base class for creating a jar from project classes.
+ * Base class for creating a <abbr>JAR</abbr> file from project classes.
  *
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
- * @version $Id$
  */
 public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Mojo {
 
@@ -55,8 +56,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private static final String[] DEFAULT_INCLUDES = new String[] {"**/**"};
 
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
-
-    private static final String SEPARATOR = FileSystems.getDefault().getSeparator();
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -85,19 +84,19 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private String finalName;
 
     /**
-     * The Jar archiver.
+     * The JAR archiver.
      */
     @Inject
     private Map<String, Archiver> archivers;
 
     /**
-     * The {@link Project}.
+     * The Maven project.
      */
     @Inject
     private Project project;
 
     /**
-     * The {@link Session}.
+     * The session.
      */
     @Inject
     private Session session;
@@ -109,22 +108,20 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     @Parameter
     private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
-    /**
-     *
-     */
     @Inject
     private ProjectManager projectManager;
 
     /**
-     * Require the jar plugin to build a new JAR even if none of the contents appear to have changed. By default, this
-     * plugin looks to see if the output jar exists and inputs have not changed. If these conditions are true, the
-     * plugin skips creation of the jar. This does not work when other plugins, like the maven-shade-plugin, are
-     * configured to post-process the jar. This plugin can not detect the post-processing, and so leaves the
-     * post-processed jar in place. This can lead to failures when those plugins do not expect to find their own output
-     * as an input. Set this parameter to <tt>true</tt> to avoid these problems by forcing this plugin to recreate the
-     * jar every time.<br/>
-     * Starting with <b>3.0.0</b> the property has been renamed from <code>jar.forceCreation</code> to
-     * <code>maven.jar.forceCreation</code>.
+     * Require the jar plugin to build a new JAR even if none of the contents appear to have changed.
+     * By default, this plugin looks to see if the output JAR exists and inputs have not changed.
+     * If these conditions are true, the plugin skips creation of the JAR file.
+     * This does not work when other plugins, like the maven-shade-plugin, are configured to post-process the JAR.
+     * This plugin can not detect the post-processing, and so leaves the post-processed JAR file in place.
+     * This can lead to failures when those plugins do not expect to find their own output as an input.
+     * Set this parameter to {@code true} to avoid these problems by forcing this plugin to recreate the JAR every time.
+     *
+     * <p>Starting with <b>3.0.0</b> the property has been renamed from {@code jar.forceCreation}
+     * to {@code maven.jar.forceCreation}.</p>
      */
     @Parameter(property = "maven.jar.forceCreation", defaultValue = "false")
     private boolean forceCreation;
@@ -136,9 +133,10 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private boolean skipIfEmpty;
 
     /**
-     * Timestamp for reproducible output archive entries, either formatted as ISO 8601 extended offset date-time
+     * Timestamp for reproducible output archive entries.
+     * This is either formatted as ISO 8601 extended offset date-time
      * (e.g. in UTC such as '2011-12-03T10:15:30Z' or with an offset '2019-10-05T20:37:42+06:00'),
-     * or as an int representing seconds since the epoch
+     * or as an integer representing seconds since the epoch
      * (like <a href="https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>).
      *
      * @since 3.2.0
@@ -147,8 +145,9 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private String outputTimestamp;
 
     /**
+     * Whether to detect multi-release JAR files.
      * If the JAR contains the {@code META-INF/versions} directory it will be detected as a multi-release JAR file
-     * ("MRJAR"), adding the {@code Multi-Release: true} attribute to the main section of the JAR MANIFEST.MF.
+     * ("MRJAR"), adding the {@code Multi-Release: true} attribute to the main section of the JAR {@code MANIFEST.MF}.
      *
      * @since 3.4.0
      */
@@ -156,44 +155,51 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private boolean detectMultiReleaseJar;
 
     /**
-     * The mojo logger
+     * The <abbr>MOJO</abbr> logger.
      */
     @Inject
     private Log log;
 
     /**
-     * Return the specific output directory to serve as the root for the archive.
-     * @return get classes directory.
+     * Creates a new <abbr>MOJO</abbr>.
+     */
+    protected AbstractJarMojo() {}
+
+    /**
+     * {@return the specific output directory to serve as the root for the archive}
      */
     protected abstract Path getClassesDirectory();
 
     /**
-     * Return the {@link #project MavenProject}
+     * Return the {@linkplain #project Maven project}.
      *
-     * @return the MavenProject.
+     * @return the Maven project
      */
     protected final Project getProject() {
         return project;
     }
 
+    /**
+     * {@return the <abbr>MOJO</abbr> logger}
+     */
     protected final Log getLog() {
         return log;
     }
 
     /**
-     * Overload this to produce a jar with another classifier, for example a test-jar.
-     * @return get the classifier.
+     * {@return the classifier of the JAR file to produce}
+     * This is usually null or empty for the main artifact, or {@code "tests"} for the JAR file of test code.
      */
     protected abstract String getClassifier();
 
     /**
-     * Overload this to produce a test-jar, for example.
-     * @return return the type.
+     * {@return the type of the JAR file to produce}
+     * This is usually {@code "jar"} for the main artifact, or {@code "test-jar"} for the JAR file of test code.
      */
     protected abstract String getType();
 
     /**
-     * Returns the Jar file to generate, based on an optional classifier.
+     * Returns the JAR file to generate, based on an optional classifier.
      *
      * @param basedir the output directory
      * @param resultFinalName the name of the ear file
@@ -201,22 +207,17 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * @return the file to generate
      */
     protected Path getJarFile(Path basedir, String resultFinalName, String classifier) {
-        if (basedir == null) {
-            throw new IllegalArgumentException("basedir is not allowed to be null");
-        }
-        if (resultFinalName == null) {
-            throw new IllegalArgumentException("finalName is not allowed to be null");
-        }
-
-        String fileName = resultFinalName + (hasClassifier() ? "-" + classifier : "") + ".jar";
-
+        Objects.requireNonNull(basedir, "basedir is not allowed to be null");
+        Objects.requireNonNull(resultFinalName, "finalName is not allowed to be null");
+        String fileName = resultFinalName + (hasClassifier(classifier) ? '-' + classifier : "") + ".jar";
         return basedir.resolve(fileName);
     }
 
     /**
      * Generates the JAR.
-     * @return The instance of File for the created archive file.
-     * @throws MojoException in case of an error.
+     *
+     * @return the path to the created archive file
+     * @throws MojoException in case of an error
      */
     public Path createArchive() throws MojoException {
         Path jarFile = getJarFile(outputDirectory, finalName, getClassifier());
@@ -231,9 +232,10 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
         if (detectMultiReleaseJar
                 && Arrays.stream(includedFiles)
-                        .anyMatch(p -> p.startsWith("META-INF" + SEPARATOR + "versions" + SEPARATOR))) {
+                        .anyMatch(
+                                p -> p.startsWith("META-INF" + File.separatorChar + "versions" + File.separatorChar))) {
             getLog().debug("Adding 'Multi-Release: true' manifest entry.");
-            archive.addManifestEntry("Multi-Release", "true");
+            archive.addManifestEntry(Attributes.Name.MULTI_RELEASE.toString(), "true");
         }
 
         // May give false positives if the files is named as module descriptor
@@ -280,21 +282,23 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
     /**
      * Generates the JAR.
-     * @throws MojoException in case of an error.
+     *
+     * @throws MojoException in case of an error
      */
     @Override
     public void execute() throws MojoException {
         if (skipIfEmpty && isEmpty(getClassesDirectory())) {
-            getLog().info("Skipping packaging of the " + getType());
+            getLog().info(String.format("Skipping packaging of the %s.", getType()));
         } else {
             Path jarFile = createArchive();
             ProducedArtifact artifact;
-            if (hasClassifier()) {
+            String classifier = getClassifier();
+            if (hasClassifier(classifier)) {
                 artifact = session.createProducedArtifact(
                         project.getGroupId(),
                         project.getArtifactId(),
                         project.getVersion(),
-                        getClassifier(),
+                        classifier,
                         null,
                         getType());
             } else {
@@ -308,12 +312,12 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         }
     }
 
-    private boolean isEmpty(Path directory) {
+    private static boolean isEmpty(Path directory) {
         if (!Files.isDirectory(directory)) {
             return true;
         }
         try (Stream<Path> children = Files.list(directory)) {
-            return !children.findAny().isPresent();
+            return children.findAny().isEmpty();
         } catch (IOException e) {
             throw new MavenArchiverException("Unable to access directory", e);
         }
@@ -327,10 +331,11 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     /**
      * Return {@code true} in case where the classifier is not {@code null} and contains something else than white spaces.
      *
-     * @return {@code true} if the classifier is set.
+     * @param classifier the classifier to verify
+     * @return {@code true} if the classifier is set
      */
-    protected boolean hasClassifier() {
-        return getClassifier() != null && !getClassifier().trim().isEmpty();
+    private static boolean hasClassifier(String classifier) {
+        return classifier != null && !classifier.isBlank();
     }
 
     private String[] getIncludes() {

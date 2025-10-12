@@ -28,16 +28,13 @@ import org.apache.maven.api.plugin.annotations.Parameter;
  * Build a JAR of the test classes for the current project.
  *
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
- * @version $Id$
  */
-// CHECKSTYLE_OFF: LineLength
 @Mojo(name = "test-jar", defaultPhase = "package")
-// CHECKSTYLE_ON: LineLength
 public class TestJarMojo extends AbstractJarMojo {
 
     /**
-     * Set this to <code>true</code> to bypass test-jar generation. Its use is <b>NOT RECOMMENDED</b>, but quite
-     * convenient on occasion.
+     * Set this to {@code true} to bypass test-jar generation.
+     * Its use is not recommended, but quite convenient on occasion.
      */
     @Parameter(property = "maven.test.skip")
     private boolean skip;
@@ -84,7 +81,7 @@ public class TestJarMojo extends AbstractJarMojo {
     @Override
     public void execute() throws MojoException {
         if (skip) {
-            getLog().info("Skipping packaging of the test-jar");
+            getLog().info("Skipping packaging of the test-jar.");
         } else {
             super.execute();
         }
