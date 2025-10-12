@@ -110,17 +110,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
     /**
-     * Using this property will fail your build cause it has been removed from the plugin configuration. See the menu entry
-     * <a href="https://maven.apache.org/plugins/maven-jar-plugin/">Using Your Own Manifest File</a> for the
-     * plugin.
-     *
-     * @deprecated For version 3.0.0 this parameter is only defined here to break the build if you use it!
-     */
-    @Parameter(property = "jar.useDefaultManifestFile", defaultValue = "false")
-    @Deprecated
-    private boolean useDefaultManifestFile;
-
-    /**
      *
      */
     @Inject
@@ -295,12 +284,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      */
     @Override
     public void execute() throws MojoException {
-        if (useDefaultManifestFile) {
-            throw new MojoException("You are using 'useDefaultManifestFile' which has been removed"
-                    + " from the maven-jar-plugin. "
-                    + "Please see the link >>Using Your Own Manifest File<< on the plugin site.");
-        }
-
         if (skipIfEmpty && isEmpty(getClassesDirectory())) {
             getLog().info("Skipping packaging of the " + getType());
         } else {
