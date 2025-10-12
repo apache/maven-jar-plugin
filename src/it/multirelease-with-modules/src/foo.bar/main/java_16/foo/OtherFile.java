@@ -16,30 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.plugins.jar;
-
-import org.apache.maven.testing.plugin.Basedir;
-import org.apache.maven.testing.plugin.InjectMojo;
-import org.apache.maven.testing.plugin.MojoTest;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+package foo;
 
 /**
- * Test for {@link JarMojo}.
+ * Test {@code &lt;Source&gt;}.
+ * Another {@code &lt;Source&gt;}.
  */
-@MojoTest
-class JarMojoTest {
+public class OtherFile {
+    public static void main(String[] args) {
+        System.out.println("OtherFile on Java 16");
+        MainFile.main(args); // Verify that we have access to the base version.
+    }
 
-    /**
-     * Tests the discovery and configuration of the mojo.
-     */
-    @Test
-    @Basedir("${basedir}/src/test/resources/unit/jar-basic-test")
-    @InjectMojo(goal = "jar")
-    void jarTestEnvironment(JarMojo mojo) {
-        assertNotNull(mojo);
-        assertEquals("foo", mojo.project.getGroupId());
+    static void requireJava16() {
+        System.out.println("Method available only on Java 16+");
     }
 }
