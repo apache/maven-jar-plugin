@@ -146,11 +146,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
-      <artifactId>file-management</artifactId>
-      <version>${mavenFileManagementVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-archiver</artifactId>
       <version>${mavenArchiverVersion}</version>
     </dependency>

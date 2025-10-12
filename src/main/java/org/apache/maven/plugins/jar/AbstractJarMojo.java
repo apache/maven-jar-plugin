@@ -18,11 +18,11 @@
  */
 package org.apache.maven.plugins.jar;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.jar.Attributes;
@@ -39,8 +39,6 @@ import org.apache.maven.api.services.ProjectManager;
 import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 import org.apache.maven.shared.archiver.MavenArchiver;
 import org.apache.maven.shared.archiver.MavenArchiverException;
-import org.apache.maven.shared.model.fileset.FileSet;
-import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
@@ -54,8 +52,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private static final String[] DEFAULT_EXCLUDES = new String[] {"**/package.html"};
 
     private static final String[] DEFAULT_INCLUDES = new String[] {"**/**"};
-
-    private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -222,43 +218,36 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
-     * Generates the JAR.
+     * Generates the <abbr>JAR</abbr> file.
      *
      * @return the path to the created archive file
-     * @throws MojoException in case of an error
+     * @throws IOException in case of an error while reading a file or writing in the JAR file
      */
-    public Path createArchive() throws MojoException {
-        Path jarFile = getJarFile(outputDirectory, finalName, getClassifier());
+    @SuppressWarnings("checkstyle:UnusedLocalVariable") // Checkstyle bug: does not detect `includedFiles` usage.
+    public Path createArchive() throws IOException {
+        String archiverName = "jar";
+        final Path jarFile = getJarFile(outputDirectory, finalName, getClassifier());
+        final Path classesDirectory = getClassesDirectory();
+        if (Files.exists(classesDirectory)) {
+            var includedFiles = new org.apache.maven.plugins.jar.Archiver(
+                    classesDirectory,
+                    (includes != null) ? Arrays.asList(includes) : List.of(),
+                    (excludes != null && excludes.length > 0)
+                            ? Arrays.asList(excludes)
+                            : List.of(AbstractJarMojo.DEFAULT_EXCLUDES));
 
-        FileSetManager fileSetManager = new FileSetManager();
-        FileSet jarContentFileSet = new FileSet();
-        jarContentFileSet.setDirectory(getClassesDirectory().toAbsolutePath().toString());
-        jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
-        jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
-
-        String[] includedFiles = fileSetManager.getIncludedFiles(jarContentFileSet);
-
-        if (detectMultiReleaseJar
-                && Arrays.stream(includedFiles)
-                        .anyMatch(
-                                p -> p.startsWith("META-INF" + File.separatorChar + "versions" + File.separatorChar))) {
-            getLog().debug("Adding 'Multi-Release: true' manifest entry.");
-            archive.addManifestEntry(Attributes.Name.MULTI_RELEASE.toString(), "true");
+            var scanner = includedFiles.new VersionScanner(detectMultiReleaseJar);
+            if (Files.exists(classesDirectory)) {
+                Files.walkFileTree(classesDirectory, scanner);
+            }
+            if (detectMultiReleaseJar && scanner.detectedMultiReleaseJAR) {
+                getLog().debug("Adding 'Multi-Release: true' manifest entry.");
+                archive.addManifestEntry(Attributes.Name.MULTI_RELEASE.toString(), "true");
+            }
+            if (scanner.containsModuleDescriptor) {
+                archiverName = "mjar";
+            }
         }
-
-        // May give false positives if the files is named as module descriptor
-        // but is not in the root of the archive or in the versioned area
-        // (and hence not actually a module descriptor).
-        // That is fine since the modular Jar archiver will gracefully
-        // handle such case.
-        // And also such case is unlikely to happen as file ending
-        // with "module-info.class" is unlikely to be included in Jar file
-        // unless it is a module descriptor.
-        boolean containsModuleDescriptor =
-                Arrays.stream(includedFiles).anyMatch(p -> p.endsWith(MODULE_DESCRIPTOR_FILE_NAME));
-
-        String archiverName = containsModuleDescriptor ? "mjar" : "jar";
-
         MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
         archiver.setArchiver((JarArchiver) archivers.get(archiverName));
@@ -269,23 +258,16 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
         archive.setForced(forceCreation);
 
-        try {
-            Path contentDirectory = getClassesDirectory();
-            if (!Files.exists(contentDirectory)) {
-                if (!forceCreation) {
-                    getLog().warn("JAR will be empty - no content was marked for inclusion!");
-                }
-            } else {
-                archiver.getArchiver().addDirectory(contentDirectory.toFile(), getIncludes(), getExcludes());
+        Path contentDirectory = getClassesDirectory();
+        if (!Files.exists(contentDirectory)) {
+            if (!forceCreation) {
+                getLog().warn("JAR will be empty - no content was marked for inclusion!");
             }
-
-            archiver.createArchive(session, project, archive);
-
-            return jarFile;
-        } catch (Exception e) {
-            // TODO: improve error handling
-            throw new MojoException("Error assembling JAR", e);
+        } else {
+            archiver.getArchiver().addDirectory(contentDirectory.toFile(), getIncludes(), getExcludes());
         }
+        archiver.createArchive(session, project, archive);
+        return jarFile;
     }
 
     /**
@@ -298,7 +280,12 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         if (skipIfEmpty && isEmpty(getClassesDirectory())) {
             getLog().info(String.format("Skipping packaging of the %s.", getType()));
         } else {
-            Path jarFile = createArchive();
+            Path jarFile;
+            try {
+                jarFile = createArchive();
+            } catch (Exception e) {
+                throw new MojoException("Error while assembling the JAR file.", e);
+            }
             ProducedArtifact artifact;
             String classifier = getClassifier();
             if (attach) {
