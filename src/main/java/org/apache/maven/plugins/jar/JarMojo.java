@@ -27,7 +27,6 @@ import org.apache.maven.api.plugin.annotations.Parameter;
  * Build a JAR from the current project.
  *
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
- * @version $Id$
  */
 @Mojo(name = "jar", defaultPhase = "package")
 public class JarMojo extends AbstractJarMojo {
@@ -38,8 +37,8 @@ public class JarMojo extends AbstractJarMojo {
     private Path classesDirectory;
 
     /**
-     * Classifier to add to the artifact generated. If given, the artifact will be attached
-     * as a supplemental artifact.
+     * Classifier to add to the artifact generated.
+     * If given, the artifact will be attached as a supplemental artifact.
      * If not given this will create the main artifact which is the default behavior.
      * If you try to do that a second time without using a classifier the build will fail.
      */
