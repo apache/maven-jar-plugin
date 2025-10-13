@@ -166,6 +166,14 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected AbstractJarMojo() {}
 
     /**
+     * Specifies whether to attach the jar to the project
+     *
+     * @since 4.0.0-beta-2
+     */
+    @Parameter(property = "maven.jar.attach", defaultValue = "true")
+    protected boolean attach;
+
+    /**
      * {@return the specific output directory to serve as the root for the archive}
      */
     protected abstract Path getClassesDirectory();
@@ -293,22 +301,26 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             Path jarFile = createArchive();
             ProducedArtifact artifact;
             String classifier = getClassifier();
-            if (hasClassifier(classifier)) {
-                artifact = session.createProducedArtifact(
-                        project.getGroupId(),
-                        project.getArtifactId(),
-                        project.getVersion(),
-                        classifier,
-                        null,
-                        getType());
-            } else {
-                if (projectHasAlreadySetAnArtifact()) {
-                    throw new MojoException("You have to use a classifier "
-                            + "to attach supplemental artifacts to the project instead of replacing them.");
+            if (attach) {
+                if (hasClassifier(classifier)) {
+                    artifact = session.createProducedArtifact(
+                            project.getGroupId(),
+                            project.getArtifactId(),
+                            project.getVersion(),
+                            classifier,
+                            null,
+                            getType());
+                } else {
+                    if (projectHasAlreadySetAnArtifact()) {
+                        throw new MojoException("You have to use a classifier "
+                                + "to attach supplemental artifacts to the project instead of replacing them.");
+                    }
+                    artifact = project.getMainArtifact().get();
                 }
-                artifact = project.getMainArtifact().get();
+                projectManager.attachArtifact(project, artifact, jarFile);
+            } else {
+                getLog().debug("Skipping attachment of the " + getType() + " artifact to the project.");
             }
-            projectManager.attachArtifact(project, artifact, jarFile);
         }
     }
 
