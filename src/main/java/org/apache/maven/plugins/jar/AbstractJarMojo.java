@@ -203,6 +203,14 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private boolean addDefaultExcludes;
 
     /**
+     * Specifies whether to attach the jar to the project
+     *
+     * @since 3.5.0
+     */
+    @Parameter(property = "maven.jar.attach", defaultValue = "true")
+    protected boolean attach;
+
+    /**
      * Return the specific output directory to serve as the root for the archive.
      * @return get classes directory.
      */
@@ -344,14 +352,18 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         } else {
             File jarFile = createArchive();
 
-            if (hasClassifier()) {
-                projectHelper.attachArtifact(getProject(), getType(), getClassifier(), jarFile);
-            } else {
-                if (projectHasAlreadySetAnArtifact()) {
-                    throw new MojoExecutionException("You have to use a classifier "
-                            + "to attach supplemental artifacts to the project instead of replacing them.");
+            if (attach) {
+                if (hasClassifier()) {
+                    projectHelper.attachArtifact(getProject(), getType(), getClassifier(), jarFile);
+                } else {
+                    if (projectHasAlreadySetAnArtifact()) {
+                        throw new MojoExecutionException("You have to use a classifier "
+                                + "to attach supplemental artifacts to the project instead of replacing them.");
+                    }
+                    getProject().getArtifact().setFile(jarFile);
                 }
-                getProject().getArtifact().setFile(jarFile);
+            } else {
+                getLog().debug("Skipping attachment of the " + getType() + " artifact to the project.");
             }
         }
     }
