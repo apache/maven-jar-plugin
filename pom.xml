@@ -237,6 +237,9 @@
                 <goal>package</goal>
               </goals>
               <showErrors>true</showErrors>
+              <filterProperties>
+                <pluginPropertyUsedForFiltering>version.maven-surefire</pluginPropertyUsedForFiltering>
+              </filterProperties>
             </configuration>
             <executions>
               <execution>

@@ -16,13 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import junit.framework.TestCase;
-
-/**
- * Unit test
- */
-public class FooTest extends TestCase {
-    public void testFoo() {
-        assertTrue(true);
-    }
-}
+public class FooTest {}
