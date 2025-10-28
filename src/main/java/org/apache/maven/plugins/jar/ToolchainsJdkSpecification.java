@@ -71,28 +71,45 @@ class ToolchainsJdkSpecification {
     private String getSpecForPath(Path path) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(path.toString(), "-version");
-            processBuilder.redirectErrorStream(true);
+            processBuilder.redirectErrorStream(false);
             Process process = processBuilder.start();
-            String version = readOutput(process.getInputStream()).trim();
+            String stdout = readOutput(process.getInputStream()).trim();
+            String stderr = readOutput(process.getErrorStream()).trim();
             process.waitFor();
 
-            if (version.startsWith("javac ")) {
-                version = version.substring(6);
-                if (version.startsWith("1.")) {
-                    version = version.substring(0, 3);
-                } else {
-                    version = version.substring(0, 2);
-                }
-                return version;
-            } else {
-                logger.warn("Unrecognized output from {}: {}", processBuilder.command(), version);
+            String version = tryParseVersion(stdout);
+            if (version == null) {
+                version = tryParseVersion(stderr);
             }
+
+            if (version == null) {
+                logger.warn(
+                        "Unrecognized output from {}: stdout: {}, stderr: {}",
+                        processBuilder.command(),
+                        stdout,
+                        stderr);
+            }
+
+            return version;
         } catch (IndexOutOfBoundsException | IOException e) {
             logger.warn("Failed to execute: {} - {}", path, e.getMessage());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
+        return null;
+    }
+
+    private String tryParseVersion(String version) {
+        if (version.startsWith("javac ")) {
+            version = version.substring(6);
+            if (version.startsWith("1.")) {
+                version = version.substring(0, 3);
+            } else {
+                version = version.substring(0, 2);
+            }
+            return version;
+        }
         return null;
     }
 
