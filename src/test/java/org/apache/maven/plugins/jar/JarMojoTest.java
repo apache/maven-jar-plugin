@@ -18,8 +18,8 @@
  */
 package org.apache.maven.plugins.jar;
 
-import org.apache.maven.plugin.testing.junit5.InjectMojo;
-import org.apache.maven.plugin.testing.junit5.MojoTest;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
