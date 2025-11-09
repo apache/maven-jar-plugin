@@ -29,7 +29,6 @@ import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
@@ -55,12 +54,6 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
     private static final String SEPARATOR = FileSystems.getDefault().getSeparator();
-
-    @Component
-    private ToolchainsJdkSpecification toolchainsJdkSpecification;
-
-    @Component
-    private ToolchainManager toolchainManager;
 
     /**
      * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
@@ -89,24 +82,6 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private String finalName;
 
     /**
-     * The Jar archiver.
-     */
-    @Component
-    private Map<String, Archiver> archivers;
-
-    /**
-     * The {@link MavenProject}.
-     */
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
-    private MavenProject project;
-
-    /**
-     * The {@link MavenSession}.
-     */
-    @Parameter(defaultValue = "${session}", readonly = true, required = true)
-    private MavenSession session;
-
-    /**
      * The archive configuration to use. See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven
      * Archiver Reference</a>.
      */
@@ -123,12 +98,6 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     @Parameter(property = "jar.useDefaultManifestFile", defaultValue = "false")
     @Deprecated
     private boolean useDefaultManifestFile;
-
-    /**
-     *
-     */
-    @Component
-    private MavenProjectHelper projectHelper;
 
     /**
      * Require the jar plugin to build a new JAR even if none of the contents appear to have changed. By default, this
@@ -209,6 +178,42 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      */
     @Parameter(property = "maven.jar.attach", defaultValue = "true")
     protected boolean attach;
+
+    /**
+     * The {@link MavenProject}.
+     */
+    private final MavenProject project;
+
+    /**
+     * The {@link MavenSession}.
+     */
+    private final MavenSession session;
+
+    private final ToolchainsJdkSpecification toolchainsJdkSpecification;
+
+    private final ToolchainManager toolchainManager;
+
+    /**
+     * The Jar archiver.
+     */
+    private final Map<String, Archiver> archivers;
+
+    private final MavenProjectHelper projectHelper;
+
+    AbstractJarMojo(
+            MavenProject project,
+            MavenSession session,
+            ToolchainsJdkSpecification toolchainsJdkSpecification,
+            ToolchainManager toolchainManager,
+            Map<String, Archiver> archivers,
+            MavenProjectHelper projectHelper) {
+        this.project = project;
+        this.session = session;
+        this.toolchainsJdkSpecification = toolchainsJdkSpecification;
+        this.toolchainManager = toolchainManager;
+        this.archivers = archivers;
+        this.projectHelper = projectHelper;
+    }
 
     /**
      * Return the specific output directory to serve as the root for the archive.

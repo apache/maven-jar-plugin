@@ -18,13 +18,21 @@
  */
 package org.apache.maven.plugins.jar;
 
-import java.io.File;
+import javax.inject.Inject;
 
+import java.io.File;
+import java.util.Map;
+
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.toolchain.ToolchainManager;
+import org.codehaus.plexus.archiver.Archiver;
 
 /**
  * Build a JAR of the test classes for the current project.
@@ -32,14 +40,12 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @version $Id$
  */
-// CHECKSTYLE_OFF: LineLength
 @Mojo(
         name = "test-jar",
         defaultPhase = LifecyclePhase.PACKAGE,
         requiresProject = true,
         threadSafe = true,
         requiresDependencyResolution = ResolutionScope.TEST)
-// CHECKSTYLE_ON: LineLength
 public class TestJarMojo extends AbstractJarMojo {
 
     /**
@@ -60,6 +66,17 @@ public class TestJarMojo extends AbstractJarMojo {
      */
     @Parameter(defaultValue = "tests")
     private String classifier;
+
+    @Inject
+    TestJarMojo(
+            MavenProject project,
+            MavenSession session,
+            ToolchainsJdkSpecification toolchainsJdkSpecification,
+            ToolchainManager toolchainManager,
+            Map<String, Archiver> archivers,
+            MavenProjectHelper projectHelper) {
+        super(project, session, toolchainsJdkSpecification, toolchainManager, archivers, projectHelper);
+    }
 
     /**
      * {@inheritDoc}
