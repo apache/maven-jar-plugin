@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @version $Id$
  */
 @MojoTest
-public class JarMojoTest {
+class JarMojoTest {
 
     /**
      * Tests the discovery and configuration of the mojo.
@@ -42,7 +42,7 @@ public class JarMojoTest {
     @Test
     @Basedir("${basedir}/src/test/resources/unit/jar-basic-test")
     @InjectMojo(goal = "jar")
-    public void testJarTestEnvironment(JarMojo mojo) throws Exception {
+    void jarTestEnvironment(JarMojo mojo) throws Exception {
         assertNotNull(mojo);
 
         assertEquals("foo", mojo.getProject().getGroupId());
