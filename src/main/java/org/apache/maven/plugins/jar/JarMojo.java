@@ -18,12 +18,20 @@
  */
 package org.apache.maven.plugins.jar;
 
-import java.io.File;
+import javax.inject.Inject;
 
+import java.io.File;
+import java.util.Map;
+
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.toolchain.ToolchainManager;
+import org.codehaus.plexus.archiver.Archiver;
 
 /**
  * Build a JAR from the current project.
@@ -52,6 +60,17 @@ public class JarMojo extends AbstractJarMojo {
      */
     @Parameter
     private String classifier;
+
+    @Inject
+    JarMojo(
+            MavenProject project,
+            MavenSession session,
+            ToolchainsJdkSpecification toolchainsJdkSpecification,
+            ToolchainManager toolchainManager,
+            Map<String, Archiver> archivers,
+            MavenProjectHelper projectHelper) {
+        super(project, session, toolchainsJdkSpecification, toolchainManager, archivers, projectHelper);
+    }
 
     /**
      * {@inheritDoc}

@@ -18,12 +18,15 @@
  */
 package org.apache.maven.plugins.jar;
 
+import javax.inject.Inject;
+
 import org.apache.maven.api.plugin.testing.InjectMojo;
 import org.apache.maven.api.plugin.testing.MojoTest;
+import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Test for {@link JarMojo}
@@ -33,13 +36,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @MojoTest
 class JarMojoTest {
 
+    @Inject
+    private MavenProject project;
+
     /**
      * Tests the discovery and configuration of the mojo.
      */
     @Test
-    @InjectMojo(goal = "jar", pom = "classpath:/unit/jar-basic-test/pom.xml")
+    @InjectMojo(goal = "jar")
     void testJarTestEnvironment(JarMojo mojo) {
         assertNotNull(mojo);
-        assertEquals("foo", mojo.getProject().getGroupId());
+        assertSame(project, mojo.getProject());
     }
 }
