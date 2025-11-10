@@ -28,7 +28,9 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,8 +75,8 @@ class ToolchainsJdkSpecification {
             ProcessBuilder processBuilder = new ProcessBuilder(path.toString(), "-version");
             processBuilder.redirectErrorStream(false);
             Process process = processBuilder.start();
-            String stdout = readOutput(process.getInputStream()).trim();
-            String stderr = readOutput(process.getErrorStream()).trim();
+            List<String> stdout = readOutput(process.getInputStream());
+            List<String> stderr = readOutput(process.getErrorStream());
             process.waitFor();
 
             String version = tryParseVersion(stdout);
@@ -100,28 +102,30 @@ class ToolchainsJdkSpecification {
         return null;
     }
 
-    private String tryParseVersion(String version) {
-        if (version.startsWith("javac ")) {
-            version = version.substring(6);
-            if (version.startsWith("1.")) {
-                version = version.substring(0, 3);
-            } else {
-                version = version.substring(0, 2);
+    private String tryParseVersion(List<String> versions) {
+        for (String version : versions) {
+            if (version.startsWith("javac ")) {
+                version = version.substring(6);
+                if (version.startsWith("1.")) {
+                    version = version.substring(0, 3);
+                } else {
+                    version = version.substring(0, 2);
+                }
+                return version;
             }
-            return version;
         }
         return null;
     }
 
-    private String readOutput(InputStream inputstream) throws IOException {
+    private List<String> readOutput(InputStream inputstream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputstream));
 
-        StringBuilder output = new StringBuilder();
+        List<String> result = new ArrayList<>();
         String line;
         while ((line = br.readLine()) != null) {
-            output.append(line + System.lineSeparator());
+            result.add(line);
         }
 
-        return output.toString();
+        return result;
     }
 }
