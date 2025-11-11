@@ -172,7 +172,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private boolean addDefaultExcludes;
 
     /**
-     * Specifies whether to attach the jar to the project
+     * Specifies whether to attach the jar to the project.
      *
      * @since 3.5.0
      */
@@ -246,7 +246,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
      * Returns the Jar file to generate, based on an optional classifier.
      *
      * @param basedir the output directory
-     * @param resultFinalName the name of the ear file
+     * @param resultFinalName the name of the JAR file
      * @param classifier an optional classifier
      * @return the file to generate
      */
@@ -382,7 +382,7 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     }
 
     /**
-     * Return {@code true} in case where the classifier is not {@code null} and contains something else than white spaces.
+     * Return {@code true} if the classifier is not {@code null} and contains something other than white spaces.
      *
      * @return {@code true} if the classifier is set.
      */
