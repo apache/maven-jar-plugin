@@ -45,8 +45,7 @@ try
     String[] snippets = new String[] {
       "[INFO] BUILD FAILURE",
       "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin",
-      "Caused by: org.apache.maven.api.plugin.MojoException: Error while assembling the JAR file.",
-      "Caused by: org.codehaus.plexus.archiver.jar.ManifestException: Invalid automatic module name: 'in-valid.name.with.new.keyword'"
+      "Caused by: org.apache.maven.api.plugin.MojoException: Invalid automatic module name: \"in-valid.name.with.new.keyword\"."
     };
 
     System.out.println("\nVerifying log snippets...");
