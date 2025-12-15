@@ -18,6 +18,8 @@
  */
 package org.apache.maven.plugins.jar;
 
+import javax.lang.model.SourceVersion;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -231,6 +233,20 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
+     * Returns whether the specified Java version is supported.
+     *
+     * @param release name of an {@link SourceVersion} enumeration constant
+     * @return whether the current environment support that version
+     */
+    private static boolean isSupported(String release) {
+        try {
+            return SourceVersion.latestSupported().compareTo(SourceVersion.valueOf(release)) >= 0;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
      * Returns the output time stamp or, as a fallback, the {@code SOURCE_DATE_EPOCH} environment variable.
      * If the time stamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
      *
@@ -245,6 +261,10 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             if (time == null) {
                 return null;
             }
+        }
+        if (!isSupported("RELEASE_19")) {
+            log.warn("Reproducible build requires Java 19 or later.");
+            return null;
         }
         for (int i = time.length(); --i >= 0; ) {
             char c = time.charAt(i);
