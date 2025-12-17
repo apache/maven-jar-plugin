@@ -74,7 +74,7 @@
 
   <properties>
     <javaVersion>8</javaVersion>
-    <mavenVersion>3.9.11</mavenVersion>
+    <mavenVersion>3.9.12</mavenVersion>
     <mavenArchiverVersion>3.6.5</mavenArchiverVersion>
 
     <!-- for JDK 25 -->
