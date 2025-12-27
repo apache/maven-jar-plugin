@@ -22,24 +22,12 @@ import org.apache.maven.api.Session;
 import org.apache.maven.api.di.Named;
 import org.apache.maven.api.di.Provides;
 import org.apache.maven.api.services.ProjectManager;
-import org.codehaus.plexus.archiver.Archiver;
-import org.codehaus.plexus.archiver.jar.JarArchiver;
-import org.codehaus.plexus.archiver.jar.JarToolModularJarArchiver;
 
+/**
+ * For providing instances to fields annotated with {@code @Inject} if the MOJO.
+ */
 @Named
 class Providers {
-
-    @Named("jar")
-    @Provides
-    static Archiver jarArchiver() {
-        return new JarArchiver();
-    }
-
-    @Named("mjar")
-    @Provides
-    static Archiver mjarArchiver() {
-        return new JarToolModularJarArchiver();
-    }
 
     @Provides
     static ProjectManager projectManager(Session session) {

@@ -25,14 +25,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NoSuchElementException;
+import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.apache.maven.api.annotations.Nonnull;
 import org.apache.maven.api.annotations.Nullable;
 import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.plugin.MojoException;
 
 /**
  * Files or root directories to archive for a single module.
@@ -40,6 +45,15 @@ import org.apache.maven.api.plugin.Log;
  * Many instances of {@code Archive} may exist when archiving a multi-modules project.
  */
 final class Archive {
+    /**
+     * Path to the <abbr>POM</abbr> file generated for this archive, or {@code null} if none.
+     * This is non-null only if module source hierarchy is used, in which case the dependencies
+     * declared in this file are the intersection of the project dependencies and the content of
+     * the {@code module-info.class} file.
+     */
+    @Nullable
+    Path pomFile;
+
     /**
      * The <var>JAR</var> file to create. May be an existing file,
      * in which case the file creation may be skipped if the file is still up-to-date.
@@ -84,24 +98,12 @@ final class Archive {
     private String mainClass;
 
     /**
-     * Files or root directories to store in the <abbr>JAR</abbr> file for targeting the base Java release.
-     */
-    @Nonnull
-    final FileSet baseRelease;
-
-    /**
      * Files or root directories to store in the <abbr>JAR</abbr> file for each target Java release
-     * other than the base release.
-     *
-     * <h4>Note on duplicated versions</h4>
-     * In principle, we should not have two elements with the same {@link FileSet#version} value.
-     * However, while it should not happen in default Maven builds, we do not forbid the case where
-     * the same version would be defined in {@code "./META-INF"} and {@code "./<module>/META-INF"}.
-     * In such case, two {@code FileSet} instances would exist for the same Java release but with
-     * two different {@link FileSet#directory} values.
+     * other than the base release. Keys are the target Java release with {@code null} for the base
+     * release.
      */
     @Nonnull
-    private final List<FileSet> additionalReleases;
+    private final NavigableMap<Runtime.Version, FileSet> filesetForRelease;
 
     /**
      * Files or root directories to archive for a single target Java release of a single module.
@@ -110,57 +112,53 @@ final class Archive {
      */
     final class FileSet {
         /**
-         * The target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file.
-         */
-        @Nullable
-        final Runtime.Version version;
-
-        /**
          * The root directory of all files or directories to archive.
          * This is the value to pass to the {@code -C} tool option.
          */
         @Nonnull
-        private final Path directory;
+        final Path directory;
 
         /**
          * The files or directories to include in the <var>JAR</var> file.
          * May be absolute paths or paths relative to {@link #directory}.
          */
         @Nonnull
-        private final List<Path> files;
+        final List<Path> files;
 
         /**
-         * Creates an initially empty set of files or directories for the specified target Java release.
+         * Creates an initially empty set of files or directories for a specific target Java release.
          *
          * @param directory the base directory of the files or directories to archive
-         * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
          */
-        private FileSet(final Path directory, final Runtime.Version version) {
-            this.version = version;
+        private FileSet(Path directory) {
             this.directory = directory;
             this.files = new ArrayList<>();
         }
 
         /**
-         * Finds a common directory for all remaining files, then clears the list of file.
-         * The common directory can be used for logging a warning message.
+         * Discards all files in this file set, normally because those files are not in any module.
+         * This method returns a common parent directory for all the files that were discarded.
+         * The caller should use that common directory for logging a warning message.
          *
          * @param base base directory found by previous invocations of this method, or {@code null} if none
-         * @return common directory of remaining files
+         * @return common directory of discarded files
          */
-        private Path clear(Path base) {
+        private Path discardAllFiles(Path base) {
             for (Path file : files) {
-                base = findCommonBaseDirectory(base, directory.resolve(file));
+                file = directory.resolve(file);
+                if (base == null) {
+                    base = file.getParent();
+                } else {
+                    while (!file.startsWith(base)) {
+                        base = base.getParent();
+                        if (base == null) {
+                            break;
+                        }
+                    }
+                }
             }
             files.clear();
             return base;
-        }
-
-        /**
-         * Returns files as values, together with the base directory (as key) for resolving relative files.
-         */
-        private Map.Entry<Path, Iterable<Path>> files() {
-            return Map.entry(directory, files);
         }
 
         /**
@@ -172,7 +170,7 @@ final class Archive {
          * @param isDirectory whether the file is a directory
          * @throws IllegalArgumentException if the given path cannot be made relative to the base directory
          */
-        void add(Path item, final BasicFileAttributes attributes, final boolean isDirectory) {
+        void add(Path item, BasicFileAttributes attributes, boolean isDirectory) {
             TimestampCheck tc = existingJAR;
             if (tc != null && tc.isUpdated(item, attributes, isDirectory)) {
                 existingJAR = null; // Signal that the existing file is outdated.
@@ -194,22 +192,18 @@ final class Archive {
          * Elements added to the list shall be instances of {@link String} or {@link Path}.
          *
          * @param addTo the list where to add the arguments as {@link String} or {@link Path} instances
-         * @param versioned whether to add arguments for the version specified by {@linkplain #version}
-         * @return whether at least one file has been added as argument
+         * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
          */
-        private boolean arguments(final List<Object> addTo, final boolean versioned) {
-            if (files.isEmpty()) {
-                // Happen if both `FileCollector.moduleHierarchy` and `FileCollector.packageHierarchy` are empty.
-                return false;
+        private void arguments(List<Object> addTo, Runtime.Version version) {
+            if (!files.isEmpty()) {
+                if (version != null) {
+                    addTo.add("--release");
+                    addTo.add(version);
+                }
+                addTo.add("-C");
+                addTo.add(directory);
+                addTo.addAll(files);
             }
-            if (versioned && version != null) {
-                addTo.add("--release");
-                addTo.add(version);
-            }
-            addTo.add("-C");
-            addTo.add(directory);
-            addTo.addAll(files);
-            return true;
         }
 
         /**
@@ -217,8 +211,7 @@ final class Archive {
          */
         @Override
         public String toString() {
-            return getClass().getSimpleName() + '[' + (version != null ? version : "base") + " = "
-                    + directory.getFileName() + ']';
+            return getClass().getSimpleName() + '[' + directory.getFileName() + ": " + files.size() + " files]";
         }
     }
 
@@ -228,17 +221,23 @@ final class Archive {
      * @param jarFile path to the <abbr>JAR</abbr> file to create
      * @param moduleName the module name if using module hierarchy, or {@code null} if using package hierarchy
      * @param directory the directory of the classes targeting the base Java release
-     * @param forceCreation whether to force new <abbr>JAR</abbr> file even the contents seem unchanged.
+     * @param forceCreation whether to force a new <abbr>JAR</abbr> file even if the content seems unchanged.
      * @param logger where to send a warning if an error occurred while checking an existing <abbr>JAR</abbr> file
      */
-    Archive(final Path jarFile, final String moduleName, final Path directory, boolean forceCreation, Log logger) {
+    @SuppressWarnings("checkstyle:NeedBraces")
+    Archive(Path jarFile, String moduleName, Path directory, boolean forceCreation, Log logger) {
         this.jarFile = jarFile;
         this.moduleName = moduleName;
-        baseRelease = new FileSet(directory, null);
-        additionalReleases = new ArrayList<>();
+        filesetForRelease = new TreeMap<>((v1, v2) -> {
+            if (v1 == v2) return 0;
+            if (v1 == null) return -1;
+            if (v2 == null) return +1;
+            return v1.compareTo(v2);
+        });
+        filesetForRelease.put(null, new FileSet(directory));
         if (!forceCreation && Files.isRegularFile(jarFile)) {
             try {
-                existingJAR = new TimestampCheck(jarFile, directory(), logger);
+                existingJAR = new TimestampCheck(jarFile, directory, logger);
             } catch (IOException e) {
                 // Ignore, we will regenerate the JAR file.
                 logger.warn(e);
@@ -247,61 +246,81 @@ final class Archive {
     }
 
     /**
-     * Returns the root directory of all files or directories to archive for this module.
+     * {@return the files or directories to store in the <abbr>JAR</abbr> file for targeting the base Java release}
      *
-     * @return the root directory of this module.
+     * @throws NoSuchElementException should not happen unless {@link #prune(boolean)} has been invoked
      */
-    public Path directory() {
-        return baseRelease.directory;
+    FileSet baseRelease() {
+        return filesetForRelease.firstEntry().getValue();
     }
 
     /**
-     * Finds a common directory for all remaining files, then clears the list of file.
-     * The common directory can be used for logging a warning message.
+     * Returns the {@code module-info.class} files. Conceptually, there is at most once such file per module.
+     * However, more than one file may exist if additional files are provided for additional Java releases.
+     * This method returns only the files that exist.
      *
-     * @return common directory of remaining files
+     * @return all {@code module-info.class} files found for all target Java releases
      */
-    Path clear() {
-        Path base = baseRelease.clear(null);
-        for (FileSet release : additionalReleases) {
-            base = release.clear(base);
-        }
-        return (base != null) ? base : directory();
-    }
-
-    /**
-     * Returns a directory which is the base of the given {@code file}.
-     * This method returns either {@code base}, or a parent of {@code base}, or {@code null}.
-     *
-     * @param base the last base directory found, or {@code null}
-     * @param file the file for which to find a common base directory
-     * @return {@code base}, or a parent of {@code base}, or {@code null}
-     */
-    private static Path findCommonBaseDirectory(Path base, Path file) {
-        if (base == null) {
-            base = file.getParent();
-        } else {
-            while (!file.startsWith(base)) {
-                base = base.getParent();
-                if (base == null) {
-                    break;
-                }
+    public List<Path> moduleInfoFiles() {
+        var files = new ArrayList<Path>();
+        filesetForRelease.values().forEach((release) -> {
+            Path file = release.directory.resolve(FileCollector.MODULE_DESCRIPTOR_FILE_NAME);
+            if (Files.isRegularFile(file)) {
+                files.add(file);
             }
+        });
+        return files;
+    }
+
+    /**
+     * Discards all files in this archive, normally because those files are not in any module.
+     * This method returns a common parent directory for all the files that were discarded.
+     * The caller should use that common directory for logging a warning message.
+     *
+     * @return common directory of discarded files, or {@code null} if none
+     */
+    Path discardAllFiles() {
+        Path base = null;
+        for (FileSet release : filesetForRelease.values()) {
+            base = release.discardAllFiles(base);
         }
         return base;
     }
 
     /**
-     * Returns whether this module can be skipped. This is {@code true} if this module has no file to archive,
-     * ignoring Maven-generated files, and {@code skipIfEmpty} is {@code true}. This method should be invoked
-     * even in the trivial case where the {@code skipIfEmpty} argument is {@code false}.
+     * Removes all empty file sets and ensures that the lowest version is declared as the base version.
+     * This method should be invoked after all output directories to archive have been fully scanned.
+     * If {@code skipIfEmpty} is {@code false}, then this method ensures that at least one file set
+     * remains even if that file set is empty.
      *
      * @param skipIfEmpty value of {@link AbstractJarMojo#skipIfEmpty}
-     * @return whether this module can be skipped
      */
-    public boolean canSkip(final boolean skipIfEmpty) {
-        additionalReleases.removeIf((v) -> v.files.isEmpty());
-        return skipIfEmpty && baseRelease.files.isEmpty() && additionalReleases.isEmpty();
+    public void prune(final boolean skipIfEmpty) {
+        FileSet keep = (skipIfEmpty || filesetForRelease.isEmpty())
+                ? null
+                : filesetForRelease.firstEntry().getValue();
+        filesetForRelease.values().removeIf((v) -> v.files.isEmpty());
+        Iterator<Map.Entry<Runtime.Version, FileSet>> it =
+                filesetForRelease.entrySet().iterator();
+        if (it.hasNext()) {
+            Map.Entry<Runtime.Version, FileSet> first = it.next();
+            if (first.getKey() != null) {
+                keep = first.getValue();
+                it.remove();
+            }
+        }
+        if (keep != null) {
+            filesetForRelease.put(null, keep);
+        }
+    }
+
+    /**
+     * {@return whether this module can be skipped}
+     * This is {@code true} if this module has no file to archive, ignoring Maven-generated files.
+     * The {@link #prune(boolean)} method should be invoked before this method for accurate result.
+     */
+    public boolean canSkip() {
+        return filesetForRelease.isEmpty();
     }
 
     /**
@@ -320,10 +339,7 @@ final class Archive {
             return false;
         }
         existingJAR = null; // Let GC do its job.
-        var fileSets = new ArrayList<Map.Entry<Path, Iterable<Path>>>(additionalReleases.size() + 1);
-        fileSets.add(baseRelease.files());
-        additionalReleases.forEach((release) -> fileSets.add(release.files()));
-        return tc.isUpToDateJAR(fileSets);
+        return tc.isUpToDateJAR(filesetForRelease.values());
     }
 
     /**
@@ -334,9 +350,7 @@ final class Archive {
      * @return container where to declare files and directories to archive
      */
     FileSet newTargetRelease(Path directory, Runtime.Version version) {
-        var release = new FileSet(directory, version);
-        additionalReleases.add(release);
-        return release;
+        return filesetForRelease.computeIfAbsent(version, (key) -> new FileSet(directory));
     }
 
     /**
@@ -445,7 +459,6 @@ final class Archive {
      *
      * @param addTo the list where to add the arguments as {@link String} or {@link Path} instances
      */
-    @SuppressWarnings("checkstyle:NeedBraces")
     void arguments(final List<Object> addTo) {
         addTo.add("--file");
         addTo.add(jarFile);
@@ -461,22 +474,8 @@ final class Archive {
             addTo.add("-C");
             addTo.addAll(mavenFiles);
         }
-        // Sort by increasing release version.
-        additionalReleases.sort((f1, f2) -> {
-            Runtime.Version v1 = f1.version;
-            Runtime.Version v2 = f2.version;
-            if (v1 != v2) {
-                if (v1 == null) return -1;
-                if (v2 == null) return +1;
-                int c = v1.compareTo(v2);
-                if (c != 0) return c;
-            }
-            // Give precedence to directories closer to the root.
-            return f1.directory.getNameCount() - f2.directory.getNameCount();
-        });
-        boolean versioned = baseRelease.arguments(addTo, false);
-        for (FileSet release : additionalReleases) {
-            versioned |= release.arguments(addTo, versioned);
+        for (Map.Entry<Runtime.Version, FileSet> entry : filesetForRelease.entrySet()) {
+            entry.getValue().arguments(addTo, entry.getKey());
         }
     }
 
@@ -535,6 +534,25 @@ final class Archive {
             }
         }
         return debugFile;
+    }
+
+    /**
+     * Stores in the given map the paths to the artifacts produced for this archive.
+     *
+     * @param artifactType {@code "jar"} or {@code "test-jar"}
+     * @param addTo the map where to add the results
+     */
+    void saveArtifactPaths(final String artifactType, final Map<String, Map<String, Path>> addTo) {
+        final Map<String, Path> paths;
+        if (pomFile != null) {
+            paths = Map.of(artifactType, jarFile, "pom", pomFile);
+        } else {
+            paths = Map.of(artifactType, jarFile);
+        }
+        if (addTo.put(moduleName, paths) != null) {
+            // Should never happen, but check anyway.
+            throw new MojoException("Module archived twice: " + moduleName);
+        }
     }
 
     /**

@@ -25,9 +25,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -129,13 +129,11 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
 
     /**
      * Checks if the <abbr>JAR</abbr> file contains all the given files, no extra entry, and no outdated entry.
-     * For each {@code Map.Entry}, the key is the base directory for resolving relative paths given by the value.
-     * If an I/O error occurs, this method returns {@code true} for instructing to recreate the <abbr>JAR</abbr> file.
      *
      * @param fileSets pairs of base directory and files potentially relative to the base directory
      * @return whether the <abbr>JAR</abbr> file is up-to-date
      */
-    boolean isUpToDateJAR(final Iterable<Map.Entry<Path, Iterable<Path>>> fileSets) {
+    boolean isUpToDateJAR(final Collection<Archive.FileSet> fileSets) {
         // No need to use JarFile because no need to handle META-INF in a special way.
         try (ZipFile jar = new ZipFile(jarFile.toFile())) {
             entries = jar.entries();
@@ -144,9 +142,9 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
                     return false;
                 }
             }
-            for (Map.Entry<Path, Iterable<Path>> fileSet : fileSets) {
-                final Path baseDir = fileSet.getKey();
-                for (Path file : fileSet.getValue()) {
+            for (Archive.FileSet fileSet : fileSets) {
+                final Path baseDir = fileSet.directory;
+                for (Path file : fileSet.files) {
                     file = baseDir.resolve(file);
                     if (!filesInBuild.remove(file)) { // For skipping the files already verified by above loop.
                         Files.walkFileTree(file, this);

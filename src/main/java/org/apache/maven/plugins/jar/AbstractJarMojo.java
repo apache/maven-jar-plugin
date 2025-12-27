@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.jar.Manifest;
 import java.util.spi.ToolProvider;
 
+import org.apache.maven.api.PathScope;
 import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
@@ -189,6 +190,13 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
+     * {@return the Maven session in which the project is built}
+     */
+    protected final Session getSession() {
+        return session;
+    }
+
+    /**
      * {@return the Maven project}
      */
     protected final Project getProject() {
@@ -220,6 +228,14 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * This is usually {@code "jar"} for the main artifact, or {@code "test-jar"} for the JAR file of test code.
      */
     protected abstract String getType();
+
+    /**
+     * {@return the scope of dependencies}
+     * It should be {@link PathScope#MAIN_COMPILE} or {@link PathScope#TEST_COMPILE}.
+     * Note that we use compile scope rather than runtime scope because dependencies
+     * cannot appear in {@code requires} statement if they didn't had compile scope.
+     */
+    protected abstract PathScope getDependencyScope();
 
     /**
      * {@return the JAR tool to use for archiving the code}
@@ -302,7 +318,9 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     /**
      * Generates the <abbr>JAR</abbr> files.
      * Map keys are module names or {@code null} if the project does not use module hierarchy.
-     * Values are paths to the <abbr>JAR</abbr> file associated with each module.
+     * Values are (<var>type</var>, <var>path</var>) pairs associated with each module where
+     * <var>type</var> is {@code "pom"}, {@code "jar"} or {@code "test-jar"} and <var>path</var>
+     * is the path to the <abbr>POM</abbr> or <abbr>JAR</abbr> file.
      *
      * <p>Note that a null key does not necessarily means that the <abbr>JAR</abbr> is not modular.
      * It only means that the project was not compiled with module hierarchy,
@@ -313,7 +331,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * @throws IOException if an error occurred while walking the file tree
      * @throws MojoException if an error occurred while writing a <abbr>JAR</abbr> file
      */
-    public Map<String, Path> createArchives() throws IOException, MojoException {
+    public Map<String, Map<String, Path>> createArchives() throws IOException, MojoException {
         final Path classesDirectory = getClassesDirectory();
         final boolean notExists = Files.notExists(classesDirectory);
         if (notExists) {
@@ -333,6 +351,11 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         if (!notExists) {
             Files.walkFileTree(classesDirectory, files);
         }
+        files.prune(skipIfEmpty);
+        List<Path> moduleRoots = files.getModuleHierarchyRoots();
+        if (!moduleRoots.isEmpty()) {
+            executor.pomDerivation = new PomDerivation(this, moduleRoots);
+        }
         return executor.writeAllJARs(files);
     }
 
@@ -344,42 +367,42 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     @Override
     @SuppressWarnings("UseSpecificCatch")
     public void execute() throws MojoException {
-        final Map<String, Path> jarFiles;
+        final Map<String, Map<String, Path>> artifactFiles;
         try {
-            jarFiles = createArchives();
+            artifactFiles = createArchives();
         } catch (MojoException e) {
             throw e;
         } catch (Exception e) {
             throw new MojoException("Error while assembling the JAR file.", e);
         }
-        if (jarFiles.isEmpty()) {
+        if (artifactFiles.isEmpty()) {
             // Message already logged by `createArchives()`.
             return;
         }
         if (attach) {
             final String classifier = nullIfAbsent(getClassifier());
-            for (Map.Entry<String, Path> entry : jarFiles.entrySet()) {
+            for (Map.Entry<String, Map<String, Path>> entry : artifactFiles.entrySet()) {
                 String moduleName = entry.getKey();
-                ProducedArtifact artifact;
-                if (moduleName == null && classifier == null) {
-                    if (projectHasAlreadySetAnArtifact()) {
-                        throw new MojoException("You have to use a classifier "
-                                + "to attach supplemental artifacts to the project instead of replacing them.");
+                for (Map.Entry<String, Path> path : entry.getValue().entrySet()) {
+                    ProducedArtifact artifact;
+                    if (moduleName == null && classifier == null) {
+                        // Note: the two maps on which we are iterating should contain only one entry in this case.
+                        if (projectHasAlreadySetAnArtifact()) {
+                            throw new MojoException("You have to use a classifier "
+                                    + "to attach supplemental artifacts to the project instead of replacing them.");
+                        }
+                        artifact = project.getMainArtifact().orElseThrow();
+                    } else {
+                        artifact = session.createProducedArtifact(
+                                project.getGroupId(),
+                                (moduleName != null) ? moduleName : project.getArtifactId(),
+                                project.getVersion(),
+                                classifier,
+                                null,
+                                path.getKey());
                     }
-                    artifact = project.getMainArtifact().orElseThrow();
-                } else {
-                    /*
-                     * TODO: we need to generate artifact with dependencies filtered from the module-info.
-                     */
-                    artifact = session.createProducedArtifact(
-                            project.getGroupId(),
-                            (moduleName != null) ? moduleName : project.getArtifactId(),
-                            project.getVersion(),
-                            classifier,
-                            null,
-                            getType());
+                    projectManager.attachArtifact(project, artifact, path.getValue());
                 }
-                projectManager.attachArtifact(project, artifact, entry.getValue());
             }
         } else {
             getLog().debug("Skipping attachment of the " + getType() + " artifact to the project.");

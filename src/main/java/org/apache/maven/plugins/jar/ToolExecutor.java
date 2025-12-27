@@ -49,7 +49,12 @@ final class ToolExecutor {
     /**
      * The Maven project for which to create an archive.
      */
-    private final Project project;
+    final Project project;
+
+    /**
+     * {@code "jar"} or {@link "test-jar"}.
+     */
+    private final String artifactType;
 
     /**
      * The output directory where to write the <abbr>JAR</abbr> file.
@@ -101,8 +106,22 @@ final class ToolExecutor {
 
     /**
      * The paths to the created archive files.
+     * Map keys are module names or {@code null} if the project does not use module hierarchy.
+     * Values are (<var>type</var>, <var>path</var>) pairs associated with each module where
+     * <var>type</var> is {@code "pom"}, {@code "jar"} or {@code "test-jar"} and <var>path</var>
+     * is the path to the <abbr>POM</abbr> or <abbr>JAR</abbr> file.
      */
-    private final Map<String, Path> result;
+    private final Map<String, Map<String, Path>> result;
+
+    /**
+     * Mapper from Maven dependencies to Java modules, or {@code null} if the project does not use module hierarchy.
+     * This mapper is created only once for a Maven project and reused for each Java module to archive.
+     *
+     * <p>This field is not used directly by {@code ToolExecutor}. It is defined in this class for transferring
+     * this information from {@link AbstractJarMojo} to {@link PomDerivation.ForModule}.
+     * This is an internal mechanism that should not be public or protected.</p>
+     */
+    PomDerivation pomDerivation;
 
     /**
      * Manifest to merge with the manifest found in the files to archive.
@@ -132,11 +151,6 @@ final class ToolExecutor {
     private final String outputTimestamp;
 
     /**
-     * Whether to skip empty <abbr>JAR</abbr> files.
-     */
-    final boolean skipIfEmpty;
-
-    /**
      * Whether to force to build new <abbr>JAR</abbr> files even if none of the contents appear to have changed.
      */
     private final boolean forceCreation;
@@ -156,10 +170,10 @@ final class ToolExecutor {
      */
     ToolExecutor(AbstractJarMojo mojo, Manifest manifest, MavenArchiveConfiguration archive) throws IOException {
         project = mojo.getProject();
+        artifactType = mojo.getType();
         outputDirectory = mojo.getOutputDirectory();
         classifier = AbstractJarMojo.nullIfAbsent(mojo.getClassifier());
         finalName = mojo.getFinalName();
-        skipIfEmpty = mojo.skipIfEmpty;
         forceCreation = mojo.forceCreation;
         outputTimestamp = mojo.getOutputTimestamp();
         logger = mojo.getLog();
@@ -234,7 +248,12 @@ final class ToolExecutor {
     }
 
     /**
-     * Writes all <abbr>JAR</abbr> files.
+     * Writes all <abbr>JAR</abbr> files, together with their derived <abbr>POM</abbr> files if applicable.
+     * The derived <abbr>POM</abbr> files are the intersections of the project <abbr>POM</abbr> with the
+     * content of {@code module-info.class} files.
+     *
+     * <h4>Preconditions</h4>
+     * The {@link FileCollector#prune(boolean)} method should have been invoked once before to invoke this method.
      *
      * @param files the result of scanning the build directory for listing the files or directories to archive
      * @return the paths to the created archive files
@@ -242,7 +261,7 @@ final class ToolExecutor {
      * @throws IOException if an error occurred while reading or writing a manifest file
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField")
-    public Map<String, Path> writeAllJARs(final FileCollector files) throws IOException {
+    public Map<String, Map<String, Path>> writeAllJARs(final FileCollector files) throws IOException {
         Path ignored = files.handleOrphanFiles();
         files.writeAllJARs(this);
         if (ignored != null) {
@@ -264,7 +283,7 @@ final class ToolExecutor {
         final Path relativePath = relativize(project.getRootDirectory(), archive.jarFile);
         if (archive.isUpToDateJAR()) {
             logger.info("Keep up-to-date JAR: \"" + relativePath + "\".");
-            result.put(archive.moduleName, archive.jarFile);
+            archive.saveArtifactPaths(artifactType, result);
             return;
         }
         logger.info("Building JAR: \"" + relativePath + "\".");
@@ -290,12 +309,15 @@ final class ToolExecutor {
          * and for the Maven metadata (if requested). The temporary files are in the `target`
          * directory and will be deleted, unless the build fails or is run in verbose mode.
          */
-        try (MetadataFiles temporaryMetadataFiles = new MetadataFiles(outputDirectory)) {
+        try (MetadataFiles metadata = new MetadataFiles(project, outputDirectory)) {
             if (writeTemporaryManifest) {
-                archive.setManifest(temporaryMetadataFiles.addManifest(manifest), true);
+                archive.setManifest(metadata.addManifest(manifest), true);
+            }
+            if (archive.moduleName != null) {
+                metadata.deriveModulePOM(this, archive, manifest);
             }
             if (archiveConfiguration.isAddMavenDescriptor()) {
-                archive.mavenFiles = temporaryMetadataFiles.addPOM(project, archiveConfiguration, isReproducible());
+                archive.mavenFiles = metadata.addPOM(archiveConfiguration, isReproducible());
             }
             /*
              * Prepare the arguments to send to the `jar` tool and log a message.
@@ -324,7 +346,7 @@ final class ToolExecutor {
             }
             if (status != 0 || logger.isDebugEnabled()) {
                 Path debugFile = archive.writeDebugFile(project.getBasedir(), outputDirectory, classifier, arguments);
-                temporaryMetadataFiles.cancelFileDeletion();
+                metadata.cancelFileDeletion();
                 if (status != 0) {
                     logCommandLineTip(project.getBasedir(), debugFile);
                     String error = errors.toString().strip();
@@ -338,7 +360,7 @@ final class ToolExecutor {
         arguments.clear();
         errors.setLength(0);
         messages.setLength(0);
-        result.put(archive.moduleName, archive.jarFile);
+        archive.saveArtifactPaths(artifactType, result);
     }
 
     /**
