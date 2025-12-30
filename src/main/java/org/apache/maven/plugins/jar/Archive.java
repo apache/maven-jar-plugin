@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.apache.maven.api.Type;
 import org.apache.maven.api.annotations.Nonnull;
 import org.apache.maven.api.annotations.Nullable;
 import org.apache.maven.api.plugin.Log;
@@ -284,6 +285,7 @@ final class Archive {
         for (FileSet release : filesetForRelease.values()) {
             base = release.discardAllFiles(base);
         }
+        filesetForRelease.clear();
         return base;
     }
 
@@ -296,18 +298,19 @@ final class Archive {
      * @param skipIfEmpty value of {@link AbstractJarMojo#skipIfEmpty}
      */
     public void prune(final boolean skipIfEmpty) {
-        FileSet keep = (skipIfEmpty || filesetForRelease.isEmpty())
+        FileSet keep = (skipIfEmpty || isEmpty())
                 ? null
                 : filesetForRelease.firstEntry().getValue();
-        filesetForRelease.values().removeIf((v) -> v.files.isEmpty());
+        filesetForRelease.values().removeIf((fs) -> fs.files.isEmpty());
         Iterator<Map.Entry<Runtime.Version, FileSet>> it =
                 filesetForRelease.entrySet().iterator();
         if (it.hasNext()) {
             Map.Entry<Runtime.Version, FileSet> first = it.next();
-            if (first.getKey() != null) {
-                keep = first.getValue();
-                it.remove();
+            if (first.getKey() == null) {
+                return; // Already contains an entry for the base version, nothing to do.
             }
+            keep = first.getValue();
+            it.remove();
         }
         if (keep != null) {
             filesetForRelease.put(null, keep);
@@ -315,11 +318,15 @@ final class Archive {
     }
 
     /**
-     * {@return whether this module can be skipped}
-     * This is {@code true} if this module has no file to archive, ignoring Maven-generated files.
+     * {@return whether this archive has nothing to archive}
+     * Note that this method may return {@code false} even when there is zero file to archive.
+     * It may happen if {@link AbstractJarMojo#skipIfEmpty} is {@code false}. In such case, the
+     * "empty" <abbr>JAR</abbr> file will still contain at {@code META-INF/MANIFEST.MF} file.
+     *
+     * <h4>Prerequisites</h4>
      * The {@link #prune(boolean)} method should be invoked before this method for accurate result.
      */
-    public boolean canSkip() {
+    public boolean isEmpty() {
         return filesetForRelease.isEmpty();
     }
 
@@ -545,7 +552,7 @@ final class Archive {
     void saveArtifactPaths(final String artifactType, final Map<String, Map<String, Path>> addTo) {
         final Map<String, Path> paths;
         if (pomFile != null) {
-            paths = Map.of(artifactType, jarFile, "pom", pomFile);
+            paths = Map.of(artifactType, jarFile, Type.POM, pomFile);
         } else {
             paths = Map.of(artifactType, jarFile);
         }
@@ -560,6 +567,13 @@ final class Archive {
      */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '[' + (moduleName != null ? moduleName : "no module") + ']';
+        var sb = new StringBuilder(getClass().getSimpleName()).append('[');
+        if (moduleName != null) {
+            sb.append('"').append(moduleName).append("\": ");
+        }
+        int count = filesetForRelease.values().stream()
+                .mapToInt((release) -> release.files.size())
+                .sum();
+        return sb.append(count).append(" files]").toString();
     }
 }

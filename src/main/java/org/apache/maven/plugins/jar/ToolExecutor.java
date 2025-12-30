@@ -37,6 +37,7 @@ import java.util.jar.Manifest;
 import java.util.spi.ToolProvider;
 
 import org.apache.maven.api.Project;
+import org.apache.maven.api.Type;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
@@ -252,7 +253,7 @@ final class ToolExecutor {
      * The derived <abbr>POM</abbr> files are the intersections of the project <abbr>POM</abbr> with the
      * content of {@code module-info.class} files.
      *
-     * <h4>Preconditions</h4>
+     * <h4>Prerequisites</h4>
      * The {@link FileCollector#prune(boolean)} method should have been invoked once before to invoke this method.
      *
      * @param files the result of scanning the build directory for listing the files or directories to archive
@@ -263,10 +264,15 @@ final class ToolExecutor {
     @SuppressWarnings("ReturnOfCollectionOrArrayField")
     public Map<String, Map<String, Path>> writeAllJARs(final FileCollector files) throws IOException {
         Path ignored = files.handleOrphanFiles();
-        files.writeAllJARs(this);
+        Path parentPOM = files.writeAllJARs(this);
         if (ignored != null) {
             logger.warn("Some files in \"" + relativize(outputDirectory, ignored)
                     + "\" were ignored because they belong to no module.");
+        }
+        if (parentPOM != null) {
+            if (result.put(null, Map.of(Type.POM, parentPOM)) != null) {
+                throw new MojoException("Internal error."); // Should never happen.
+            }
         }
         return result;
     }

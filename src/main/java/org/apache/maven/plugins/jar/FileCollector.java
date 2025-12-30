@@ -388,10 +388,10 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      * @param skipIfEmpty value of {@link AbstractJarMojo#skipIfEmpty}
      */
     public void prune(boolean skipIfEmpty) {
-        boolean isPackageHierarchy = moduleHierarchy.isEmpty();
+        boolean isModuleHierarchy = !moduleHierarchy.isEmpty();
         moduleHierarchy.values().forEach((archive) -> archive.prune(skipIfEmpty));
-        moduleHierarchy.values().removeIf(Archive::canSkip);
-        packageHierarchy.prune(isPackageHierarchy && skipIfEmpty);
+        moduleHierarchy.values().removeIf(Archive::isEmpty);
+        packageHierarchy.prune(isModuleHierarchy || skipIfEmpty);
     }
 
     /**
@@ -406,13 +406,13 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      * in each module, and ignore the {@code DEPENDENCIES} file because its content is not
      * correct for a module. For now, we just log a warning an ignore.</p>
      *
-     * <h4>Preconditions</h4>
+     * <h4>Prerequisites</h4>
      * The {@link #prune(boolean)} method should have been invoked once before to invoke this method.
      *
      * @return if this method ignored some files, the root directory of those files
      */
     Path handleOrphanFiles() {
-        if (moduleHierarchy.isEmpty() || packageHierarchy.canSkip()) {
+        if (moduleHierarchy.isEmpty() || packageHierarchy.isEmpty()) {
             // Classpath project or module-project without orphan files. Nothing to do.
             return null;
         }
@@ -422,20 +422,26 @@ final class FileCollector extends SimpleFileVisitor<Path> {
 
     /**
      * Writes all <abbr>JAR</abbr> files.
+     * If the project is multi-module, then this method returns the path to the generated parent <abbr>POM</abbr> file.
+     *
+     * <h4>Prerequisites</h4>
      * The {@link #prune(boolean)} method should have been invoked once before to invoke this method.
      *
+     * @return path to the generated parent <abbr>POM</abbr> file, or {@code null} if none
      * @throws MojoException if an error occurred during the execution of the "jar" tool
      * @throws IOException if an error occurred while reading or writing a manifest file
      */
-    void writeAllJARs(final ToolExecutor executor) throws IOException {
+    Path writeAllJARs(final ToolExecutor executor) throws IOException {
         for (Archive module : moduleHierarchy.values()) {
-            if (!module.canSkip()) {
-                executor.writeSingleJAR(this, module);
-            }
+            executor.writeSingleJAR(this, module);
         }
-        if (!packageHierarchy.canSkip()) {
+        if (executor.pomDerivation != null) {
+            return executor.pomDerivation.writeParentPOM(packageHierarchy);
+        }
+        if (!packageHierarchy.isEmpty()) {
             executor.writeSingleJAR(this, packageHierarchy);
         }
+        return null;
     }
 
     /**
@@ -450,7 +456,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      * ignore the latter case because this method is used for deriving <abbr>POM</abbr> files, and
      * we do not perform such derivation for projects organized in the classical Maven 3 way.
      *
-     * <h4>Preconditions</h4>
+     * <h4>Prerequisites</h4>
      * The {@link #prune(boolean)} method should have been invoked once before to invoke this method.
      */
     List<Path> getModuleHierarchyRoots() {

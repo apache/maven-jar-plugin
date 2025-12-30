@@ -51,6 +51,7 @@ import org.apache.maven.api.Session;
 import org.apache.maven.api.Type;
 import org.apache.maven.api.model.Dependency;
 import org.apache.maven.api.model.Model;
+import org.apache.maven.api.model.Parent;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.services.DependencyCoordinatesFactory;
 import org.apache.maven.api.services.DependencyCoordinatesFactoryRequest;
@@ -365,31 +366,15 @@ final class PomDerivation {
         }
 
         /**
-         * Derives the path to the <abbr>POM</abbr> file to generate.
-         *
-         * @param jarFile path to the <abbr>JAR</abbr> file (the file does not need to exist)
-         * @return path to the <abbr>POM</abbr> file to generate
-         */
-        private static Path derivePathToPOM(final Path jarFile) {
-            String filename = jarFile.getFileName().toString();
-            filename = filename.substring(0, filename.lastIndexOf('.') + 1) + "pom";
-            return jarFile.resolveSibling(filename);
-        }
-
-        /**
          * Derives a <abbr>POM</abbr> file for the archive specified ad construction time.
          *
          * @throws IOException if an error occurred while writing the <abbr>POM</abbr> file
+         *
+         * @see #writeParentPOM(Archive)
          */
         void writeModulePOM() throws IOException {
             try {
-                Model moduleModel = derive();
-                try (BufferedWriter out = Files.newBufferedWriter(pomFile)) {
-                    var sw = new MavenStaxWriter();
-                    sw.setAddLocationInformation(false);
-                    sw.write(out, moduleModel);
-                    out.newLine();
-                }
+                writePOM(deriveModulePOM(), pomFile);
             } catch (ModelBuilderException | XMLStreamException e) {
                 throw new MojoException("Cannot derive a POM file for the \"" + moduleName + "\" module.", e);
             }
@@ -401,19 +386,20 @@ final class PomDerivation {
          * @return intersection of {@link #projectModel} and {@code module-info.class}
          * @throws ModelBuilderException if an error occurred while building the model
          */
-        private Model derive() throws ModelBuilderException {
-            Model.Builder builder = Model.newBuilder(projectModel, true).artifactId(moduleName);
-            /*
-             * Remove the list of sub-projects (also known as "modules" in Maven 3).
-             * They are not relevant to the specific JAR file that we are creating.
-             */
-            builder = builder.root(false).modules(null).subprojects(null);
-            /*
-             * Remove all build information. The <sources> element contains information about many modules,
-             * not only the specific module that we are archiving. The <plugins> element is for building the
-             * project and is usually not of interest for consumers.
-             */
-            builder = builder.build(null).reporting(null);
+        private Model deriveModulePOM() throws ModelBuilderException {
+            Model.Builder builder = Model.newBuilder()
+                    .modelVersion("4.0.0")
+                    .groupId(projectModel.getGroupId())
+                    .artifactId(moduleName)
+                    .version(projectModel.getVersion())
+                    .parent(Parent.newBuilder()
+                            .groupId(projectModel.getGroupId())
+                            .artifactId(projectModel.getArtifactId())
+                            .version(projectModel.getVersion())
+                            .build());
+            if (name != null) {
+                builder = builder.name(name);
+            }
             /*
              * Filter the dependencies by keeping only the one declared in a `requires` statement of the
              * `module-info.class` of the module that we are archiving. Also adjust the `<optional>` and
@@ -456,10 +442,7 @@ final class PomDerivation {
              * We do this replacement because the `<name>` of the project model applies to all modules,
              * while the MANIFEST.MF has more chances to be specific to the module that we are archiving.
              */
-            if (name != null) {
-                builder = builder.name(name);
-            }
-            return builder.preserveModelVersion(false).modelVersion("4.0.0").build();
+            return builder.build();
         }
 
         /**
@@ -479,6 +462,59 @@ final class PomDerivation {
                 dependency = dependency.withOptional(Boolean.toString(optional));
             }
             return dependency;
+        }
+    }
+
+    /**
+     * Writes the parent <abbr>POM</abbr> file as the project file but without the dependencies.
+     * The dependencies are removed because they will declared on a module-by-module basis.
+     *
+     * @param packageHierarchy value of {@link FileCollector#packageHierarchy}
+     * @return path to the file that has been written
+     * @throws IOException if an I/O error occurred while writing the model
+     *
+     * @see ForModule#writeModulePOM()
+     */
+    Path writeParentPOM(final Archive packageHierarchy) throws IOException {
+        Path pomFile = derivePathToPOM(packageHierarchy.jarFile);
+        Model.Builder builder = Model.newBuilder(projectModel, true);
+        builder = builder.root(false).modules(null).subprojects(null);
+        builder = builder.dependencies(null).build(null).reporting(null);
+        builder = builder.preserveModelVersion(false).modelVersion("4.0.0");
+        try {
+            writePOM(builder.build(), pomFile);
+        } catch (ModelBuilderException | XMLStreamException e) {
+            throw new MojoException("Cannot write the parent POM.", e);
+        }
+        return pomFile;
+    }
+
+    /**
+     * Derives the path to the <abbr>POM</abbr> file to generate.
+     *
+     * @param jarFile path to the <abbr>JAR</abbr> file (the file does not need to exist)
+     * @return path to the <abbr>POM</abbr> file to generate
+     */
+    private static Path derivePathToPOM(final Path jarFile) {
+        String filename = jarFile.getFileName().toString();
+        filename = filename.substring(0, filename.lastIndexOf('.') + 1) + "pom";
+        return jarFile.resolveSibling(filename);
+    }
+
+    /**
+     * Writes the given model in the given file.
+     *
+     * @param model the model to write
+     * @param file the destination file
+     * @throws IOException if an I/O error occurred while writing the model
+     * @throws XMLStreamException if a XML error occurred while writing the model
+     */
+    private static void writePOM(Model model, Path file) throws IOException, XMLStreamException {
+        try (BufferedWriter out = Files.newBufferedWriter(file)) {
+            var sw = new MavenStaxWriter();
+            sw.setAddLocationInformation(false);
+            sw.write(out, model);
+            out.newLine();
         }
     }
 }
