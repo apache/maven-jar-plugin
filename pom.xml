@@ -82,7 +82,7 @@
     <mavenFileManagementVersion>3.2.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
     <mavenPluginTestingVersion>4.0.0-beta-4</mavenPluginTestingVersion>
-    <plexusArchiverVersion>4.10.4</plexusArchiverVersion>
+    <plexusArchiverVersion>4.11.0</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
     <version.plexus-xml>4.0.3</version.plexus-xml>
