@@ -155,6 +155,15 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     private boolean detectMultiReleaseJar;
 
     /**
+     * Establish the automatic module name of the module in the JAR.
+     * Ignored if the JAR contains a {@code module-info.class} file.
+     *
+     * @since 3.6.0
+     */
+    @Parameter(property = "maven.jar.automaticModuleName")
+    private String automaticModuleName;
+
+    /**
      * The <abbr>MOJO</abbr> logger.
      */
     @Inject
@@ -256,6 +265,15 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         // unless it is a module descriptor.
         boolean containsModuleDescriptor =
                 Arrays.stream(includedFiles).anyMatch(p -> p.endsWith(MODULE_DESCRIPTOR_FILE_NAME));
+
+        if (automaticModuleName != null && !automaticModuleName.isEmpty()) {
+            if (containsModuleDescriptor) {
+                getLog().warn("Not setting automatic module name, because a module descriptor was found.");
+            } else {
+                getLog().debug("Adding 'Automatic-Module-Name: " + automaticModuleName + "' manifest entry.");
+                archive.addManifestEntry("Automatic-Module-Name", automaticModuleName);
+            }
+        }
 
         String archiverName = containsModuleDescriptor ? "mjar" : "jar";
 
