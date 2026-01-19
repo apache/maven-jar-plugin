@@ -86,8 +86,8 @@
             </manifest>
             <manifestEntries>
               <!--
-                We override this config since we are detecting the versioned area,
-                The output JAR should contain `Multi-Release: true`
+                For verifying that this entry will be overridden.
+                If users really want to disable multi-release, they should set <detectMultiReleaseJar> to false.
                -->
               <Multi-Release>false</Multi-Release>
             </manifestEntries>

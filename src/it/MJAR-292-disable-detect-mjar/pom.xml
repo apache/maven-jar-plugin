@@ -84,6 +84,7 @@
               <mainClass>myproject.HelloWorld</mainClass>
             </manifest>
           </archive>
+          <detectMultiReleaseJar>false</detectMultiReleaseJar>
         </configuration>
       </plugin>
     </plugins>
