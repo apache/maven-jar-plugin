@@ -166,7 +166,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected AbstractJarMojo() {}
 
     /**
-     * Specifies whether to attach the jar to the project
+     * Specifies whether to attach the jar to the project.
      *
      * @since 4.0.0-beta-2
      */
@@ -210,7 +210,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * Returns the JAR file to generate, based on an optional classifier.
      *
      * @param basedir the output directory
-     * @param resultFinalName the name of the ear file
+     * @param resultFinalName the name of the JAR file
      * @param classifier an optional classifier
      * @return the file to generate
      */
@@ -341,7 +341,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
-     * Return {@code true} in case where the classifier is not {@code null} and contains something else than white spaces.
+     * Return {@code true} if the classifier is not {@code null} and contains something other than white spaces.
      *
      * @param classifier the classifier to verify
      * @return {@code true} if the classifier is set
