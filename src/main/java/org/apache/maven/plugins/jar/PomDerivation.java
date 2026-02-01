@@ -479,7 +479,7 @@ final class PomDerivation {
         Path pomFile = derivePathToPOM(packageHierarchy.jarFile);
         Model.Builder builder = Model.newBuilder(projectModel, true);
         builder = builder.root(false).modules(null).subprojects(null);
-        builder = builder.dependencies(null).build(null).reporting(null);
+        builder = builder.dependencies(null).build(null).reporting(null).distributionManagement(null);
         builder = builder.preserveModelVersion(false).modelVersion("4.0.0");
         try {
             writePOM(builder.build(), pomFile);

@@ -341,15 +341,7 @@ final class ToolExecutor {
              * Execute the `jar` tool with arguments determined by the values dispatched
              * in the various fields of the `Archive`. Information and error essages are logged.
              */
-            String[] options = new String[arguments.size()];
-            Arrays.setAll(options, (i) -> arguments.get(i).toString());
-            int status = tool.run(messageWriter, errorWriter, options);
-            if (!messages.isEmpty()) {
-                logger.info(messages);
-            }
-            if (!errors.isEmpty()) {
-                logger.error(errors);
-            }
+            int status = executeJarTool();
             if (status != 0 || logger.isDebugEnabled()) {
                 Path debugFile = archive.writeDebugFile(project.getBasedir(), outputDirectory, classifier, arguments);
                 metadata.cancelFileDeletion();
@@ -363,10 +355,51 @@ final class ToolExecutor {
                 }
             }
         }
+        clear();
+        if (archive.validate(arguments)) {
+            int status = executeJarTool();
+            if (status != 0) {
+                var message = new StringBuilder().append("The \"").append(relativePath).append("\" archive file is invalid");
+                String error = errors.toString().strip();
+                if (error.isEmpty()) {
+                    message.append('.');
+                } else {
+                    message.append(": ").append(error);
+                }
+                throw new MojoException(message.toString());
+            }
+            clear();
+        }
+        archive.saveArtifactPaths(artifactType, result);
+    }
+
+    /**
+     * Executes the {@code jar} tools with the argument currently in the {@link #arguments} list.
+     * Warning and error messages are logged but not cleared.
+     *
+     * @return the result of executing the tool: 0 on success, non-zero on failure.
+     */
+    private int executeJarTool() {
+        String[] options = new String[arguments.size()];
+        Arrays.setAll(options, (i) -> arguments.get(i).toString());
+        int status = tool.run(messageWriter, errorWriter, options);
+        if (!messages.isEmpty()) {
+            logger.info(messages);
+        }
+        if (!errors.isEmpty()) {
+            logger.error(errors);
+        }
+        return status;
+    }
+
+    /**
+     * Clears the list of arguments and the buffer where warnings and errors are written.
+     * After invoking this method, {@code ToolExecutor} is ready to archive another module.
+     */
+    private void clear() {
         arguments.clear();
         errors.setLength(0);
         messages.setLength(0);
-        archive.saveArtifactPaths(artifactType, result);
     }
 
     /**

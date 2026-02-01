@@ -34,6 +34,7 @@ import org.apache.maven.api.PathScope;
 import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
+import org.apache.maven.api.Type;
 import org.apache.maven.api.di.Inject;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
@@ -384,9 +385,9 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             for (Map.Entry<String, Map<String, Path>> entry : artifactFiles.entrySet()) {
                 String moduleName = entry.getKey();
                 for (Map.Entry<String, Path> path : entry.getValue().entrySet()) {
+                    String type = path.getKey();
                     ProducedArtifact artifact;
-                    if (moduleName == null && classifier == null) {
-                        // Note: the two maps on which we are iterating should contain only one entry in this case.
+                    if (moduleName == null && classifier == null && Type.JAR.equals(type)) {
                         if (projectHasAlreadySetAnArtifact()) {
                             throw new MojoException("You have to use a classifier "
                                     + "to attach supplemental artifacts to the project instead of replacing them.");
@@ -399,7 +400,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
                                 project.getVersion(),
                                 classifier,
                                 null,
-                                path.getKey());
+                                type);
                     }
                     projectManager.attachArtifact(project, artifact, path.getValue());
                 }
