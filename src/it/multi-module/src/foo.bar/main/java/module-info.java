@@ -16,21 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.plugins.jar;
-
-import org.apache.maven.api.Session;
-import org.apache.maven.api.di.Named;
-import org.apache.maven.api.di.Provides;
-import org.apache.maven.api.services.ProjectManager;
-
-/**
- * For providing instances to fields annotated with {@code @Inject} if the MOJO.
- */
-@Named
-class Providers {
-
-    @Provides
-    static ProjectManager projectManager(Session session) {
-        return session.getService(ProjectManager.class);
-    }
-}
+module foo.bar {}

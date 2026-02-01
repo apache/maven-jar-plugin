@@ -16,21 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.plugins.jar;
-
-import org.apache.maven.api.Session;
-import org.apache.maven.api.di.Named;
-import org.apache.maven.api.di.Provides;
-import org.apache.maven.api.services.ProjectManager;
+package more;
 
 /**
- * For providing instances to fields annotated with {@code @Inject} if the MOJO.
+ * Test {@code &lt;Source&gt;}.
+ * Another {@code &lt;Source&gt;}.
  */
-@Named
-class Providers {
-
-    @Provides
-    static ProjectManager projectManager(Session session) {
-        return session.getService(ProjectManager.class);
+public class OtherFile {
+    public static void main(String[] args) {
+        System.out.println("OtherFile of more on Java 16");
+        MainFile.main(args); // Verify that we have access to the base version.
     }
 }

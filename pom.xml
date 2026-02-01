@@ -34,6 +34,26 @@
   <name>Apache Maven JAR Plugin</name>
   <description>Builds a Java Archive (JAR) file from the compiled project classes and resources.</description>
 
+  <developers>
+    <developer>
+      <id>evenisse</id>
+      <name>Emmanuel Venisse</name>
+      <email>evenisse@apache.org</email>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>desruisseaux</id>
+      <name>Martin Desruisseaux</name>
+      <email>desruisseaux@apache.org</email>
+      <organization>Geomatys</organization>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
   <contributors>
     <contributor>
       <name>Jerome Lacoste</name>
@@ -134,6 +154,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
+      <artifactId>maven-support</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
       <artifactId>maven-api-xml</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
@@ -143,11 +169,6 @@
       <artifactId>maven-xml</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>file-management</artifactId>
-      <version>${mavenFileManagementVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
@@ -213,7 +234,7 @@
               <!--
                 ! The manifest specification does not describe any method for writing comments into the manifest.
               -->
-              <exclude>src/it/mjar-71-01/src/main/resources/META-INF/MANIFEST.MF</exclude>
+              <exclude>src/it/mjar-71-01/src/main/my-custom-dir/some-manifest.mf</exclude>
               <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
             </excludes>
           </configuration>

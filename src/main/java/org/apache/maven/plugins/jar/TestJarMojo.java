@@ -20,6 +20,7 @@ package org.apache.maven.plugins.jar;
 
 import java.nio.file.Path;
 
+import org.apache.maven.api.PathScope;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
@@ -85,5 +86,15 @@ public class TestJarMojo extends AbstractJarMojo {
         } else {
             super.execute();
         }
+    }
+
+    /**
+     * Returns the scope of dependencies for test code.
+     *
+     * @return {@link PathScope#TEST_COMPILE}
+     */
+    @Override
+    protected PathScope getDependencyScope() {
+        return PathScope.TEST_COMPILE;
     }
 }

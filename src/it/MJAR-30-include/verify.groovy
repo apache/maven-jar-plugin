@@ -67,7 +67,7 @@ try
     {
         String artifactName = artifactNames[i];
 		if ( !contents.contains( artifactName ) )
-		{
+        {
         	System.err.println( "Artifact[" + artifactName + "] not found in jar archive" );
         	return false;
         }
