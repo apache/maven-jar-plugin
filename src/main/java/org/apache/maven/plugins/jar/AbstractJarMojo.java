@@ -140,6 +140,15 @@ public abstract class AbstractJarMojo extends AbstractMojo {
     private boolean detectMultiReleaseJar;
 
     /**
+     * Establish the automatic module name of the module in the JAR.
+     * Ignored if the JAR contains a {@code module-info.class} file.
+     *
+     * @since 3.6.0
+     */
+    @Parameter(property = "maven.jar.automaticModuleName")
+    private String automaticModuleName;
+
+    /**
      * If set to {@code false}, the files and directories that by default are excluded from the resulting archive,
      * like {@code .gitignore}, {@code .cvsignore} etc. will be included.
      * This means all files like the following will be included.
@@ -296,6 +305,15 @@ public abstract class AbstractJarMojo extends AbstractMojo {
         // unless it is a module descriptor.
         boolean containsModuleDescriptor =
                 Arrays.stream(includedFiles).anyMatch(p -> p.endsWith(MODULE_DESCRIPTOR_FILE_NAME));
+
+        if (automaticModuleName != null && !automaticModuleName.isEmpty()) {
+            if (containsModuleDescriptor) {
+                getLog().warn("Not setting automatic module name, because a module descriptor was found.");
+            } else {
+                getLog().debug("Adding 'Automatic-Module-Name: " + automaticModuleName + "' manifest entry.");
+                archive.addManifestEntry("Automatic-Module-Name", automaticModuleName);
+            }
+        }
 
         String archiverName = containsModuleDescriptor ? "mjar" : "jar";
 
