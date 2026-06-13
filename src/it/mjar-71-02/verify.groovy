@@ -51,14 +51,14 @@ try
             // Only compare files
             if ( entry.getName().equals ( "META-INF/MANIFEST.MF" ) )
             {
-            	String manifest = IOUtils.toString( jar.getInputStream ( entry ) );
-            	int index = manifest.indexOf( "Archiver-Version: foobar-1.23456" );
-            	if ( index > 0 )
-            	{	
-            		System.err.println( "MANIFEST contains: 'Archiver-Version: foobar-1.23456', but shouldn't" );
-            		return false;
-            	}
-            	return true;
+                String manifest = IOUtils.toString( jar.getInputStream ( entry ) );
+                int index = manifest.indexOf( "Archiver-Version: foobar-1.23456" );
+                if ( index <= 0 )
+                {
+                    System.err.println( "MANIFEST doesn't contain: 'Archiver-Version: foobar-1.23456'" );
+                    return false;
+                }
+                return true;
             }
         }
     }

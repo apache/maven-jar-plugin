@@ -58,7 +58,7 @@ if ( buildLog.exists() ) {
 int jarPluginExecutions = 0;
 String[] lines = buildLogContent.split( "\n" );
 for ( String line : lines ) {
-    if ( line.contains( "Building jar:" ) && line.contains( "MJAR-70-recreation-1.0-SNAPSHOT.jar" ) ) {
+    if ( line.contains( "Building JAR:" ) && line.contains( "MJAR-70-recreation-1.0-SNAPSHOT.jar" ) ) {
         jarPluginExecutions++;
         System.out.println( "Found JAR creation: " + line );
     }
