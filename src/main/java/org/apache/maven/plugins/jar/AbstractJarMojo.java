@@ -62,26 +62,26 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * is being packaged into the JAR.
      */
     @Parameter
-    private String[] includes;
+    protected String[] includes;
 
     /**
      * List of files to exclude. Specified as fileset patterns which are relative to the input directory whose contents
      * is being packaged into the JAR.
      */
     @Parameter
-    private String[] excludes;
+    protected String[] excludes;
 
     /**
      * Directory containing the generated JAR.
      */
     @Parameter(defaultValue = "${project.build.directory}", required = true)
-    private Path outputDirectory;
+    protected Path outputDirectory;
 
     /**
      * Name of the generated JAR.
      */
     @Parameter(defaultValue = "${project.build.finalName}", readonly = true)
-    private String finalName;
+    protected String finalName;
 
     /**
      * The JAR archiver.
@@ -106,7 +106,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * Archiver Reference</a>.
      */
     @Parameter
-    private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
+    protected MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
     @Inject
     private ProjectManager projectManager;
@@ -124,13 +124,13 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * to {@code maven.jar.forceCreation}.</p>
      */
     @Parameter(property = "maven.jar.forceCreation", defaultValue = "false")
-    private boolean forceCreation;
+    protected boolean forceCreation;
 
     /**
      * Skip creating empty archives.
      */
     @Parameter(defaultValue = "false")
-    private boolean skipIfEmpty;
+    protected boolean skipIfEmpty;
 
     /**
      * Timestamp for reproducible output archive entries.
@@ -142,7 +142,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * @since 3.2.0
      */
     @Parameter(defaultValue = "${project.build.outputTimestamp}")
-    private String outputTimestamp;
+    protected String outputTimestamp;
 
     /**
      * Whether to detect multi-release JAR files.
@@ -152,7 +152,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * @since 3.4.0
      */
     @Parameter(property = "maven.jar.detectMultiReleaseJar", defaultValue = "true")
-    private boolean detectMultiReleaseJar;
+    protected boolean detectMultiReleaseJar;
 
     /**
      * The <abbr>MOJO</abbr> logger.
@@ -228,7 +228,12 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * @throws MojoException in case of an error
      */
     public Path createArchive() throws MojoException {
-        Path jarFile = getJarFile(outputDirectory, finalName, getClassifier());
+        Path basedir = outputDirectory != null
+                ? outputDirectory
+                : Path.of(project.getBuild().getDirectory());
+        String resultFinalName =
+                finalName != null ? finalName : project.getBuild().getFinalName();
+        Path jarFile = getJarFile(basedir, resultFinalName, getClassifier());
 
         FileSetManager fileSetManager = new FileSetManager();
         FileSet jarContentFileSet = new FileSet();
