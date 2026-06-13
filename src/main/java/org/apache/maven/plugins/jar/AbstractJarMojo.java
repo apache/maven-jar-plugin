@@ -87,19 +87,19 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * The JAR archiver.
      */
     @Inject
-    private Map<String, Archiver> archivers;
+    protected Map<String, Archiver> archivers;
 
     /**
      * The Maven project.
      */
     @Inject
-    private Project project;
+    protected Project project;
 
     /**
      * The session.
      */
     @Inject
-    private Session session;
+    protected Session session;
 
     /**
      * The archive configuration to use. See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven
@@ -109,7 +109,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
     @Inject
-    private ProjectManager projectManager;
+    protected ProjectManager projectManager;
 
     /**
      * Require the jar plugin to build a new JAR even if none of the contents appear to have changed.
@@ -158,7 +158,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * The <abbr>MOJO</abbr> logger.
      */
     @Inject
-    private Log log;
+    protected Log log;
 
     /**
      * Creates a new <abbr>MOJO</abbr>.
@@ -304,9 +304,10 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             getLog().info(String.format("Skipping packaging of the %s.", getType()));
         } else {
             Path jarFile = createArchive();
-            ProducedArtifact artifact;
-            String classifier = getClassifier();
+
             if (attach) {
+                ProducedArtifact artifact;
+                String classifier = getClassifier();
                 if (hasClassifier(classifier)) {
                     artifact = session.createProducedArtifact(
                             project.getGroupId(),
