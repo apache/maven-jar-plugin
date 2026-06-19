@@ -266,6 +266,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
         MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
+        archiver.setBuildJdkSpecDefaultEntry(archive.getManifest().isAddBuildEnvironmentEntries());
         archiver.setArchiver((JarArchiver) archivers.get(archiverName));
         archiver.setOutputFile(jarFile.toFile());
 
