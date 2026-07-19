@@ -83,6 +83,17 @@
     <version.maven-toolchains-plugin>3.1.0</version.maven-toolchains-plugin>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- align commons-io: file-management pulls 2.19.0, plexus-archiver needs 2.22.0 -->
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.22.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <!-- Maven Core -->
     <dependency>
@@ -141,13 +152,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.36</version>
-    </dependency>
-
-    <!-- we need for Maven rc-3, looks like dependencyManagement is not taken into account -->
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.22.0</version>
     </dependency>
 
     <!-- Test -->
