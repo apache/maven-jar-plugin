@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import java.util.jar.*;
+import java.util.jar.*
 
 def jarFile = new File(basedir, 'target/mjar-557-detect-multi-release-1.0-SNAPSHOT.jar')
 assert jarFile.exists()
 assert jarFile.isFile()
 
-def mrjar = new JarFile(jarFile)
-def manifest = mrjar.manifest.mainAttributes
-
-assert manifest.getValue(Attributes.Name.MULTI_RELEASE) == "true"
+new JarFile(jarFile).withCloseable { mrjar ->
+    def manifest = mrjar.manifest.mainAttributes
+    assert manifest.getValue(Attributes.Name.MULTI_RELEASE) == "true",
+        "Expected Multi-Release: true but got: " + manifest.getValue(Attributes.Name.MULTI_RELEASE)
+}
