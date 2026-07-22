@@ -31,16 +31,14 @@
 
 Usage
 
-  Some brief examples on how to use this plugin. If you want to use advanced
-  configurations you should have a look at the 
+  Some brief examples of how to use this plugin. If you want to use advanced
+  configurations, you should have a look at the 
   {{{./index.html#Examples}Example section}}.
-  documentation for
-  {{{/shared/maven-archiver/}Maven Archiver}}.
 
-  To handle archiving this version of Maven JAR Plugin uses
+  To handle archiving, this version of the Maven JAR Plugin uses
   {{{/shared/maven-archiver/index.html}Maven Archiver}} ${mavenArchiverVersion}.
 
-  <<Note:>> If you need to sign your JAR files you should use the 
+  <<Note:>> If you need to sign your JAR files, you should use the 
   {{{/plugins/maven-jarsigner-plugin/}Maven Jarsigner Plugin}} instead. 
 
 * How to build a JAR file
@@ -58,8 +56,8 @@ Usage
 </project>
 +----------+
   
-  Since 'jar' is the default packaging type it is not required to set it in this case.
-  Apart from the above you will normally want some real java source files which should be located within
+  Since 'jar' is the default packaging type, it is not required to set it in this case.
+  Apart from the above, you will normally want some real Java source files which should be located within
   <<<src/main/java>>>. If you need extra resources on your classpath (for example property files) 
   they should be located in <<<src/main/resources>>>.
   Now we can create a JAR-file by using the command below:
@@ -70,11 +68,11 @@ mvn package
 
   The 'package' phase is always responsible for bundling all the files in the artifact, in this case a JAR-file.
 
-  In your project's <<<target>>> directory you'll see the generated jar file which is named like:
+  In your project's <<<target>>> directory, you'll see the generated jar file which is named like:
   'core-1.0-SNAPSHOT.jar'. The resulting 'jar' file contains the compiled java class files as well as
   the files from <<<src/main/resources>>>.
 
-  Usually there is no need to mentioned the 'maven-jar-plugin' explicit cause it's bound to
+  Usually there is no need to mention the 'maven-jar-plugin' explicitly because it's bound to
   the {{{/guides/introduction/introduction-to-the-lifecycle.html}Maven Build Life Cycle}}.
 
   For full documentation, click {{{./plugin-info.html}here}}.
@@ -85,7 +83,7 @@ mvn package
   {{{https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html}changes in the JAR file specifications}}
   as well - Modular JAR files. Modular JAR files are JAR files with <<<module-info.class>>> file in the root directory
   (or in the versioned area for multi-release JAR files). If the project contains <<<module-info.class>>>
-  the resulting JAR will be a Modular JAR without a need for any configuration regardless of the plugin version used.
+  the resulting JAR will be a modular JAR without a need for any configuration regardless of the plugin version used.
 
   Starting with version 3.1.2, if the JAR file contains <<<module-info.class>>>, this plugin will update
   the modular descriptor (<<<module-info.class>>>) with additional attributes such as the list of packages included
@@ -95,5 +93,5 @@ mvn package
   (for example how to set it read {{{../../shared/maven-archiver/examples/classpath.html}Make The Jar Executable}}).
   Internally the plugin uses the JDK <<<jar>>> tool so in order to add the additional attributes and to
   verify the modular descriptor Maven should be run with JDK version 9 or newer. If version 8 or earlier is used
-  the resulting JAR still will be Modular JAR (as it contains <<<module-info.class>>>) but no additional attributes
+  the resulting JAR will still be a modular JAR (as it contains <<<module-info.class>>>) but no additional attributes
   will be added and no validation will be performed.

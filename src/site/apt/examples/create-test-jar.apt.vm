@@ -31,7 +31,7 @@ How to create a jar containing test classes
   When you want to create a jar containing <test-classes>, you would probably want to reuse those classes.
   There are two ways to solve this:
   
-  * Create an attached jar with the <test-classes> from the current project and loose its transitive <<<test>>>-scoped dependencies.
+  * Create an attached jar with the <test-classes> from the current project and lose its transitive <<<test>>>-scoped dependencies.
   
   * Create a separate project with the <test-classes>.
   
@@ -66,7 +66,7 @@ How to create a jar containing test classes
 </project>
 +-----------------+
 
-  To reuse this artifact in an other project, you must declare this dependency with type test-jar :
+  To reuse this artifact in another project, you must declare this dependency with type test-jar :
 
 +-----------------+
 <project>
@@ -85,12 +85,12 @@ How to create a jar containing test classes
 </project>
 +-----------------+
 
-  Based on such configuration there will be two jar files generated. The first one contains the 
-  classes from <<<src/main/java>>> whereas the second one will contain the classes from <<<src/test/java>>>.
+  Based on such configuration, two jar files wll be generated. The first one contains the 
+  classes from <<<src/main/java>>>. The second one will contain the classes from <<<src/test/java>>>.
   The generated jar files follow the naming schema <<<artifactId-version.jar>>> for the first one and
-  <<<artifactId-version-classifier.jar>>> for the second one. The parts <<<artifactId>>>, <<<versions>>>
-  will be replaced by the values given within your project <<<pom.xml>>> file. The <<<classifier>>>
-  will be set to <<<tests>>> which is a default of the maven-jar-plugin which can be changed if you need by
+  <<<artifactId-version-classifier.jar>>> for the second one. The <<<artifactId>>> and <<<version>>>
+  will be replaced by the values given within the project's <<<pom.xml>>> file. The <<<classifier>>>
+  will be set to <<<tests>>> which is a default of the maven-jar-plugin and can be changed if needed by
   {{{../test-jar-mojo.html}using the configuration in the jar goal}}.
 
   <<Note:>> The downside of this solution is that you don't get the transitive <<<test>>>-scoped dependencies automatically. 
@@ -98,7 +98,7 @@ How to create a jar containing test classes
   
 * The preferred way
 
-  In order to let Maven resolve all <<<test>>>-scoped transitive dependencies you should create a separate project.
+  In order to let Maven resolve all <<<test>>>-scoped transitive dependencies, you should create a separate project.
   
 +-----------------+
 <project>
