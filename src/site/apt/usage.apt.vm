@@ -38,7 +38,7 @@ Usage
   To handle archiving, this version of the Maven JAR Plugin uses
   {{{/shared/maven-archiver/index.html}Maven Archiver}} ${mavenArchiverVersion}.
 
-  <<Note:>> If you need to sign your JAR files, you should use the 
+  <<Note:>> If you need to sign your JAR files, you should use the
   {{{/plugins/maven-jarsigner-plugin/}Maven Jarsigner Plugin}} instead. 
 
 * How to build a JAR file
