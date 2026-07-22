@@ -85,8 +85,8 @@ How to create a jar containing test classes
 </project>
 +-----------------+
 
-  Based on such configuration, two jar files wll be generated. The first one contains the 
-  classes from <<<src/main/java>>>. The second one will contain the classes from <<<src/test/java>>>.
+  Based on such configuration, two jar files will be generated. The first one contains the
+  classes from <<<src/main/java>>> whereas the second one will contain the classes from <<<src/test/java>>>.
   The generated jar files follow the naming schema <<<artifactId-version.jar>>> for the first one and
   <<<artifactId-version-classifier.jar>>> for the second one. The <<<artifactId>>> and <<<version>>>
   will be replaced by the values given within the project's <<<pom.xml>>> file. The <<<classifier>>>
