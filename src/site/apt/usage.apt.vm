@@ -32,7 +32,7 @@
 Usage
 
   Some brief examples of how to use this plugin. If you want to use advanced
-  configurations, you should have a look at the 
+  configurations, you should have a look at the
   {{{./index.html#Examples}Example section}}.
 
   To handle archiving, this version of the Maven JAR Plugin uses
