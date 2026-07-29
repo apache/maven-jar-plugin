@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,8 +33,7 @@ import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
 import org.apache.maven.api.build.context.BuildContext;
-import org.apache.maven.api.build.context.Input;
-import org.apache.maven.api.build.context.Status;
+import org.apache.maven.api.build.context.InputSet;
 import org.apache.maven.api.di.Inject;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
@@ -310,6 +308,11 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     /**
      * Generates the JAR.
      *
+     * <p>Uses the {@link BuildContext} aggregation pattern to register all class files as
+     * inputs and associate them with the JAR output. The JAR is only rebuilt when at least
+     * one input has changed since the last build (unless {@link #forceCreation} is set).
+     * When inputs are removed, the build context automatically handles stale output cleanup.</p>
+     *
      * @throws MojoException in case of an error
      */
     @Override
@@ -320,55 +323,38 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             return;
         }
 
-        // Check if any input files have changed since the last build.
-        // When forceCreation is false and the JAR already exists, skip creation
-        // if no inputs have been added, modified, or removed.
-        if (!forceCreation) {
-            Path jarFile = getJarFile(
-                    outputDirectory != null
-                            ? outputDirectory
-                            : Path.of(project.getBuild().getDirectory()),
-                    finalName != null ? finalName : project.getBuild().getFinalName(),
-                    getClassifier());
-            if (Files.isRegularFile(jarFile) && !hasChangedInputs()) {
+        Path basedir = outputDirectory != null
+                ? outputDirectory
+                : Path.of(project.getBuild().getDirectory());
+        String resultFinalName =
+                finalName != null ? finalName : project.getBuild().getFinalName();
+        Path jarFile = getJarFile(basedir, resultFinalName, getClassifier());
+
+        // Register all class files as inputs and aggregate them into the JAR output.
+        // The aggregate() callback is only invoked when at least one input has changed.
+        Path classesDir = getClassesDirectory();
+        if (!forceCreation && Files.isDirectory(classesDir)) {
+            InputSet inputSet = buildContext.newInputSet();
+            inputSet.registerInputs(classesDir, List.of("**/**"), List.of());
+
+            boolean rebuilt = inputSet.aggregate(jarFile, (output, inputs) -> {
+                createArchive();
+            });
+
+            if (!rebuilt) {
                 getLog().info("Nothing to package - all classes are up to date.");
                 buildContext.markSkipExecution();
-                if (attach) {
-                    attachArtifact(jarFile);
-                }
-                return;
             }
+        } else {
+            // forceCreation is set or no classes directory — always create the JAR
+            jarFile = createArchive();
         }
-
-        Path jarFile = createArchive();
 
         if (attach) {
             attachArtifact(jarFile);
         } else {
             getLog().debug("Skipping attachment of the " + getType() + " artifact to the project.");
         }
-    }
-
-    /**
-     * Checks whether any input files in the classes directory have changed since the last build.
-     * Uses the BuildContext to register and scan the classes directory, returning {@code true}
-     * if at least one file has been added, modified, or removed.
-     *
-     * @return {@code true} if any input files have changed, {@code false} if all are up to date
-     */
-    private boolean hasChangedInputs() {
-        Path classesDir = getClassesDirectory();
-        if (!Files.isDirectory(classesDir)) {
-            return false;
-        }
-        Collection<? extends Input> inputs =
-                buildContext.registerAndProcessInputs(classesDir, List.of("**/**"), List.of());
-        for (Input input : inputs) {
-            if (input.getStatus() != Status.UNMODIFIED) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
