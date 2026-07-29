@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.jar.Attributes;
@@ -31,6 +33,9 @@ import java.util.stream.Stream;
 import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
+import org.apache.maven.api.build.context.BuildContext;
+import org.apache.maven.api.build.context.Input;
+import org.apache.maven.api.build.context.Status;
 import org.apache.maven.api.di.Inject;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
@@ -110,6 +115,14 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
     @Inject
     protected ProjectManager projectManager;
+
+    /**
+     * The build context for incremental build support.
+     * Used to detect whether input files have changed since the last build,
+     * allowing the plugin to skip JAR creation when nothing has changed.
+     */
+    @Inject
+    protected BuildContext buildContext;
 
     /**
      * Require the jar plugin to build a new JAR even if none of the contents appear to have changed.
@@ -303,32 +316,81 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     public void execute() throws MojoException {
         if (skipIfEmpty && isEmpty(getClassesDirectory())) {
             getLog().info(String.format("Skipping packaging of the %s.", getType()));
-        } else {
-            Path jarFile = createArchive();
+            buildContext.markSkipExecution();
+            return;
+        }
 
-            if (attach) {
-                ProducedArtifact artifact;
-                String classifier = getClassifier();
-                if (hasClassifier(classifier)) {
-                    artifact = session.createProducedArtifact(
-                            project.getGroupId(),
-                            project.getArtifactId(),
-                            project.getVersion(),
-                            classifier,
-                            null,
-                            getType());
-                } else {
-                    if (projectHasAlreadySetAnArtifact()) {
-                        throw new MojoException("You have to use a classifier "
-                                + "to attach supplemental artifacts to the project instead of replacing them.");
-                    }
-                    artifact = project.getMainArtifact().get();
+        // Check if any input files have changed since the last build.
+        // When forceCreation is false and the JAR already exists, skip creation
+        // if no inputs have been added, modified, or removed.
+        if (!forceCreation) {
+            Path jarFile = getJarFile(
+                    outputDirectory != null
+                            ? outputDirectory
+                            : Path.of(project.getBuild().getDirectory()),
+                    finalName != null ? finalName : project.getBuild().getFinalName(),
+                    getClassifier());
+            if (Files.isRegularFile(jarFile) && !hasChangedInputs()) {
+                getLog().info("Nothing to package - all classes are up to date.");
+                buildContext.markSkipExecution();
+                if (attach) {
+                    attachArtifact(jarFile);
                 }
-                projectManager.attachArtifact(project, artifact, jarFile);
-            } else {
-                getLog().debug("Skipping attachment of the " + getType() + " artifact to the project.");
+                return;
             }
         }
+
+        Path jarFile = createArchive();
+
+        if (attach) {
+            attachArtifact(jarFile);
+        } else {
+            getLog().debug("Skipping attachment of the " + getType() + " artifact to the project.");
+        }
+    }
+
+    /**
+     * Checks whether any input files in the classes directory have changed since the last build.
+     * Uses the BuildContext to register and scan the classes directory, returning {@code true}
+     * if at least one file has been added, modified, or removed.
+     *
+     * @return {@code true} if any input files have changed, {@code false} if all are up to date
+     */
+    private boolean hasChangedInputs() {
+        Path classesDir = getClassesDirectory();
+        if (!Files.isDirectory(classesDir)) {
+            return false;
+        }
+        Collection<? extends Input> inputs =
+                buildContext.registerAndProcessInputs(classesDir, List.of("**/**"), List.of());
+        for (Input input : inputs) {
+            if (input.getStatus() != Status.UNMODIFIED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Attaches the given JAR file as a project artifact.
+     *
+     * @param jarFile the JAR file to attach
+     * @throws MojoException if the artifact cannot be attached
+     */
+    private void attachArtifact(Path jarFile) {
+        ProducedArtifact artifact;
+        String classifier = getClassifier();
+        if (hasClassifier(classifier)) {
+            artifact = session.createProducedArtifact(
+                    project.getGroupId(), project.getArtifactId(), project.getVersion(), classifier, null, getType());
+        } else {
+            if (projectHasAlreadySetAnArtifact()) {
+                throw new MojoException("You have to use a classifier "
+                        + "to attach supplemental artifacts to the project instead of replacing them.");
+            }
+            artifact = project.getMainArtifact().get();
+        }
+        projectManager.attachArtifact(project, artifact, jarFile);
     }
 
     private static boolean isEmpty(Path directory) {
