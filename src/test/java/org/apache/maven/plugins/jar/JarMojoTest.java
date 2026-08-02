@@ -18,9 +18,18 @@
  */
 package org.apache.maven.plugins.jar;
 
-import org.apache.maven.api.plugin.testing.Basedir;
-import org.apache.maven.api.plugin.testing.InjectMojo;
-import org.apache.maven.api.plugin.testing.MojoTest;
+import java.util.HashMap;
+
+import org.apache.maven.api.build.context.BuildContext;
+import org.apache.maven.api.di.Priority;
+import org.apache.maven.api.di.Provides;
+import org.apache.maven.api.services.PathMatcherFactory;
+import org.apache.maven.impl.DefaultPathMatcherFactory;
+import org.apache.maven.internal.build.context.impl.DefaultBuildContext;
+import org.apache.maven.internal.build.context.impl.FilesystemWorkspace;
+import org.apache.maven.testing.plugin.Basedir;
+import org.apache.maven.testing.plugin.InjectMojo;
+import org.apache.maven.testing.plugin.MojoTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,5 +55,20 @@ class JarMojoTest {
         assertNotNull(mojo);
 
         assertEquals("foo", mojo.getProject().getGroupId());
+    }
+
+    @Provides
+    @Priority(10)
+    @SuppressWarnings("unused")
+    private static PathMatcherFactory pathMatcherFactory() {
+        return new DefaultPathMatcherFactory();
+    }
+
+    @Provides
+    @Priority(10)
+    @SuppressWarnings("unused")
+    private static BuildContext buildContext() {
+        return new DefaultBuildContext(
+                new FilesystemWorkspace(), null, new HashMap<>(), null, new DefaultPathMatcherFactory());
     }
 }

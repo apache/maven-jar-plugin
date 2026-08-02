@@ -82,6 +82,7 @@ public class TestJarMojo extends AbstractJarMojo {
     public void execute() throws MojoException {
         if (skip) {
             getLog().info("Skipping packaging of the test-jar.");
+            buildContext.markSkipExecution();
         } else {
             super.execute();
         }
