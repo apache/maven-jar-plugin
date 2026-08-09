@@ -29,9 +29,8 @@ under the License.
 
       <p><strong>${project.name} ${project.version}</strong> is distributed in source format.</p>
 
-      <p>Use a source archive if you intend to build <strong>${project.name}</strong> yourself.</p>
-
-      <p>Otherwise, simply use the ready-made binary artifacts from <strong>central repository</strong>.</p>
+      <p>Use a source archive if you want to build <strong>${project.name}</strong> yourself.
+        Otherwise, use the ready-made binary artifacts from the central repository.</p>
 
       <p><strong>${project.name}</strong> is distributed under the <a href="https://www.apache.org/licenses/">Apache License, version 2.0</a>.</p>
 
@@ -58,16 +57,20 @@ under the License.
           </tbody>
         </table>
 
-        <p>It is essential that you <a href="https://www.apache.org/info/verification.html">verify the integrity</a> of the downloaded file
-          using the checksum (.sha512 file)
-          or using the signature (.asc file) against the public <a href="https://downloads.apache.org/maven/KEYS">KEYS</a> used by the Apache Maven developers.
+        <p>Verify the integrity of the downloaded file before use. Use the checksum
+          (.sha512 file) or the signature (.asc file). Verify the signature against
+          the public <a href="https://downloads.apache.org/maven/KEYS">KEYS</a> used
+          by the Apache Maven developers. See the
+          <a href="https://www.apache.org/info/verification.html">verification instructions</a>
+          for more information.
         </p>
 
       </subsection>
 
       <subsection name="Previous Versions">
-        <p>It is strongly recommended to use the latest release version of <strong>${project.name}</strong> to take advantage of the newest features and bug fixes.</p>
-        <p>Older non-recommended releases can be found on our <a href="https://archive.apache.org/dist/maven/plugins/">archive site</a>.</p>
+        <p>Use the latest release version of <strong>${project.name}</strong>. It contains
+          the newest features and bug fixes.</p>
+        <p>Older releases are on the <a href="https://archive.apache.org/dist/maven/plugins/">archive site</a>.</p>
       </subsection>
     </section>
   </body>

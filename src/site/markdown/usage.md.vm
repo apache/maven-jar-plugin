@@ -1,0 +1,83 @@
+---
+title: Usage
+author: 
+  - Jerome Lacoste
+  - Dennis Lundberg
+  - Olivier Lamy
+  - Karl Heinz Marbaise
+date: 2016-06-03
+---
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+# Usage
+
+The examples below show how to use this plugin. For advanced configurations, see the [Example section](./index.html#Examples). See the documentation for [Maven Archiver](/shared/maven-archiver/).
+
+This version of the Maven JAR Plugin uses [Maven Archiver](/shared/maven-archiver/index.html) ${mavenArchiverVersion} to handle archive creation.
+
+**Note:** If you need to sign your JAR files, use the [Maven Jarsigner Plugin](/plugins/maven-jarsigner-plugin/) instead.
+
+How to build a JAR file
+-----------------------
+
+To create a JAR file with Maven, create a `pom.xml` file with at least the following content:
+
+```xml
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>com.mycompany.project</groupId>
+  <artifactId>core</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <!-- <packaging>jar</packaging>  -->
+</project>
+```
+
+The `jar` packaging type is the default. You do not have to set it in this case.
+
+1. Place your Java source files in `src/main/java`.
+2. If you need extra resources, such as property files, on the classpath, place them in `src/main/resources`.
+3. Create the JAR file with the command below:
+
+```sh
+mvn package
+```
+
+The `package` phase bundles all the files into the artifact. In this case, the artifact is a JAR file.
+
+The generated JAR file is in the `target` directory. Its name is `core-1.0-SNAPSHOT.jar`. The JAR file contains the compiled Java class files and the files from `src/main/resources`.
+
+Usually you do not need to declare the `maven-jar-plugin` in your `pom.xml`. The plugin is bound to the [Maven Build Life Cycle](/guides/introduction/introduction-to-the-lifecycle.html).
+
+For full documentation, see [plugin-info](./plugin-info.html).
+
+Modular JAR files
+-----------------
+
+The [Java Platform Module System (JPMS)](https://openjdk.java.net/projects/jigsaw/spec/) introduced Modular JAR files in the [JAR file specifications](https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html). A Modular JAR file contains a `module-info.class` file in the root directory. For multi-release JAR files, the file is in the versioned area. If the project contains `module-info.class`, the final JAR is a modular JAR. This happens without any configuration and regardless of the plugin version.
+
+Since version 3.1.2, this plugin updates the modular descriptor when the JAR contains `module-info.class`. The plugin adds additional attributes, such as the list of included packages. It verifies the modular descriptor. It also verifies that all services provided by the module are in the JAR file. The most notable added attribute is the module main class.
+
+If the JAR manifest contains the `Main-Class` attribute, this plugin sets the module main class to the same value. For an example, see [Make The Jar Executable](../../shared/maven-archiver/examples/classpath.html).
+
+The plugin uses the JDK `jar` tool internally to add the additional attributes and to verify the modular descriptor. This requires JDK version 9 or newer.
+
+If you use JDK version 8 or earlier, the JAR is still a modular JAR. The JAR contains `module-info.class`. The plugin adds no additional attributes and performs no validation.
