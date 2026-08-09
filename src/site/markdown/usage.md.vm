@@ -40,7 +40,7 @@ How to build a JAR file
 
 To create a JAR file with Maven, create a `pom.xml` file with at least the following content:
 
-```unknown
+```xml
 <project>
   <modelVersion>4.0.0</modelVersion>
   
@@ -57,7 +57,7 @@ The `jar` packaging type is the default. You do not have to set it in this case.
 2. If you need extra resources, such as property files, on the classpath, place them in `src/main/resources`.
 3. Create the JAR file with the command below:
 
-```unknown
+```sh
 mvn package
 ```
 
