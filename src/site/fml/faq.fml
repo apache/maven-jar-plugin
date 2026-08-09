@@ -30,7 +30,7 @@ under the License.
         <p>
           The `archive` parameter is a class outside of this plugin. It is
           part of the Maven Archiver component. Read the Maven Archiver
-          documentation
+          documentation.
           <a href="/shared/maven-archiver/index.html">here</a>.
         </p>
       </answer>
