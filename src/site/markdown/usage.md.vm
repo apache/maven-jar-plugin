@@ -29,16 +29,16 @@ under the License.
 
 # Usage
 
-Some brief examples on how to use this plugin. If you want to use advanced configurations you should have a look at the [Example section](./index.html#Examples). documentation for [Maven Archiver](/shared/maven-archiver/).
+The examples below show how to use this plugin. For advanced configurations, see the [Example section](./index.html#Examples). See the documentation for [Maven Archiver](/shared/maven-archiver/).
 
-To handle archiving this version of Maven JAR Plugin uses [Maven Archiver](/shared/maven-archiver/index.html) ${mavenArchiverVersion}.
+This version of the Maven JAR Plugin uses [Maven Archiver](/shared/maven-archiver/index.html) ${mavenArchiverVersion} to handle archive creation.
 
-**Note:** If you need to sign your JAR files you should use the [Maven Jarsigner Plugin](/plugins/maven-jarsigner-plugin/) instead. 
+**Note:** If you need to sign your JAR files, use the [Maven Jarsigner Plugin](/plugins/maven-jarsigner-plugin/) instead.
 
 How to build a JAR file
 -----------------------
 
-When you want to create a JAR-file with Maven, you first have to create a `pom.xml`-file with at least the following content:
+To create a JAR file with Maven, create a `pom.xml` file with at least the following content:
 
 ```unknown
 <project>
@@ -51,23 +51,33 @@ When you want to create a JAR-file with Maven, you first have to create a `pom.x
 </project>
 ```
 
-Since 'jar' is the default packaging type it is not required to set it in this case. Apart from the above you will normally want some real java source files which should be located within `src/main/java`. If you need extra resources on your classpath (for example property files) they should be located in `src/main/resources`. Now we can create a JAR-file by using the command below:
+The `jar` packaging type is the default. You do not have to set it in this case.
+
+1. Place your Java source files in `src/main/java`.
+2. If you need extra resources, such as property files, on the classpath, place them in `src/main/resources`.
+3. Create the JAR file with the command below:
 
 ```unknown
 mvn package
 ```
 
-The 'package' phase is always responsible for bundling all the files in the artifact, in this case a JAR-file.
+The `package` phase bundles all the files into the artifact. In this case, the artifact is a JAR file.
 
-In your project's `target` directory you'll see the generated jar file which is named like: 'core-1.0-SNAPSHOT.jar'. The resulting 'jar' file contains the compiled java class files as well as the files from `src/main/resources`.
+The generated JAR file is in the `target` directory. Its name is `core-1.0-SNAPSHOT.jar`. The JAR file contains the compiled Java class files and the files from `src/main/resources`.
 
-Usually there is no need to mentioned the 'maven-jar-plugin' explicit cause it's bound to the [Maven Build Life Cycle](/guides/introduction/introduction-to-the-lifecycle.html).
+Usually you do not need to declare the `maven-jar-plugin` in your `pom.xml`. The plugin is bound to the [Maven Build Life Cycle](/guides/introduction/introduction-to-the-lifecycle.html).
 
-For full documentation, click [here](./plugin-info.html).
+For full documentation, see [plugin-info](./plugin-info.html).
 
 Modular JAR files
 -----------------
 
-The [Java Platform Module System (JPMS)](https://openjdk.java.net/projects/jigsaw/spec/) introduced [changes in the JAR file specifications](https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html) as well - Modular JAR files. Modular JAR files are JAR files with `module-info.class` file in the root directory (or in the versioned area for multi-release JAR files). If the project contains `module-info.class` the resulting JAR will be a Modular JAR without a need for any configuration regardless of the plugin version used.
+The [Java Platform Module System (JPMS)](https://openjdk.java.net/projects/jigsaw/spec/) introduced Modular JAR files in the [JAR file specifications](https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html). A Modular JAR file contains a `module-info.class` file in the root directory. For multi-release JAR files, the file is in the versioned area. If the project contains `module-info.class`, the final JAR is a Modular JAR. This happens without any configuration and regardless of the plugin version.
 
-Starting with version 3.1.2, if the JAR file contains `module-info.class`, this plugin will update the modular descriptor (`module-info.class`) with additional attributes such as the list of packages included and will validate the resulting modular descriptor (for example if all services provided by the module are actually included in the JAR file). The most notable additional attribute added is the module main class. If the JAR manifest contains `Main-Class` attribute this plugin will set the module main class to the same value (for example how to set it read [Make The Jar Executable](../../shared/maven-archiver/examples/classpath.html)). Internally the plugin uses the JDK `jar` tool so in order to add the additional attributes and to verify the modular descriptor Maven should be run with JDK version 9 or newer. If version 8 or earlier is used the resulting JAR still will be Modular JAR (as it contains `module-info.class`) but no additional attributes will be added and no validation will be performed.
+Since version 3.1.2, this plugin updates the modular descriptor when the JAR contains `module-info.class`. The plugin adds additional attributes, such as the list of included packages. It verifies the modular descriptor. It also verifies that all services provided by the module are in the JAR file. The most notable added attribute is the module main class.
+
+If the JAR manifest contains the `Main-Class` attribute, this plugin sets the module main class to the same value. For an example, see [Make The Jar Executable](../../shared/maven-archiver/examples/classpath.html).
+
+The plugin uses the JDK `jar` tool internally to add the additional attributes and to verify the modular descriptor. This requires JDK version 9 or newer.
+
+If you use JDK version 8 or earlier, the JAR is still a Modular JAR. The JAR contains `module-info.class`. The plugin adds no additional attributes and performs no validation.

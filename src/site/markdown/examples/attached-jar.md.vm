@@ -24,11 +24,11 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# How to create an additional attached jar artifact from the project
+# How to Create an Additional Attached JAR Artifact
 
-Specify a list of fileset patterns to be included or excluded by adding `<includes>`/`<include>` or `<excludes>`/`<exclude>` and add a `classifier` in your `pom.xml`.
+Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`. Add a `classifier` as well.
 
-**Note:** the jar-plugin must be defined in a new execution, otherwise it will replace the default use of the jar-plugin instead of adding a second artifact. The `classifier` is also required to create more than one artifact.
+**Note:** Define the JAR Plugin in a new execution. Otherwise, it replaces the default use of the JAR Plugin. It does not add a second artifact. The `classifier` is also required to create more than one artifact.
 
 ```unknown
 <project>

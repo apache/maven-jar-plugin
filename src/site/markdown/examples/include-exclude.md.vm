@@ -24,9 +24,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# How to include/exclude content from jar artifact
+# How to Include or Exclude Content from a JAR Artifact
 
-Specify a list of fileset patterns to be included or excluded by adding `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`.
+Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`. These elements specify the fileset patterns to include or exclude.
 
 ```unknown
 <project>
@@ -51,4 +51,4 @@ Specify a list of fileset patterns to be included or excluded by adding `<includ
 </project>
 ```
 
-Note that the patterns need to be relative to the path specified for the plugin's `classesDirectory` parameter.
+The patterns must be relative to the path for the plugin's `classesDirectory` parameter.

@@ -28,9 +28,9 @@ under the License.
       <question>Why is there no documentation for the archive parameter?</question>
       <answer>
         <p>
-          The archive parameter is a class that resides outside of this plugin,
-          in the Maven Archiver component. You can find the documentation for
-          Maven Archiver
+          The `archive` parameter is a class outside of this plugin. It is
+          part of the Maven Archiver component. Read the Maven Archiver
+          documentation
           <a href="/shared/maven-archiver/index.html">here</a>.
         </p>
       </answer>

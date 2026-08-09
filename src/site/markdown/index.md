@@ -25,33 +25,31 @@ under the License.
 -->
 
 # Apache Maven JAR Plugin
-This plugin provides the capability to build jars. To sign jars, use the [Maven Jarsigner Plugin](/plugins/maven-jarsigner-plugin/).
+
+This plugin builds JAR files. To sign JAR files, use the [Maven Jarsigner Plugin](/plugins/maven-jarsigner-plugin/).
 
 ## Goals Overview
 
-- [jar:jar](./jar-mojo.html) create a jar file for your project classes inclusive resources.
-- [jar:test-jar](./test-jar-mojo.html) create a jar file for your project test classes .
+- [jar:jar](./jar-mojo.html): create a JAR file for your project classes and their resources.
+- [jar:test-jar](./test-jar-mojo.html): create a JAR file for your project test classes.
+
 ## Usage
 
-General instructions on how to use the JAR Plugin can be found on the [usage page](./usage.html). Some more specific use cases are described in the examples below.
+General instructions for the JAR Plugin are on the [usage page](./usage.html). The examples below describe more specific use cases.
 
-In case you still have questions regarding the plugin's usage, please have a look at the [FAQ](./faq.html) and feel free to contact the [user mailing list](./mailing-lists.html). The posts to the mailing list are archived and could already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching the [mail archive](./mailing-lists.html).
+If you have questions about the plugin, see the [FAQ](./faq.html) or contact the [user mailing list](./mailing-lists.html). The mailing list stores all posts in an archive. An older thread can contain the answer to your question. You can search the [mail archive](./mailing-lists.html) for the answer.
 
-If you feel like the plugin is missing a feature or has a defect, you can file a feature request or bug report in our [issue tracker](https://github.com/apache/maven-jar-plugin/issues). When creating a new issue, please provide a comprehensive description of your concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason, entire debug logs, POMs, or most preferably little demo projects attached to the issue are very much appreciated. Of course, patches are welcome, too. Contributors can check out the project from our [source repository](./scm.html) and will find supplementary information in the [guide to helping with Maven](http://maven.apache.org/guides/development/guide-helping.html).
+If the plugin is missing a feature or has a defect, file a feature request or bug report in the [issue tracker](https://github.com/apache/maven-jar-plugin/issues). When you create a new issue, describe your concern in detail. The developers must reproduce the problem to fix a bug. Attach entire debug logs, POMs, or small demo projects to the issue. Patches are welcome. Contributors can check out the project from the [source repository](./scm.html) and find supplementary information in the [guide to helping with Maven](http://maven.apache.org/guides/development/guide-helping.html).
 
 ## Archiver Configuration
 
-The plugin uses Maven Archiver to handle jar content and manifest configuration.
-
-You can have a look at the [Maven Archiver Documentation](/shared/maven-archiver/) to understand how to setup this.
-
-You might also want to consult the [Guide to Working with Manifests](/guides/mini/guide-manifest.html).
+The plugin uses Maven Archiver to handle JAR content and manifest configuration. See the [Maven Archiver Documentation](/shared/maven-archiver/) to learn how to set it up. You can also see the [Guide to Working with Manifests](/guides/mini/guide-manifest.html).
 
 ## Examples
 
-To provide you with better understanding of some usages of the JAR Plugin, you can take a look at the following examples:
+The following examples show some usages of the JAR Plugin:
 
 - [Manifest Customization](./examples/manifest-customization.html)
-- [Howto include/exclude Content from a jar archive](./examples/include-exclude.html)
-- [How to create an additional attached jar artifact from the project](./examples/attached-jar.html)
-- [How to create a jar containing test classes](./examples/create-test-jar.html)
+- [Include/Exclude Content from a JAR Archive](./examples/include-exclude.html)
+- [Create an Additional Attached JAR Artifact](./examples/attached-jar.html)
+- [Create a JAR With Test Classes](./examples/create-test-jar.html)
