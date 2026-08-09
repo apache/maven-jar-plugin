@@ -36,7 +36,7 @@ The easy way
 
 Use this configuration to produce a JAR with your test classes and resources:
 
-```unknown
+```sh
 <project>
   ...
   <build>
@@ -63,7 +63,7 @@ Use this configuration to produce a JAR with your test classes and resources:
 
 To reuse this artifact in another project, declare the dependency with `type` set to `test-jar`:
 
-```unknown
+```sh
 <project>
   ...
   <dependencies>
@@ -91,7 +91,7 @@ The preferred way
 
 To let Maven resolve all `test`-scoped transitive dependencies, create a separate project:
 
-```unknown
+```sh
 <project>
    <groupId>groupId</groupId>
     <artifactId>artifactId-tests</artifactId>
@@ -105,7 +105,7 @@ To let Maven resolve all `test`-scoped transitive dependencies, create a separat
 
 Add this dependency to use the reusable test classes in another project:
 
-```unknown
+```sh
 <project>
   ...
   <dependencies>
