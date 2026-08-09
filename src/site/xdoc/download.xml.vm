@@ -70,7 +70,7 @@ under the License.
       <subsection name="Previous Versions">
         <p>Use the latest release version of <strong>${project.name}</strong>. It contains
           the newest features and bug fixes.</p>
-        <p>You can find older releases on our <a href="https://archive.apache.org/dist/maven/plugins/">archive site</a>.</p>
+        <p>Older releases are on the <a href="https://archive.apache.org/dist/maven/plugins/">archive site</a>.</p>
       </subsection>
     </section>
   </body>
