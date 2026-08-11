@@ -176,6 +176,30 @@ class ArchiveTest {
     }
 
     /**
+     * Ensures that the arguments given to the {@code jar} tool contain no empty directory.
+     * A {@code META-INF/versions/<n>} directory is added to a {@link FileSet} whose {@code -C} directory
+     * is that same directory. Therefore, {@code relativize(dir, dir)} is the empty path.
+     * An empty jar file argument is invalid, so it must become "." (archive the whole directory content).
+     */
+    @Test
+    void archivingADirectoryAsAWholeYieldsDotNotEmptyEntry() {
+        Path versionDir = Path.of("p/target/classes/META-INF/versions/9").toAbsolutePath();
+        List<Object> args = argsAfterAdding(versionDir, versionDir);
+        Path jar = versionDir.resolve("out.jar");
+        int sawDot = 0;
+        for (Object o : args) {
+            if (o instanceof Path p && !p.equals(jar) && !p.equals(versionDir)) {
+                String s = p.toString();
+                assertFalse(s.isEmpty(), "jar file argument must never be empty");
+                if (s.equals(".")) {
+                    sawDot++;
+                }
+            }
+        }
+        assertEquals(1, sawDot, "the whole -C directory must be archived with \".\" exactly once");
+    }
+
+    /**
      * Creates arguments for the {@code jar} tool with the given files in order.
      *
      * @param directory the root directory of the files

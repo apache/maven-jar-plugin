@@ -214,6 +214,15 @@ final class Archive {
                     indexOfShortest = i;
                     shortest = item;
                     if (count <= 1) {
+                        if (shortest.toString().isEmpty()) {
+                            /*
+                             * The item is the `-C` directory itself (e.g. a `META-INF/versions/<n>` directory
+                             * added as a whole). An empty file argument is invalid for the `jar` tool
+                             * (some implementations reject it, others silently misbehave),
+                             * so archive the whole directory content with ".".
+                             */
+                            shortest = Path.of(".");
+                        }
                         break; // We will not find better.
                     }
                 }
