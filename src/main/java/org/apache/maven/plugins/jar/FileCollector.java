@@ -161,7 +161,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
         fileMatcher = matcherFactory.createPathMatcher(directory, mojo.getIncludes(), mojo.getExcludes(), false);
         directoryMatcher = matcherFactory.deriveDirectoryMatcher(fileMatcher);
         acceptsAllFiles = matcherFactory.isIncludesAll(directoryMatcher) && matcherFactory.isIncludesAll(fileMatcher);
-        packageHierarchy = context.newArchive(null, directory);
+        packageHierarchy = context.newArchive(null, null, directory);
         moduleHierarchy = new LinkedHashMap<>();
         resetToPackageHierarchy();
     }
@@ -183,7 +183,8 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      */
     private void enterModuleDirectory(final Path directory) {
         String moduleName = directory.getFileName().toString();
-        currentModule = moduleHierarchy.computeIfAbsent(moduleName, (name) -> context.newArchive(name, directory));
+        currentModule = moduleHierarchy.computeIfAbsent(
+                moduleName, (name) -> context.newArchive(name, currentTargetVersion, directory));
         currentFilesToArchive = currentModule.newTargetRelease(directory, currentTargetVersion);
     }
 

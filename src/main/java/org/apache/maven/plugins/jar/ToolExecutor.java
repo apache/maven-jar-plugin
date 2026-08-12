@@ -245,9 +245,10 @@ final class ToolExecutor {
      * but collect information for creating the file later.
      *
      * @param  moduleName the module name if using module hierarchy, or {@code null} if using package hierarchy
+     * @param  version the target Java release, or {@code null} for the base version
      * @param  directory the directory of the classes targeting the base Java release
      */
-    Archive newArchive(final String moduleName, final Path directory) {
+    Archive newArchive(final String moduleName, final Runtime.Version version, final Path directory) {
         var sb = new StringBuilder(60);
         if (moduleName != null) {
             sb.append(moduleName).append('-').append(project.getVersion());
@@ -258,7 +259,7 @@ final class ToolExecutor {
             sb.append('-').append(classifier);
         }
         String filename = sb.append(".jar").toString();
-        return new Archive(outputDirectory.resolve(filename), moduleName, directory, forceCreation, logger);
+        return new Archive(outputDirectory.resolve(filename), moduleName, version, directory, forceCreation, logger);
     }
 
     /**

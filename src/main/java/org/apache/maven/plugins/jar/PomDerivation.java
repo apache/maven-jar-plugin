@@ -89,6 +89,7 @@ final class PomDerivation {
 
     /**
      * Provide module descriptors from module names.
+     * May be {@code null} if no {@code module-info} was found.
      */
     private final ModuleFinder moduleFinder;
 
@@ -138,8 +139,10 @@ final class PomDerivation {
         final Path[] allModulePaths = toRealPaths(moduleRoots, dependencies.values());
         fromURI = new HashMap<>(allModulePaths.length); // TODO: use newHashMap with JDK19.
         moduleFinder = ModuleFinder.of(allModulePaths);
-        for (ModuleReference reference : moduleFinder.findAll()) {
-            reference.location().ifPresent((location) -> fromURI.put(location, reference));
+        if (moduleFinder != null) {
+            for (ModuleReference reference : moduleFinder.findAll()) {
+                reference.location().ifPresent((location) -> fromURI.put(location, reference));
+            }
         }
         fromDependency = new HashMap<>(dependencies.size()); // TODO: use newHashMap with JDK19.
         for (Map.Entry<org.apache.maven.api.Dependency, Path> entry : dependencies.entrySet()) {
@@ -280,6 +283,9 @@ final class PomDerivation {
      * @return module descriptor for the specified module name
      */
     private Optional<ModuleDescriptor> findModuleDescriptor(String moduleName) {
+        if (moduleFinder == null) {
+            return Optional.empty();
+        }
         return moduleFinder.find(moduleName).map(ModuleReference::descriptor);
     }
 

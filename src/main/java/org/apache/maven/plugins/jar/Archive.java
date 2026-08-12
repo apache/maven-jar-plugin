@@ -222,12 +222,19 @@ final class Archive {
      *
      * @param jarFile path to the <abbr>JAR</abbr> file to create
      * @param moduleName the module name if using module hierarchy, or {@code null} if using package hierarchy
+     * @param version the target Java release, or {@code null} for the base version
      * @param directory the directory of the classes targeting the base Java release
      * @param forceCreation whether to force a new <abbr>JAR</abbr> file even if the content seems unchanged
      * @param logger where to send a warning if an error occurred while checking an existing <abbr>JAR</abbr> file
      */
     @SuppressWarnings("checkstyle:NeedBraces")
-    Archive(Path jarFile, String moduleName, Path directory, boolean forceCreation, Log logger) {
+    Archive(
+            final Path jarFile,
+            final String moduleName,
+            final Runtime.Version version,
+            final Path directory,
+            final boolean forceCreation,
+            final Log logger) {
         this.jarFile = jarFile;
         this.moduleName = moduleName;
         filesetForRelease = new TreeMap<>((v1, v2) -> {
@@ -236,7 +243,7 @@ final class Archive {
             if (v2 == null) return +1;
             return v1.compareTo(v2);
         });
-        filesetForRelease.put(null, new FileSet(directory));
+        filesetForRelease.put(version, new FileSet(directory));
         if (!forceCreation && Files.isRegularFile(jarFile)) {
             try {
                 existingJAR = new TimestampCheck(jarFile, directory, logger);
@@ -253,7 +260,16 @@ final class Archive {
      * @throws NoSuchElementException should not happen unless {@link #prune(boolean)} has been invoked
      */
     FileSet baseRelease() {
-        return filesetForRelease.firstEntry().getValue();
+        Map.Entry<Runtime.Version, FileSet> entry = filesetForRelease.firstEntry();
+        String message = null;
+        if (entry != null) {
+            Runtime.Version version = entry.getKey();
+            if (version == null) {
+                return entry.getValue();
+            }
+            message = "Expected base version but found version " + version;
+        }
+        throw new NoSuchElementException(message);
     }
 
     /**
