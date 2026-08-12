@@ -48,6 +48,16 @@ import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
  */
 final class ToolExecutor {
     /**
+     * First JDK feature version whose {@code jar} tool can run {@code --validate} on archives
+     * that contain records. Earlier {@code jar} tools failed with "This feature requires ASM8"
+     * (JDK-8282446, fixed by JDK-8282508 in JDK 19 by not backported to a 17u or 18u update).
+     *
+     * @see <a href="https://bugs.openjdk.org/browse/JDK-8282446">JDK-8282446</a>
+     * @see <a href="https://bugs.openjdk.org/browse/JDK-8282508">JDK-8282508</a>
+     */
+    private static final int JDK_FIXING_JAR_VALIDATE = 19;
+
+    /**
      * The Maven project for which to create an archive.
      */
     final Project project;
@@ -359,20 +369,34 @@ final class ToolExecutor {
             }
         }
         clear();
+        /*
+         * The `jar --validate` operation of the JDK 17 and 18 `jar` tools fails with
+         * "This feature requires ASM8" on any class compiled as a record (JDK-8282446).
+         * The `jar` tool was fixed in JDK 19. Maven 4 runs on JDK 17+, so on JDK 17/18
+         * we skip the post-creation validation pass; the archive was already created
+         * successfully by the `--create` pass above.
+         */
         if (archive.validate(arguments)) {
-            int status = executeJarTool();
-            if (status != 0) {
-                var message = new StringBuilder()
-                        .append("The \"")
-                        .append(relativePath)
-                        .append("\" archive file is invalid");
-                String error = errors.toString().strip();
-                if (error.isEmpty()) {
-                    message.append('.');
-                } else {
-                    message.append(": ").append(error);
+            final int version = Runtime.version().feature();
+            if (version >= JDK_FIXING_JAR_VALIDATE) {
+                int status = executeJarTool();
+                if (status != 0) {
+                    var message = new StringBuilder()
+                            .append("The \"")
+                            .append(relativePath)
+                            .append("\" archive file is invalid");
+                    String error = errors.toString().strip();
+                    if (error.isEmpty()) {
+                        message.append('.');
+                    } else {
+                        message.append(": ").append(error);
+                    }
+                    throw new MojoException(message.toString());
                 }
-                throw new MojoException(message.toString());
+            } else {
+                logger.info("Skipping the `jar --validate` pass on JDK " + version
+                        + ": that JDK's jar tool cannot validate archives containing records"
+                        + " (fixed in JDK " + JDK_FIXING_JAR_VALIDATE + ").");
             }
             clear();
         }
