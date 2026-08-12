@@ -313,9 +313,18 @@ final class ToolExecutor {
          * the files to archive.
          */
         boolean writeTemporaryManifest = (manifestFromPlugin != null && manifestFile == null); // Check <archive>.
-        final Manifest manifest = archive.mergeManifest(manifestFile, manifestFromPlugin);
+        Manifest manifest = archive.mergeManifest(manifestFile, manifestFromPlugin);
         if (manifest != manifestFromPlugin) {
             writeTemporaryManifest |= (manifestFromPlugin != null); // Check if a merge of two manifests.
+        } else if (manifest != null) {
+            /*
+             * `setMainClass` below removes the Main-Class attribute, and `manifestFromPlugin` is
+             * shared across every module of a module hierarchy. Work on a per-module copy so that
+             * the (unspecified) directory iteration order does not decide which module keeps the
+             * main class: otherwise a non-owning module processed first consumes the attribute and
+             * the owning module never receives it.
+             */
+            manifest = new Manifest(manifest);
         }
         writeTemporaryManifest |= archive.setMainClass(manifest);
         if (manifest != null) {

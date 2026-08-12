@@ -80,8 +80,12 @@ final class Archive {
     final String moduleName;
 
     /**
-     * Path to {@code META-INF/MANIFEST.MF}, or {@code null} if none. The manifest file
-     * should be included by the {@code --manifest} option instead of as an ordinary file.
+     * Path to {@code META-INF/MANIFEST.MF}, or {@code null} if none.
+     * If non-null, this value will be given to the {@code --manifest} option.
+     * The use of this option is preferable to adding {@code MANIFEST.MF} as an ordinary file.
+     *
+     * @see #setManifest(Path, boolean)
+     * @see #mergeManifest(Path, Manifest)
      */
     @Nullable
     private Path manifest;
@@ -382,6 +386,9 @@ final class Archive {
      * As an extension, this method accepts the {@code module/classname} syntax (a syntax already used in some
      * Java tools). If a module is specified, the main class is kept only if the module match. The intent is to
      * allow users to specify on which module the main class applies when they use plugin configuration.
+     *
+     * <p>This method may modify the {@code content} manifest. Caller shall ensure that the given manifest
+     * is not a shared instance. This method returns whether a change has actually been done.</p>
      *
      * @param content combination of existing {@code MANIFEST.MF} and manifest inferred from configuration, or null
      * @return whether the given manifest has been modified by this method
