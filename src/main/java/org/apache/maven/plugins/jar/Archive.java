@@ -181,16 +181,51 @@ final class Archive {
             if (tc != null && tc.isUpdated(item, attributes, isDirectory)) {
                 existingJAR = null; // Signal that the existing file is outdated.
             }
-            if (files.isEmpty()) {
-                /*
-                 * In our tests, it seems that the first file after the "-C" option needs to be relative
-                 * to the directory given to "-C" and all other files need to be absolute. This behavior
-                 * does not seem to be documented, but we couldn't get the "jar" tool to work otherwise
-                 * (except by repeating "-C" before each file).
-                 */
-                item = directory.relativize(item);
-            }
+            /*
+             * Current version does not relativize paths here, because it seems that we cannot relativize all files
+             * (see `relativizePaths()` for more information). But we may change this behavior in a future version
+             * of the Maven JAR plugin if future a JDK version changes the way that the JAR tool handles paths.
+             */
             files.add(item);
+        }
+
+        /**
+         * Relativizes paths in the {@link #files} list according apparently necessary heuristic rules.
+         * In our tests, it seems that the first file after the {@code -C} option needs to be relative
+         * to the directory given to {@code -C} and all other files need to be absolute. This behavior
+         * does not seem to be documented, but we couldn't get the {@code jar} tool to work otherwise
+         * (except by repeating {@code -C} before each file).
+         *
+         * Furthermore, it seems that the relativized file needs to be the shortest one,
+         * otherwise the {@code jar} tool rejects files after the first one with "names do not match".
+         * Which file is first depends on the unspecified directory-iteration order,
+         * so this method needs to search for the shortest path.
+         */
+        private void heuristicallyRelativizePaths() {
+            Path shortest = null;
+            int indexOfShortest = 0;
+            int shortestCount = Integer.MAX_VALUE;
+            final int size = files.size();
+            for (int i = 0; i < size; i++) {
+                Path item = directory.relativize(files.get(i));
+                int count = item.getNameCount();
+                if (count < shortestCount) {
+                    shortestCount = count;
+                    indexOfShortest = i;
+                    shortest = item;
+                    if (count <= 1) {
+                        break; // We will not find better.
+                    }
+                }
+            }
+            if (shortest != null) {
+                if (indexOfShortest != 0) {
+                    files.remove(indexOfShortest);
+                    files.add(0, shortest);
+                } else {
+                    files.set(0, shortest);
+                }
+            }
         }
 
         /**
@@ -201,6 +236,7 @@ final class Archive {
          * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
          */
         private void arguments(List<Object> addTo, Runtime.Version version) {
+            heuristicallyRelativizePaths();
             if (!files.isEmpty()) {
                 if (version != null) {
                     addTo.add("--release");

@@ -19,6 +19,8 @@
 package org.apache.maven.plugins.jar;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -156,5 +158,54 @@ class ArchiveTest {
         final Archive b = archive("foo.bar", null, base);
         assertNotSame(b.newTargetRelease(base, null), b.newTargetRelease(v16, r16));
         assertEquals(base, b.baseRelease().directory);
+    }
+
+    /**
+     * Ensures that the shortest path is first and relative.
+     * In our tests, it seems that the first <abbr>JAR</abbr> entry after the {@code -C} option
+     * shall be relative, and only that file. Furthermore, it seems that this file shall be the
+     * shortest.
+     */
+    @Test
+    void shortestPathIsRelativeRegardlessOfFileOrder() {
+        Path classes = Path.of("p/target/classes").toAbsolutePath(); // Absolute, as usual in Maven builds.
+        Path a = classes.resolve("myproject/HelloWorld.class");
+        Path b = classes.resolve("myproject/foo/Utils.class");
+        assertFirstEntryRelative(argsAfterAdding(classes, a, b));
+        assertFirstEntryRelative(argsAfterAdding(classes, b, a)); // Reverse order.
+    }
+
+    /**
+     * Creates arguments for the {@code jar} tool with the given files in order.
+     *
+     * @param directory the root directory of the files
+     * @param files files in the given root directory or sub-directories
+     * @return arguments for the {@code jar} tool
+     */
+    private static List<Object> argsAfterAdding(Path directory, Path... filesInOrder) {
+        Archive archive = archive("myproject", null, directory);
+        var base = archive.baseRelease();
+        for (Path f : filesInOrder) {
+            base.add(f, null, false);
+        }
+        var args = new ArrayList<Object>();
+        archive.arguments(args);
+        return args;
+    }
+
+    /**
+     * Asserts that all paths in the argument list are absolute except the first path after the {@code -C} option.
+     * This assertion methods expect the first path to be always ending with {@code "HelloWorld.class"}.
+     */
+    private static void assertFirstEntryRelative(List<Object> args) {
+        for (Object token : args) {
+            if (token instanceof Path p) {
+                if (p.endsWith("HelloWorld.class")) {
+                    assertFalse(p.isAbsolute(), p.toString());
+                } else {
+                    assertTrue(p.isAbsolute(), p.toString());
+                }
+            }
+        }
     }
 }
