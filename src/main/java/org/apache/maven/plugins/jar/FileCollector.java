@@ -98,10 +98,11 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     private final PathMatcher directoryMatcher;
 
     /**
-     * Whether the matchers accept all files. In such case, we can declare whole directories
-     * to the {@code jar} tool instead of scaning the directory tree ourselves.
+     * Whether the matchers accept all files and there is no need to sort the files.
+     * In such case, we can declare whole directories to the {@code jar} tool instead
+     * of scanning the directory tree ourselves.
      */
-    private final boolean acceptsAllFiles;
+    private final boolean addDirectories;
 
     /**
      * Files found in the output directory when package hierarchy is used.
@@ -163,7 +164,9 @@ final class FileCollector extends SimpleFileVisitor<Path> {
         directoryRoles = new ArrayDeque<>();
         fileMatcher = matcherFactory.createPathMatcher(directory, mojo.getIncludes(), mojo.getExcludes(), false);
         directoryMatcher = matcherFactory.deriveDirectoryMatcher(fileMatcher);
-        acceptsAllFiles = matcherFactory.isIncludesAll(directoryMatcher) && matcherFactory.isIncludesAll(fileMatcher);
+        addDirectories = !context.isReproducible()
+                && matcherFactory.isIncludesAll(fileMatcher)
+                && matcherFactory.isIncludesAll(directoryMatcher);
         packageHierarchy = context.newArchive(null, null, directory);
         moduleHierarchy = new LinkedHashMap<>();
         resetToPackageHierarchy();
@@ -322,7 +325,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
          * Do not move this condition inside the `switch` block because `role` may have been modified.
          * The `role` value is now the role of `directory`, not anymore the role of parent directory.
          */
-        if (acceptsAllFiles && role == DirectoryRole.RESOURCES) {
+        if (addDirectories && role == DirectoryRole.RESOURCES) {
             currentFilesToArchive.add(directory, attributes, true);
             /*
              * Since we are skipping the whole directory, `postVisitDirectory(…)` will not be invoked.

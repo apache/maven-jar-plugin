@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +142,26 @@ final class Archive {
      */
     final class FileSet {
         /**
+         * A comparator for sorting paths in a reproducible order.
+         * This comparator assumes that all paths are relative to the same base directory (this is not verified).
+         * Note: we do not use {@link Path#compareTo(Path)} because the Javadoc said that it is platform dependent.
+         */
+        private static final Comparator<Path> REPRODUCIBLE_ORDER = (p1, p2) -> {
+            final int c1 = p1.getNameCount();
+            final int c2 = p2.getNameCount();
+            final int c = Math.min(c1, c2);
+            for (int i = 0; i < c; i++) {
+                String n1 = p1.getName(i).toString();
+                String n2 = p2.getName(i).toString();
+                int r = n1.compareTo(n2); // Case-sensitive comparison on all platforms.
+                if (r != 0) {
+                    return r;
+                }
+            }
+            return c1 - c2;
+        };
+
+        /**
          * The root directory of all files or directories to archive.
          * This is the value to pass to the {@code -C} tool option.
          */
@@ -230,6 +251,9 @@ final class Archive {
                     addTo.add("--release");
                     addTo.add(version);
                 }
+                if (isReproducible) {
+                    files.sort(REPRODUCIBLE_ORDER);
+                }
                 if (REPEAT_C) {
                     for (Path file : files) {
                         addTo.add("-C");
@@ -254,6 +278,11 @@ final class Archive {
     }
 
     /**
+     * Whether reproducible build was requested.
+     */
+    private final boolean isReproducible;
+
+    /**
      * Creates an initially empty set of files or directories.
      *
      * @param jarFile path to the <abbr>JAR</abbr> file to create
@@ -261,6 +290,7 @@ final class Archive {
      * @param version the target Java release, or {@code null} for the base version
      * @param directory the directory of the classes targeting the base Java release
      * @param forceCreation whether to force a new <abbr>JAR</abbr> file even if the content seems unchanged
+     * @param isReproducible whether reproducible build was requested
      * @param logger where to send a warning if an error occurred while checking an existing <abbr>JAR</abbr> file
      */
     @SuppressWarnings("checkstyle:NeedBraces")
@@ -270,9 +300,11 @@ final class Archive {
             final Runtime.Version version,
             final Path directory,
             final boolean forceCreation,
+            final boolean isReproducible,
             final Log logger) {
         this.jarFile = jarFile;
         this.moduleName = moduleName;
+        this.isReproducible = isReproducible;
         filesetForRelease = new TreeMap<>((v1, v2) -> {
             if (v1 == v2) return 0;
             if (v1 == null) return -1;

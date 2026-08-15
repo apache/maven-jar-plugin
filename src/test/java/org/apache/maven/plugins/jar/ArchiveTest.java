@@ -26,6 +26,7 @@ import java.util.jar.Manifest;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -43,8 +44,8 @@ class ArchiveTest {
      * Creates an {@code Archive} suitable for a unit test. {@code forceCreation = true} skips the
      * existing-JAR timestamp check, so the (here {@code null}) logger is never dereferenced.
      */
-    private static Archive archive(String moduleName, Runtime.Version version, Path directory) {
-        return new Archive(directory.resolve("out.jar"), moduleName, version, directory, true, null);
+    private static Archive archive(String moduleName, Runtime.Version version, Path directory, boolean isReproducible) {
+        return new Archive(directory.resolve("out.jar"), moduleName, version, directory, true, isReproducible, null);
     }
 
     /**
@@ -80,7 +81,7 @@ class ArchiveTest {
      */
     @Test
     void owningModuleClaimsMainClassAndRemovesItFromManifest() {
-        Archive owner = archive("foo.bar", null, Path.of("."));
+        Archive owner = archive("foo.bar", null, Path.of("."), false);
         Manifest m = manifestWithMainClass("foo.bar/foo.MainFile");
         // The owner keeps the main class (emitted via --main-class) ...
         assertTrue(owner.setMainClass(m));
@@ -96,7 +97,7 @@ class ArchiveTest {
      */
     @Test
     void nonOwningModuleRejectsMainClass() {
-        Archive nonOwner = archive("foo.bar.more", null, Path.of("."));
+        Archive nonOwner = archive("foo.bar.more", null, Path.of("."), false);
         Manifest m = manifestWithMainClass("foo.bar/foo.MainFile");
         assertFalse(nonOwner.setMainClass(m));
         assertNull(mainClassOf(m));
@@ -129,8 +130,8 @@ class ArchiveTest {
         final Manifest shared = manifestWithMainClass("foo.bar/foo.MainFile");
         final Manifest m1 = new Manifest(shared);
         final Manifest m2 = new Manifest(shared);
-        assertEquals(ownerIsFirst, archive(first, null, path).setMainClass(m1));
-        assertEquals(!ownerIsFirst, archive(second, null, path).setMainClass(m2));
+        assertEquals(ownerIsFirst, archive(first, null, path, false).setMainClass(m1));
+        assertEquals(!ownerIsFirst, archive(second, null, path, false).setMainClass(m2));
         // Per-module copies must leave the shared plugin manifest untouched.
         assertEquals("foo.bar/foo.MainFile", mainClassOf(shared));
         assertNull(mainClassOf(m1));
@@ -150,18 +151,19 @@ class ArchiveTest {
         final Runtime.Version r16 = Runtime.Version.parse("16");
 
         // Version-directory first (the failing order): Archive seeded from v16, base registered later.
-        final Archive a = archive("foo.bar", r16, v16);
+        final Archive a = archive("foo.bar", r16, v16, false);
         assertNotSame(a.newTargetRelease(v16, r16), a.newTargetRelease(base, null));
         assertEquals(base, a.baseRelease().directory, "base must rebind to the version-less directory");
 
         // Base-directory first: still correct.
-        final Archive b = archive("foo.bar", null, base);
+        final Archive b = archive("foo.bar", null, base, false);
         assertNotSame(b.newTargetRelease(base, null), b.newTargetRelease(v16, r16));
         assertEquals(base, b.baseRelease().directory);
     }
 
     /**
      * Ensures that all path are relative.
+     * Opportunistically verifies that reproducible build sorts the files.
      *
      * <h4>Historical note</h4>
      * In our tests, it seems that the first <abbr>JAR</abbr> entry after the {@code -C} option
@@ -174,8 +176,12 @@ class ArchiveTest {
         Path classes = Path.of("p/target/classes").toAbsolutePath(); // Absolute, as usual in Maven builds.
         Path a = classes.resolve("myproject/HelloWorld.class");
         Path b = classes.resolve("myproject/foo/Utils.class");
-        assertAllEntriesRelative(argsAfterAdding(classes, a, b));
-        assertAllEntriesRelative(argsAfterAdding(classes, b, a)); // Reverse order.
+        String[] ordered = {"HelloWorld.class", "Utils.class"};
+        String[] reverse = {"Utils.class", "HelloWorld.class"};
+        assertArrayEquals(ordered, assertAllEntriesRelative(argsAfterAdding(classes, false, a, b)));
+        assertArrayEquals(reverse, assertAllEntriesRelative(argsAfterAdding(classes, false, b, a)));
+        assertArrayEquals(ordered, assertAllEntriesRelative(argsAfterAdding(classes, true, a, b)));
+        assertArrayEquals(ordered, assertAllEntriesRelative(argsAfterAdding(classes, true, b, a)));
     }
 
     /**
@@ -187,7 +193,7 @@ class ArchiveTest {
     @Test
     void archivingADirectoryAsAWholeYieldsDotNotEmptyEntry() {
         Path versionDir = Path.of("p/target/classes/META-INF/versions/9").toAbsolutePath();
-        List<Object> args = argsAfterAdding(versionDir, versionDir);
+        List<Object> args = argsAfterAdding(versionDir, false, versionDir);
         Path jar = versionDir.resolve("out.jar");
         int sawDot = 0;
         for (Object o : args) {
@@ -206,11 +212,12 @@ class ArchiveTest {
      * Creates arguments for the {@code jar} tool with the given files in order.
      *
      * @param directory the root directory of the files
+     * @param isReproducible whether reproducible build was requested
      * @param files files in the given root directory or sub-directories
      * @return arguments for the {@code jar} tool
      */
-    private static List<Object> argsAfterAdding(Path directory, Path... filesInOrder) {
-        Archive archive = archive("myproject", null, directory);
+    private static List<Object> argsAfterAdding(Path directory, boolean isReproducible, Path... filesInOrder) {
+        Archive archive = archive("myproject", null, directory, isReproducible);
         var base = archive.baseRelease();
         for (Path f : filesInOrder) {
             base.add(f, null, false);
@@ -227,8 +234,12 @@ class ArchiveTest {
      * This method shall reflect the policy adopted in the {@code Archive.FileSet.add(…)} implementation.
      * Different strategies have been tried in the past, such as making only the first file relative and
      * all other files absolute.
+     *
+     * @param args the arguments as a mix of {@link String} and {@link Path} elements
+     * @return the filenames of the relative paths
      */
-    private static void assertAllEntriesRelative(List<Object> args) {
+    private static String[] assertAllEntriesRelative(final List<Object> args) {
+        final var filenames = new ArrayList<String>(2);
         boolean foundOptionC = false;
         boolean expectDirectory = true;
         for (Object token : args) {
@@ -244,8 +255,10 @@ class ArchiveTest {
                     }
                 } else {
                     assertFalse(p.isAbsolute(), p.toString());
+                    filenames.add(p.getFileName().toString());
                 }
             }
         }
+        return filenames.toArray(String[]::new);
     }
 }
