@@ -161,18 +161,21 @@ class ArchiveTest {
     }
 
     /**
-     * Ensures that the shortest path is first and relative.
+     * Ensures that all path are relative.
+     *
+     * <h4>Historical note</h4>
      * In our tests, it seems that the first <abbr>JAR</abbr> entry after the {@code -C} option
      * shall be relative, and only that file. Furthermore, it seems that this file shall be the
-     * shortest.
+     * shortest. We tried to apply this heuristic rules in a branch, but it does not save a lot
+     * of characters compared to repeating {@code -C}.
      */
     @Test
-    void shortestPathIsRelativeRegardlessOfFileOrder() {
+    void jarEntriesAreRelativeRegardlessOfFileOrder() {
         Path classes = Path.of("p/target/classes").toAbsolutePath(); // Absolute, as usual in Maven builds.
         Path a = classes.resolve("myproject/HelloWorld.class");
         Path b = classes.resolve("myproject/foo/Utils.class");
-        assertFirstEntryRelative(argsAfterAdding(classes, a, b));
-        assertFirstEntryRelative(argsAfterAdding(classes, b, a)); // Reverse order.
+        assertAllEntriesRelative(argsAfterAdding(classes, a, b));
+        assertAllEntriesRelative(argsAfterAdding(classes, b, a)); // Reverse order.
     }
 
     /**
@@ -218,16 +221,29 @@ class ArchiveTest {
     }
 
     /**
-     * Asserts that all paths in the argument list are absolute except the first path after the {@code -C} option.
-     * This assertion methods expect the first path to be always ending with {@code "HelloWorld.class"}.
+     * Asserts that every {@link Path} in the jar-tool argument list, other than the values of
+     * {@code --file}/{@code --manifest}/{@code --main-class} and the {@code -C} directories,
+     * is a relative path. The later are jar entry name relative to its {@code -C} directory.
+     * This method shall reflect the policy adopted in the {@code Archive.FileSet.add(…)} implementation.
+     * Different strategies have been tried in the past, such as making only the first file relative and
+     * all other files absolute.
      */
-    private static void assertFirstEntryRelative(List<Object> args) {
+    private static void assertAllEntriesRelative(List<Object> args) {
+        boolean foundOptionC = false;
+        boolean expectDirectory = true;
         for (Object token : args) {
+            if ("-C".equals(token)) {
+                foundOptionC = true;
+                expectDirectory = true;
+            }
             if (token instanceof Path p) {
-                if (p.endsWith("HelloWorld.class")) {
-                    assertFalse(p.isAbsolute(), p.toString());
-                } else {
+                if (expectDirectory) {
                     assertTrue(p.isAbsolute(), p.toString());
+                    if (foundOptionC) {
+                        expectDirectory = false;
+                    }
+                } else {
+                    assertFalse(p.isAbsolute(), p.toString());
                 }
             }
         }

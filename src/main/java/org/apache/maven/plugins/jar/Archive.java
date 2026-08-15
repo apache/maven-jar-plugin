@@ -48,6 +48,29 @@ import org.apache.maven.api.plugin.MojoException;
  */
 final class Archive {
     /**
+     * Whether to repeat the {@code -C} option before each file.
+     * Doing so makes the command-line very verbose while the documentation of
+     * <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html">The jar Command</a>
+     * gives the impression that this option can be provided only once.
+     * However, our tests suggest that the first file after the directory specified by the {@code -C} option
+     * must be relative to that directory and all files after the first one must be prefixed by the directory
+     * which was specified in the {@code -C} option. This behavior is not documented, but we couldn't get the
+     * {@code jar} tool to work otherwise (except by repeating {@code -C} before each file).
+     * Furthermore, it seems that the relativized file needs to be the shortest one,
+     * otherwise the {@code jar} tool rejects files after the first one with "names do not match".
+     * Which file is first depends on the unspecified directory-iteration order.
+     *
+     * <p>If this flag is {@code true}, the plugin repeats {@code -C} before each file.
+     * This flag should be set to {@code false} if a future version of the {@code jar}
+     * tool allows to specify {@code -C} only once.</p>
+     *
+     * <p><b>Historical note:</b> we also tried to relativize only the first file after {@code -C}
+     * and keep all subsequent files as absolute. It works, but because we have to repeat the directory
+     * in the file name, it saves only 3 or 4 characters per file compared to repeating {@code -C}.</p>
+     */
+    private static final boolean REPEAT_C = true;
+
+    /**
      * Path to the <abbr>POM</abbr> file generated for this archive, or {@code null} if none.
      * This is non-null only if module source hierarchy is used, in which case the dependencies
      * declared in this file are the intersection of the project dependencies and the content of
@@ -181,60 +204,17 @@ final class Archive {
             if (tc != null && tc.isUpdated(item, attributes, isDirectory)) {
                 existingJAR = null; // Signal that the existing file is outdated.
             }
-            /*
-             * Current version does not relativize paths here, because it seems that we cannot relativize all files
-             * (see `relativizePaths()` for more information). But we may change this behavior in a future version
-             * of the Maven JAR plugin if future a JDK version changes the way that the JAR tool handles paths.
-             */
+            item = directory.relativize(item);
+            if (item.getNameCount() <= 1 && item.toString().isEmpty()) {
+                /*
+                 * The item is the `-C` directory itself (e.g. a `META-INF/versions/<n>` directory
+                 * added as a whole). An empty file argument is invalid for the `jar` tool
+                 * (some implementations reject it, others silently misbehave),
+                 * so archive the whole directory content with ".".
+                 */
+                item = Path.of(".");
+            }
             files.add(item);
-        }
-
-        /**
-         * Relativizes paths in the {@link #files} list according apparently necessary heuristic rules.
-         * In our tests, it seems that the first file after the {@code -C} option needs to be relative
-         * to the directory given to {@code -C} and all other files need to be absolute. This behavior
-         * does not seem to be documented, but we couldn't get the {@code jar} tool to work otherwise
-         * (except by repeating {@code -C} before each file).
-         *
-         * Furthermore, it seems that the relativized file needs to be the shortest one,
-         * otherwise the {@code jar} tool rejects files after the first one with "names do not match".
-         * Which file is first depends on the unspecified directory-iteration order,
-         * so this method needs to search for the shortest path.
-         */
-        private void heuristicallyRelativizePaths() {
-            Path shortest = null;
-            int indexOfShortest = 0;
-            int shortestCount = Integer.MAX_VALUE;
-            final int size = files.size();
-            for (int i = 0; i < size; i++) {
-                Path item = directory.relativize(files.get(i));
-                int count = item.getNameCount();
-                if (count < shortestCount) {
-                    shortestCount = count;
-                    indexOfShortest = i;
-                    shortest = item;
-                    if (count <= 1) {
-                        if (shortest.toString().isEmpty()) {
-                            /*
-                             * The item is the `-C` directory itself (e.g. a `META-INF/versions/<n>` directory
-                             * added as a whole). An empty file argument is invalid for the `jar` tool
-                             * (some implementations reject it, others silently misbehave),
-                             * so archive the whole directory content with ".".
-                             */
-                            shortest = Path.of(".");
-                        }
-                        break; // We will not find better.
-                    }
-                }
-            }
-            if (shortest != null) {
-                if (indexOfShortest != 0) {
-                    files.remove(indexOfShortest);
-                    files.add(0, shortest);
-                } else {
-                    files.set(0, shortest);
-                }
-            }
         }
 
         /**
@@ -245,15 +225,22 @@ final class Archive {
          * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
          */
         private void arguments(List<Object> addTo, Runtime.Version version) {
-            heuristicallyRelativizePaths();
             if (!files.isEmpty()) {
                 if (version != null) {
                     addTo.add("--release");
                     addTo.add(version);
                 }
-                addTo.add("-C");
-                addTo.add(directory);
-                addTo.addAll(files);
+                if (REPEAT_C) {
+                    for (Path file : files) {
+                        addTo.add("-C");
+                        addTo.add(directory);
+                        addTo.add(file);
+                    }
+                } else {
+                    addTo.add("-C");
+                    addTo.add(directory);
+                    addTo.addAll(files);
+                }
             }
         }
 
