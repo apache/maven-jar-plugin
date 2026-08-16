@@ -18,8 +18,6 @@
  */
 package org.apache.maven.plugins.jar;
 
-import javax.lang.model.SourceVersion;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -150,6 +148,8 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * environment variable is used as a fallback value,
      * to ease forcing Reproducible Build externally when the build has not enabled it natively in <abbr>POM</abbr>.
      *
+     * <p>This property is supported only with Java Development Kit (<abbr>JDK</abbr>) version 19 or later.</p>
+     *
      * @since 3.2.0
      */
     @Parameter(defaultValue = "${project.build.outputTimestamp}")
@@ -224,20 +224,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
-     * Returns whether the specified Java version is supported.
-     *
-     * @param release name of an {@link SourceVersion} enumeration constant
-     * @return whether the current environment support that version
-     */
-    private static boolean isSupported(String release) {
-        try {
-            return SourceVersion.latestSupported().compareTo(SourceVersion.valueOf(release)) >= 0;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    /**
      * Returns the output time stamp or, as a fallback, the {@code SOURCE_DATE_EPOCH} environment variable.
      * If the time stamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
      *
@@ -253,8 +239,8 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
                 return null;
             }
         }
-        if (!isSupported("RELEASE_19")) {
-            log.warn("Reproducible build requires Java 19 or later.");
+        if (Runtime.version().feature() < ToolExecutor.JDK_SUPPORT_DATE) {
+            log.warn("Reproducible build requires Java " + ToolExecutor.JDK_SUPPORT_DATE + " or later.");
             return null;
         }
         for (int i = time.length(); --i >= 0; ) {

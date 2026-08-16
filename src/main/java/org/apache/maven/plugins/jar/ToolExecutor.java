@@ -58,6 +58,11 @@ final class ToolExecutor {
     private static final int JDK_FIXING_JAR_VALIDATE = 19;
 
     /**
+     * First JDK feature version whose {@code jar} tool support the {@code --date} option.
+     */
+    static final int JDK_SUPPORT_DATE = 19;
+
+    /**
      * The Maven project for which to create an archive.
      */
     final Project project;
