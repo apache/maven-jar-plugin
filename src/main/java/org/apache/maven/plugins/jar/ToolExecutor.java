@@ -187,9 +187,7 @@ final class ToolExecutor {
     ToolExecutor(AbstractJarMojo mojo, Manifest manifest, MavenArchiveConfiguration archive) throws IOException {
         project = mojo.project;
         artifactType = mojo.getType();
-        outputDirectory = (mojo.outputDirectory != null)
-                ? mojo.outputDirectory
-                : Path.of(project.getBuild().getDirectory());
+        outputDirectory = mojo.getOutputDirectory();
         classifier = AbstractJarMojo.nullIfAbsent(mojo.getClassifier());
         finalName =
                 (mojo.finalName != null) ? mojo.finalName : project.getBuild().getFinalName();

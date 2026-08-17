@@ -267,6 +267,29 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
+     * Returns the output directory and ensures that the directory exists.
+     * The returned directory will be either {@link #outputDirectory} if non-null,
+     * or {@link org.apache.maven.api.model.Build#getDirectory()} otherwise.
+     *
+     * <p>The directory is usually {@code target} and should always exist since it is usually the output
+     * of the compiler plugin. If nevertheless the directory does not exist, then this method creates it.
+     * However, this method does not try to create the parent directory, which should be the Maven sub-project.</p>
+     *
+     * @return the directory containing the generated <abbr>JAR</abbr> files.
+     * @throws IOException if the output directory did not existed and could not be created
+     */
+    protected Path getOutputDirectory() throws IOException {
+        Path dir = outputDirectory;
+        if (dir == null) {
+            dir = Path.of(project.getBuild().getDirectory());
+        }
+        if (Files.notExists(dir)) {
+            dir = Files.createDirectory(dir);
+        }
+        return dir;
+    }
+
+    /**
      * Returns the given elements as a list if non-null.
      *
      * @param elements the elements, or {@code null}
