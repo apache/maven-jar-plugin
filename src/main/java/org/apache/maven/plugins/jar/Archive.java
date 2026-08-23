@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,29 +47,6 @@ import org.apache.maven.api.plugin.MojoException;
  * Many instances of {@code Archive} may exist when archiving a multi-modules project.
  */
 final class Archive {
-    /**
-     * Whether to repeat the {@code -C} option before each file.
-     * Doing so makes the command-line very verbose while the documentation of
-     * <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html">The jar Command</a>
-     * gives the impression that this option can be provided only once.
-     * However, our tests suggest that the first file after the directory specified by the {@code -C} option
-     * must be relative to that directory and all files after the first one must be prefixed by the directory
-     * which was specified in the {@code -C} option. This behavior is not documented, but we couldn't get the
-     * {@code jar} tool to work otherwise (except by repeating {@code -C} before each file).
-     * Furthermore, it seems that the relativized file needs to be the shortest one,
-     * otherwise the {@code jar} tool rejects files after the first one with "names do not match".
-     * Which file is first depends on the unspecified directory-iteration order.
-     *
-     * <p>If this flag is {@code true}, the plugin repeats {@code -C} before each file.
-     * This flag should be set to {@code false} if a future version of the {@code jar}
-     * tool allows to specify {@code -C} only once.</p>
-     *
-     * <p><b>Historical note:</b> we also tried to relativize only the first file after {@code -C}
-     * and keep all subsequent files as absolute. It works, but because we have to repeat the directory
-     * in the file name, it saves only 3 or 4 characters per file compared to repeating {@code -C}.</p>
-     */
-    private static final boolean REPEAT_C = true;
-
     /**
      * Path to the <abbr>POM</abbr> file generated for this archive, or {@code null} if none.
      * This is non-null only if module source hierarchy is used, in which case the dependencies
@@ -142,26 +118,6 @@ final class Archive {
      */
     final class FileSet {
         /**
-         * A comparator for sorting paths in a reproducible order.
-         * This comparator assumes that all paths are relative to the same base directory (this is not verified).
-         * Note: we do not use {@link Path#compareTo(Path)} because the Javadoc said that it is platform dependent.
-         */
-        private static final Comparator<Path> REPRODUCIBLE_ORDER = (p1, p2) -> {
-            final int c1 = p1.getNameCount();
-            final int c2 = p2.getNameCount();
-            final int c = Math.min(c1, c2);
-            for (int i = 0; i < c; i++) {
-                String n1 = p1.getName(i).toString();
-                String n2 = p2.getName(i).toString();
-                int r = n1.compareTo(n2); // Case-sensitive comparison on all platforms.
-                if (r != 0) {
-                    return r;
-                }
-            }
-            return c1 - c2;
-        };
-
-        /**
          * The root directory of all files or directories to archive.
          * This is the value to pass to the {@code -C} tool option.
          */
@@ -171,6 +127,8 @@ final class Archive {
         /**
          * The files or directories to include in the <var>JAR</var> file.
          * May be absolute paths or paths relative to {@link #directory}.
+         * It usually contains only the files or directories directly in
+         * the root {@linkplain #directory}, not in sub-directories.
          */
         @Nonnull
         final List<Path> files;
@@ -195,7 +153,6 @@ final class Archive {
          */
         private Path discardAllFiles(Path base) {
             for (Path file : files) {
-                file = directory.resolve(file);
                 if (base == null) {
                     base = file.getParent();
                 } else {
@@ -213,58 +170,66 @@ final class Archive {
 
         /**
          * Adds the given path to the list of files or directories to archive.
-         * This method may store a relative path instead of the absolute path.
+         * If the given path is a directory, then all children will be included.
+         * Children to exclude, if any, should be managed by {@link ExcludedFiles}.
          *
          * @param item a file or directory to archive
          * @param attributes the file's basic attributes
          * @param isDirectory whether the file is a directory
-         * @throws IllegalArgumentException if the given path cannot be made relative to the base directory
          */
         void add(Path item, BasicFileAttributes attributes, boolean isDirectory) {
             TimestampCheck tc = existingJAR;
             if (tc != null && tc.isUpdated(item, attributes, isDirectory)) {
                 existingJAR = null; // Signal that the existing file is outdated.
             }
-            item = directory.relativize(item);
-            if (item.getNameCount() <= 1 && item.toString().isEmpty()) {
-                /*
-                 * The item is the `-C` directory itself (e.g. a `META-INF/versions/<n>` directory
-                 * added as a whole). An empty file argument is invalid for the `jar` tool
-                 * (some implementations reject it, others silently misbehave),
-                 * so archive the whole directory content with ".".
-                 */
-                item = Path.of(".");
-            }
             files.add(item);
         }
 
         /**
          * Adds to the given list the arguments to provide to the "jar" tool for this version.
-         * Elements added to the list shall be instances of {@link String} or {@link Path}.
+         * The elements added to the list will be instances of {@link String} or {@link Path}.
+         *
+         * <h4>Note about the {@code -C} option</h4>
+         * This method repeats the {@code -C} option before each file.
+         * Our tests suggest that the first file after the directory specified by the {@code -C} option must
+         * be relative to that directory and all files after the first one must be prefixed by the directory
+         * which was specified in the {@code -C} option. This behavior is not very intuitive and replying on
+         * it may be fragile. Furthermore, it seems that the relativized file needs to be the shortest one,
+         * otherwise the {@code jar} tool rejects files after the first one with "names do not match".
+         * Which file is first depends on the unspecified directory-iteration order.
+         * Repeating the {@code -C} option for each file seems safer.
          *
          * @param addTo the list where to add the arguments as {@link String} or {@link Path} instances
          * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
+         * @throws IllegalArgumentException if a path cannot be made relative to the base directory
          */
         private void arguments(List<Object> addTo, Runtime.Version version) {
-            if (!files.isEmpty()) {
-                if (version != null) {
-                    addTo.add("--release");
-                    addTo.add(version);
+            if (files.isEmpty()) {
+                return;
+            }
+            if (version != null) {
+                addTo.add("--release");
+                addTo.add(version);
+            }
+            Path previous = null;
+            for (Path file : files) {
+                if (previous != null && file.startsWith(previous)) {
+                    // Already added a parent directory.
+                    continue;
                 }
-                if (isReproducible) {
-                    files.sort(REPRODUCIBLE_ORDER);
+                previous = file;
+                file = directory.relativize(file);
+                if (file.getNameCount() <= 1 && file.toString().isEmpty()) {
+                    /*
+                     * The `-C` directory itself (e.g. a "META-INF/versions/<n>" directory added as a whole).
+                     * An empty file argument is invalid for the `jar` tool (some implementations reject it,
+                     * others silently misbehave), so archive the whole directory content with ".".
+                     */
+                    file = Path.of(".");
                 }
-                if (REPEAT_C) {
-                    for (Path file : files) {
-                        addTo.add("-C");
-                        addTo.add(directory);
-                        addTo.add(file);
-                    }
-                } else {
-                    addTo.add("-C");
-                    addTo.add(directory);
-                    addTo.addAll(files);
-                }
+                addTo.add("-C");
+                addTo.add(directory);
+                addTo.add(file);
             }
         }
 
@@ -278,11 +243,6 @@ final class Archive {
     }
 
     /**
-     * Whether reproducible build was requested.
-     */
-    private final boolean isReproducible;
-
-    /**
      * Creates an initially empty set of files or directories.
      *
      * @param jarFile path to the <abbr>JAR</abbr> file to create
@@ -290,7 +250,6 @@ final class Archive {
      * @param version the target Java release, or {@code null} for the base version
      * @param directory the directory of the classes targeting the base Java release
      * @param forceCreation whether to force a new <abbr>JAR</abbr> file even if the content seems unchanged
-     * @param isReproducible whether reproducible build was requested
      * @param logger where to send a warning if an error occurred while checking an existing <abbr>JAR</abbr> file
      */
     @SuppressWarnings("checkstyle:NeedBraces")
@@ -300,11 +259,9 @@ final class Archive {
             final Runtime.Version version,
             final Path directory,
             final boolean forceCreation,
-            final boolean isReproducible,
             final Log logger) {
         this.jarFile = jarFile;
         this.moduleName = moduleName;
-        this.isReproducible = isReproducible;
         filesetForRelease = new TreeMap<>((v1, v2) -> {
             if (v1 == v2) return 0;
             if (v1 == null) return -1;

@@ -27,8 +27,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -75,15 +75,17 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      * Files found in the <abbr>JAR</abbr> file but not yet traversed by the file visitor.
      * Files are added lazily only when needed, and removed as soon as they have been traversed.
      * Path are absolute (resolved with {@link #classesDir}).
+     * For each entry, the associated value is whether the path is a directory.
      */
-    private final Set<Path> filesInJAR;
+    private final Map<Path, Boolean> filesInJAR;
 
     /**
      * Some of the files in the build directory. This list contains only the files for which we have already
      * verified the timestamp. We store them in a separated list for avoiding to check the timestamp twice.
      * We need this list because we still need to verify if the files are in the {@link #jarFile}.
+     * For each entry, the associated value is whether the path is a directory.
      */
-    private final Set<Path> filesInBuild;
+    private final Map<Path, Boolean> filesInBuild;
 
     /**
      * Whether at least one file is more recent than the <abbr>JAR</abbr> file.
@@ -105,8 +107,8 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
         this.jarFile = jarFile;
         this.logger = logger;
         jarFileTime = Files.getLastModifiedTime(jarFile);
-        filesInJAR = new HashSet<>();
-        filesInBuild = new HashSet<>();
+        filesInJAR = new HashMap<>();
+        filesInBuild = new HashMap<>();
     }
 
     /**
@@ -115,15 +117,13 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      * @param file the file to check
      * @param attributes the file's basic attributes
      * @param isDirectory whether the file is a directory
-     * @return whether the modification time is more recent that the <abbr>JAR</abbr> file
+     * @return whether the modification time is more recent than the <abbr>JAR</abbr> file
      */
     boolean isUpdated(final Path file, final BasicFileAttributes attributes, final boolean isDirectory) {
         if (jarFileTime.compareTo(attributes.lastModifiedTime()) < 0) {
             return true;
         }
-        if (!isDirectory) {
-            filesInBuild.add(file);
-        }
+        filesInBuild.put(file, isDirectory);
         return false;
     }
 
@@ -137,29 +137,37 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
         // No need to use JarFile because no need to handle META-INF in a special way.
         try (ZipFile jar = new ZipFile(jarFile.toFile())) {
             entries = jar.entries();
-            for (Path file : filesInBuild) {
+            for (Path file : filesInBuild.keySet()) {
                 if (!isFoundInJAR(file)) {
                     return false;
                 }
             }
+            // Verify the timestamps of files that were not verified by `isUpdate(…)`.
             for (Archive.FileSet fileSet : fileSets) {
-                final Path baseDir = fileSet.directory;
+                Path directory = null;
                 for (Path file : fileSet.files) {
-                    file = baseDir.resolve(file);
-                    if (!filesInBuild.remove(file)) { // For skipping the files already verified by above loop.
-                        Files.walkFileTree(file, this);
-                        if (hasUpdates) {
+                    final Boolean isDirectory = filesInBuild.remove(file);
+                    if (isDirectory == null) { // For skipping the files already verified by the first loop.
+                        if (hasUpdatedInSubdir(directory)) {
                             return false;
                         }
+                        directory = null;
+                    } else if (isDirectory) {
+                        // Because of files order, it is sufficient to remember only the last directory.
+                        directory = file;
                     }
                 }
-            }
-            // Check for remaining files in the JAR which were not in the build directory.
-            for (Path file : filesInJAR) {
-                if (!isIgnored(classesDir.relativize(file))) {
+                if (hasUpdatedInSubdir(directory)) {
                     return false;
                 }
             }
+            // Check for remaining files in the JAR which were not in the build directory.
+            for (Map.Entry<Path, Boolean> entry : filesInJAR.entrySet()) {
+                if (!(entry.getValue() || isIgnored(classesDir.relativize(entry.getKey())))) {
+                    return false;
+                }
+            }
+            filesInJAR.clear();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (!(entry.isDirectory() || isIgnored(Path.of(entry.getName())))) {
@@ -196,6 +204,23 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
     }
 
     /**
+     * Returns whether a file in the given directory has been updated.
+     *
+     * @param directory the directory to traverse, or {@code null}
+     * @return whether the given directory contains at least one updated file
+     * @throws IOException if an error occurred during the directory traversal
+     */
+    private boolean hasUpdatedInSubdir(final Path directory) throws IOException {
+        if (directory != null) {
+            Files.walkFileTree(directory, this);
+            if (hasUpdates) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if the given file is new or more recent than the <abbr>JAR</abbr> file.
      * Checks also if the file exists in the <abbr>JAR</abbr> file.
      *
@@ -214,23 +239,22 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
 
     /**
      * Returns whether the given file is found in the <abbr>JAR</abbr> file.
+     * If the file is found, it is removed from the {@link #filesInJAR} map.
      *
      * @param file the file to check
      * @return whether the given file was found in the <abbr>JAR</abbr> file
      */
     private boolean isFoundInJAR(final Path file) {
-        if (filesInJAR.remove(file)) {
+        if (filesInJAR.remove(file) != null) {
             return true;
         }
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
-            if (!entry.isDirectory()) {
-                Path p = classesDir.resolve(entry.getName());
-                if (p.equals(file)) {
-                    return true;
-                }
-                filesInJAR.add(p);
+            Path p = classesDir.resolve(entry.getName());
+            if (p.equals(file)) {
+                return true;
             }
+            filesInJAR.put(p, entry.isDirectory());
         }
         return false;
     }

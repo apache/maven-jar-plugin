@@ -262,14 +262,7 @@ final class ToolExecutor {
             sb.append('-').append(classifier);
         }
         String filename = sb.append(".jar").toString();
-        return new Archive(
-                outputDirectory.resolve(filename),
-                moduleName,
-                version,
-                directory,
-                forceCreation,
-                isReproducible(),
-                logger);
+        return new Archive(outputDirectory.resolve(filename), moduleName, version, directory, forceCreation, logger);
     }
 
     /**

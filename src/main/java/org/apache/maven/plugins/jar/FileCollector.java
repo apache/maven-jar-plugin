@@ -26,6 +26,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ import org.apache.maven.api.annotations.Nullable;
 import org.apache.maven.api.services.PathMatcherFactory;
 
 /**
- * Dispatch the files in the output directory into the <abbr>JAR</abbr> files to create.
+ * Dispatch the files from the output directory into the <abbr>JAR</abbr> files to create.
  * Instead of just archiving as-is the content of the output directory, this class separates
  * the following subdirectories to the options listed below:
  *
@@ -86,6 +87,11 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     private final boolean detectMultiReleaseJar;
 
     /**
+     * The root directory to traverse. It will be used for temporarily moving excluded files.
+     */
+    private final Path rootDirectory;
+
+    /**
      * Combination of includes and excludes path matcher applied on files.
      */
     @Nonnull
@@ -98,11 +104,17 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     private final PathMatcher directoryMatcher;
 
     /**
-     * Whether the matchers accept all files and there is no need to sort the files.
-     * In such case, we can declare whole directories to the {@code jar} tool instead
-     * of scanning the directory tree ourselves.
+     * Files or directories to exclude. These files will be moved to a temporary location
+     * for allowing {@link ToolExecutor} to specify whole directories to the {@code jar} tool.
+     * Specifying whole directories is preferable to enumerating the files because otherwise,
+     * the generated <abbr>JAR</abbr> file contains only entries for the files and is missing
+     * entries for the directories.
+     *
+     * <p>This field is {@code null} if it is not possible to have any excluded file
+     * (because there is no include/exclude filters).</p>
      */
-    private final boolean addDirectories;
+    @Nullable
+    private final List<Path> exclusion;
 
     /**
      * Files found in the output directory when package hierarchy is used.
@@ -160,13 +172,16 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      */
     FileCollector(AbstractJarMojo mojo, ToolExecutor context, Path directory, PathMatcherFactory matcherFactory) {
         this.context = context;
+        rootDirectory = directory;
         detectMultiReleaseJar = mojo.detectMultiReleaseJar;
         directoryRoles = new ArrayDeque<>();
         fileMatcher = matcherFactory.createPathMatcher(directory, mojo.getIncludes(), mojo.getExcludes(), false);
         directoryMatcher = matcherFactory.deriveDirectoryMatcher(fileMatcher);
-        addDirectories = !context.isReproducible()
-                && matcherFactory.isIncludesAll(fileMatcher)
-                && matcherFactory.isIncludesAll(directoryMatcher);
+        if (matcherFactory.isIncludesAll(fileMatcher) && matcherFactory.isIncludesAll(directoryMatcher)) {
+            exclusion = null;
+        } else {
+            exclusion = new ArrayList<>();
+        }
         packageHierarchy = context.newArchive(null, null, directory);
         moduleHierarchy = new LinkedHashMap<>();
         resetToPackageHierarchy();
@@ -234,6 +249,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
             role = DirectoryRole.ROOT;
         } else {
             if (!directoryMatcher.matches(directory)) {
+                exclusion.add(directory); // Cannot be null if excluded directories may exist.
                 return FileVisitResult.SKIP_SUBTREE;
             }
             checkForManifest = false;
@@ -325,21 +341,22 @@ final class FileCollector extends SimpleFileVisitor<Path> {
          * Do not move this condition inside the `switch` block because `role` may have been modified.
          * The `role` value is now the role of `directory`, not anymore the role of parent directory.
          */
-        if (addDirectories && role == DirectoryRole.RESOURCES) {
+        if (role == DirectoryRole.RESOURCES) {
             currentFilesToArchive.add(directory, attributes, true);
-            /*
-             * Since we are skipping the whole directory, `postVisitDirectory(…)` will not be invoked.
-             * We must reset `currentFilesToArchive` and `currentTargetVersion` by an explicit call.
-             * This is important mostly after we added a whole `META-INF/versions/<n>` directory,
-             * otherwise base files visited afterwards (directory iteration order is unspecified)
-             * would be added to this version's file set instead of the base release.
-             */
-            resetToParentDirectoryState();
-            return FileVisitResult.SKIP_SUBTREE;
-        } else {
-            directoryRoles.addLast(role);
-            return FileVisitResult.CONTINUE;
+            if (exclusion == null) {
+                /*
+                 * Since we are skipping the whole directory, `postVisitDirectory(…)` will not be invoked.
+                 * We must reset `currentFilesToArchive` and `currentTargetVersion` by an explicit call.
+                 * This is important mostly after we added a whole `META-INF/versions/<n>` directory,
+                 * otherwise base files visited afterwards (directory iteration order is unspecified)
+                 * would be added to this version's file set instead of the base release.
+                 */
+                resetToParentDirectoryState();
+                return FileVisitResult.SKIP_SUBTREE;
+            }
         }
+        directoryRoles.addLast(role);
+        return FileVisitResult.CONTINUE;
     }
 
     /**
@@ -355,16 +372,17 @@ final class FileCollector extends SimpleFileVisitor<Path> {
             throw error;
         }
         switch (directoryRoles.removeLast()) {
+            case ROOT:
+                break;
+
             case NAMED_MODULE:
                 // Exited the directory of a single module.
                 resetToPackageHierarchy();
                 break;
 
-            case ROOT:
-                break;
-
             default:
                 resetToParentDirectoryState();
+                break;
         }
         return FileVisitResult.CONTINUE;
     }
@@ -404,6 +422,8 @@ final class FileCollector extends SimpleFileVisitor<Path> {
             } else {
                 currentFilesToArchive.add(file, attributes, false);
             }
+        } else {
+            exclusion.add(file); // Cannot be null if excluded files may exist.
         }
         return FileVisitResult.CONTINUE;
     }
@@ -461,14 +481,20 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      * @throws IOException if an error occurred while reading or writing a manifest file
      */
     Path writeAllJARs(final ToolExecutor executor) throws IOException {
-        for (Archive module : moduleHierarchy.values()) {
-            executor.writeSingleJAR(this, module);
-        }
-        if (executor.pomDerivation != null) {
-            return executor.pomDerivation.writeParentPOM(packageHierarchy);
-        }
-        if (!packageHierarchy.isEmpty()) {
-            executor.writeSingleJAR(this, packageHierarchy);
+        try (ExcludedFiles moved =
+                (exclusion == null || exclusion.isEmpty()) ? null : new ExcludedFiles(rootDirectory, exclusion)) {
+            if (moved != null) {
+                moved.move();
+            }
+            for (Archive module : moduleHierarchy.values()) {
+                executor.writeSingleJAR(this, module);
+            }
+            if (executor.pomDerivation != null) {
+                return executor.pomDerivation.writeParentPOM(packageHierarchy);
+            }
+            if (!packageHierarchy.isEmpty()) {
+                executor.writeSingleJAR(this, packageHierarchy);
+            }
         }
         return null;
     }
