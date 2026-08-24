@@ -118,7 +118,9 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * This does not work when other plugins, like the maven-shade-plugin, are configured to post-process the JAR.
      * This plugin can not detect the post-processing, and so leaves the post-processed JAR file in place.
      * This can lead to failures when those plugins do not expect to find their own output as an input.
-     * Set this parameter to {@code true} to avoid these problems by forcing this plugin to recreate the JAR every time.
+     * Set this parameter to {@code true} to recreate the JAR every time.
+     * When {@link #skipIfEmpty} is {@code true} and the classes directory is empty, packaging is skipped even if
+     * {@code forceCreation} is true.
      *
      * <p>Starting with <b>3.0.0</b> the property has been renamed from {@code jar.forceCreation}
      * to {@code maven.jar.forceCreation}.</p>
@@ -128,6 +130,8 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
     /**
      * Skip creating empty archives.
+     * When {@code true}, packaging is skipped if the classes directory is empty, even if {@link #forceCreation} is also
+     * {@code true}.
      */
     @Parameter(defaultValue = "false")
     protected boolean skipIfEmpty;
