@@ -239,10 +239,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
                 return null;
             }
         }
-        if (Runtime.version().feature() < ToolExecutor.JDK_SUPPORT_DATE) {
-            log.warn("Reproducible build requires Java " + ToolExecutor.JDK_SUPPORT_DATE + " or later.");
-            return null;
-        }
         for (int i = time.length(); --i >= 0; ) {
             char c = time.charAt(i);
             if ((c < '0' || c > '9') && (i != 0 || c != '-')) {

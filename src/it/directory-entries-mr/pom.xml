@@ -31,13 +31,6 @@
 
     This is the same test as `directory-entries` but with multi-release.</description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Request a reproducible build; on JDK 19+ this switches the plugin from directory
-         collection to the deterministic path, which is where directory entries used to be lost. -->
-    <project.build.outputTimestamp>2020-02-02T00:00:00Z</project.build.outputTimestamp>
-  </properties>
-
   <build>
     <pluginManagement>
       <plugins>
