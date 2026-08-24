@@ -21,6 +21,7 @@ package org.apache.maven.plugins.jar;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -228,6 +229,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * If the time stamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
      *
      * @return the time stamp in presumed ISO 8601 format, or {@code null} if none
+     * @throws MojoException if the timestamp looks like a number of seconds but cannot be parsed as such
      *
      * @since 4.0.0-beta-2
      */
@@ -245,7 +247,11 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
                 return time;
             }
         }
-        return Instant.ofEpochSecond(Long.parseLong(time)).toString();
+        try {
+            return Instant.ofEpochSecond(Long.parseLong(time)).toString();
+        } catch (NumberFormatException | DateTimeException e) {
+            throw new MojoException("Timestamp \"" + time + "\" is not a number of seconds.", e);
+        }
     }
 
     /**

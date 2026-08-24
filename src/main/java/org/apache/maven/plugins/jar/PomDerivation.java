@@ -166,15 +166,18 @@ final class PomDerivation {
         }
         builtModules = new HashMap<>(moduleRoots.size()); // TODO: use newHashMap with JDK19.
         for (Path root : moduleRoots) {
+            root = root.toRealPath();
             ModuleDescriptor descriptor = fromURI.get(root.toUri()).descriptor();
-            builtModules.put(
-                    descriptor.name(),
-                    Dependency.newBuilder()
-                            .groupId(projectModel.getGroupId())
-                            .artifactId(descriptor.name())
-                            .version(projectModel.getVersion())
-                            .type(Type.MODULAR_JAR)
-                            .build());
+            if (descriptor != null) {
+                builtModules.put(
+                        descriptor.name(),
+                        Dependency.newBuilder()
+                                .groupId(projectModel.getGroupId())
+                                .artifactId(descriptor.name())
+                                .version(projectModel.getVersion())
+                                .type(Type.MODULAR_JAR)
+                                .build());
+            }
         }
     }
 

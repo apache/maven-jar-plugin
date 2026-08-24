@@ -222,8 +222,14 @@ final class MetadataFiles implements Closeable {
     private static Path linkOrCopy(final Path source, final Path target) throws IOException {
         try {
             return Files.createLink(target, source);
-        } catch (UnsupportedOperationException e) {
-            return Files.copy(source, target);
+        } catch (UnsupportedOperationException | IOException s) {
+            // Cross-filesystem hard links fail with an IOException ("Invalid cross-device link").
+            try {
+                return Files.copy(source, target);
+            } catch (IOException e) {
+                e.addSuppressed(s);
+                throw e;
+            }
         }
     }
 
@@ -238,6 +244,10 @@ final class MetadataFiles implements Closeable {
 
     /**
      * Deletes all temporary files and directories created by this class.
+     * If a file cannot be deleted, an arbitrary number of files will be leftovers.
+     * This is consistent with what we do when the {@code jar} tool raised an error
+     * and {@link #cancelFileDeletion()} is invoked. These leftover files are in the
+     * build directory, so they will be deleted by the next call to {@code mvn clean}.
      *
      * @throws IOException if an error occurred while deleting a file or directory
      */

@@ -546,7 +546,7 @@ final class Archive {
      * @return whether a validation should be run
      */
     boolean validate(final List<Object> addTo) {
-        if (filesetForRelease.values().stream().allMatch(Objects::isNull)) {
+        if (filesetForRelease.keySet().stream().anyMatch(Objects::nonNull)) {
             // At least one --release option was used. Validation was implicit.
             return false;
         }
