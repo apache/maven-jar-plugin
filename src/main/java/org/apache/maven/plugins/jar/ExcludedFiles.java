@@ -53,14 +53,25 @@ final class ExcludedFiles implements Closeable {
     private final Path temporaryDirectory;
 
     /**
+     * Index of the first path which is a directory instead of a file.
+     * All paths before this index in the {@link #original} and {@link #moved} arrays are files.
+     * All paths at this index and after this index are directories.
+     */
+    private final int indexOfFirstDirectory;
+
+    /**
      * Creates a new list of files to move in a temporary directory.
      *
      * @param directory the directory which was scanned for files to include in the <abbr>JAR</abbr>
-     * @param files paths of files or directories to temporarily move in another directory
+     * @param excludedFiles paths of files to temporarily move in another directory
+     * @param excludedDirectories paths of directories to temporarily move in another directory
      * @throws IOException if an error occurred while creating the temporary directory.
      */
-    ExcludedFiles(final Path directory, final List<Path> files) throws IOException {
-        original = files.toArray(Path[]::new);
+    ExcludedFiles(Path directory, List<Path> excludedFiles, List<Path> excludedDirectories) throws IOException {
+        indexOfFirstDirectory = excludedFiles.size();
+        final int nd = excludedDirectories.size();
+        original = excludedFiles.toArray(new Path[indexOfFirstDirectory + nd]);
+        System.arraycopy(excludedDirectories.toArray(), 0, original, indexOfFirstDirectory, nd);
         moved = new Path[original.length];
         temporaryDirectory = Files.createTempDirectory(directory, "excluded-");
     }
@@ -75,12 +86,17 @@ final class ExcludedFiles implements Closeable {
             final Path source = original[i];
             String prefix = source.getFileName().toString();
             String suffix = null;
-            int s = prefix.lastIndexOf('.');
-            if (s > 0) {
-                suffix = prefix.substring(s);
-                prefix = prefix.substring(0, s);
+            Path target;
+            if (i < indexOfFirstDirectory) {
+                int s = prefix.lastIndexOf('.');
+                if (s > 0) {
+                    suffix = prefix.substring(s);
+                    prefix = prefix.substring(0, s);
+                }
+                target = Files.createTempFile(temporaryDirectory, prefix, suffix);
+            } else {
+                target = Files.createTempDirectory(temporaryDirectory, prefix);
             }
-            Path target = Files.createTempFile(temporaryDirectory, prefix, suffix);
             try {
                 moved[i] = Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {

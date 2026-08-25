@@ -104,7 +104,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     private final PathMatcher directoryMatcher;
 
     /**
-     * Files or directories to exclude. These files will be moved to a temporary location
+     * Files to exclude. These files will be moved to a temporary location
      * for allowing {@link ToolExecutor} to specify whole directories to the {@code jar} tool.
      * Specifying whole directories is preferable to enumerating the files because otherwise,
      * the generated <abbr>JAR</abbr> file contains only entries for the files and is missing
@@ -114,7 +114,14 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      * (because there is no include/exclude filters).</p>
      */
     @Nullable
-    private final List<Path> exclusion;
+    private final List<Path> excludedFiles;
+
+    /**
+     * Directories to exclude. This field serves the same purpose as {@link #excludedFiles},
+     * but where the sources a directories instead of files.
+     */
+    @Nullable
+    private final List<Path> excludedDirectories;
 
     /**
      * Files found in the output directory when package hierarchy is used.
@@ -178,9 +185,11 @@ final class FileCollector extends SimpleFileVisitor<Path> {
         fileMatcher = matcherFactory.createPathMatcher(directory, mojo.getIncludes(), mojo.getExcludes(), false);
         directoryMatcher = matcherFactory.deriveDirectoryMatcher(fileMatcher);
         if (matcherFactory.isIncludesAll(fileMatcher) && matcherFactory.isIncludesAll(directoryMatcher)) {
-            exclusion = null;
+            excludedFiles = null;
+            excludedDirectories = null;
         } else {
-            exclusion = new ArrayList<>();
+            excludedFiles = new ArrayList<>();
+            excludedDirectories = new ArrayList<>();
         }
         packageHierarchy = context.newArchive(null, null, directory);
         moduleHierarchy = new LinkedHashMap<>();
@@ -249,7 +258,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
             role = DirectoryRole.ROOT;
         } else {
             if (!directoryMatcher.matches(directory)) {
-                exclusion.add(directory); // Cannot be null if excluded directories may exist.
+                excludedDirectories.add(directory); // Cannot be null if excluded directories may exist.
                 return FileVisitResult.SKIP_SUBTREE;
             }
             checkForManifest = false;
@@ -343,7 +352,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
          */
         if (role == DirectoryRole.RESOURCES) {
             currentFilesToArchive.add(directory, attributes, true);
-            if (exclusion == null) {
+            if (excludedFiles == null) {
                 /*
                  * Since we are skipping the whole directory, `postVisitDirectory(…)` will not be invoked.
                  * We must reset `currentFilesToArchive` and `currentTargetVersion` by an explicit call.
@@ -423,7 +432,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
                 currentFilesToArchive.add(file, attributes, false);
             }
         } else {
-            exclusion.add(file); // Cannot be null if excluded files may exist.
+            excludedFiles.add(file); // Cannot be null if excluded files may exist.
         }
         return FileVisitResult.CONTINUE;
     }
@@ -470,6 +479,17 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     }
 
     /**
+     * Returns the object in charge of moving excluded files to a temporary directory, or {@code null} if none.
+     */
+    private ExcludedFiles exclusion() throws IOException {
+        if ((excludedFiles == null || excludedFiles.isEmpty())
+                && (excludedDirectories == null || excludedDirectories.isEmpty())) {
+            return null;
+        }
+        return new ExcludedFiles(rootDirectory, excludedFiles, excludedDirectories);
+    }
+
+    /**
      * Writes all <abbr>JAR</abbr> files.
      * If the project is multi-module, then this method returns the path to the generated parent <abbr>POM</abbr> file.
      *
@@ -481,10 +501,9 @@ final class FileCollector extends SimpleFileVisitor<Path> {
      * @throws IOException if an error occurred while reading or writing a manifest file
      */
     Path writeAllJARs(final ToolExecutor executor) throws IOException {
-        try (ExcludedFiles moved =
-                (exclusion == null || exclusion.isEmpty()) ? null : new ExcludedFiles(rootDirectory, exclusion)) {
-            if (moved != null) {
-                moved.move();
+        try (ExcludedFiles exclusion = exclusion()) {
+            if (exclusion != null) {
+                exclusion.move();
             }
             for (Archive module : moduleHierarchy.values()) {
                 executor.writeSingleJAR(this, module);

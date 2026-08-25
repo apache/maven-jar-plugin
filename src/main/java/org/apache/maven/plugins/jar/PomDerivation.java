@@ -167,13 +167,14 @@ final class PomDerivation {
         builtModules = new HashMap<>(moduleRoots.size()); // TODO: use newHashMap with JDK19.
         for (Path root : moduleRoots) {
             root = root.toRealPath();
-            ModuleDescriptor descriptor = fromURI.get(root.toUri()).descriptor();
-            if (descriptor != null) {
+            ModuleReference reference = fromURI.get(root.toUri());
+            if (reference != null) { // Actually a null value would be a bug, but be tolerant.
+                String moduleName = reference.descriptor().name();
                 builtModules.put(
-                        descriptor.name(),
+                        moduleName,
                         Dependency.newBuilder()
                                 .groupId(projectModel.getGroupId())
-                                .artifactId(descriptor.name())
+                                .artifactId(moduleName)
                                 .version(projectModel.getVersion())
                                 .type(Type.MODULAR_JAR)
                                 .build());
