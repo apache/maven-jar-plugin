@@ -72,7 +72,7 @@ For full documentation, see [plugin-info](./plugin-info.html).
 Modular JAR files
 -----------------
 
-The [Java Platform Module System (JPMS)](https://openjdk.java.net/projects/jigsaw/spec/) introduced Modular JAR files in the [JAR file specifications](https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html). A Modular JAR file contains a `module-info.class` file in the root directory. For multi-release JAR files, the file is in the versioned area. If the project contains `module-info.class`, the final JAR is a Modular JAR. This happens without any configuration and regardless of the plugin version.
+The [Java Platform Module System (JPMS)](https://openjdk.java.net/projects/jigsaw/spec/) introduced Modular JAR files in the [JAR file specifications](https://cr.openjdk.java.net/~mr/jigsaw/spec/jar.html). A Modular JAR file contains a `module-info.class` file in the root directory. For multi-release JAR files, the file is in the versioned area. If the project contains `module-info.class`, the final JAR is a modular JAR. This happens without any configuration and regardless of the plugin version.
 
 Since version 3.1.2, this plugin updates the modular descriptor when the JAR contains `module-info.class`. The plugin adds additional attributes, such as the list of included packages. It verifies the modular descriptor. It also verifies that all services provided by the module are in the JAR file. The most notable added attribute is the module main class.
 
@@ -80,4 +80,4 @@ If the JAR manifest contains the `Main-Class` attribute, this plugin sets the mo
 
 The plugin uses the JDK `jar` tool internally to add the additional attributes and to verify the modular descriptor. This requires JDK version 9 or newer.
 
-If you use JDK version 8 or earlier, the JAR is still a Modular JAR. The JAR contains `module-info.class`. The plugin adds no additional attributes and performs no validation.
+If you use JDK version 8 or earlier, the JAR is still a modular JAR. The JAR contains `module-info.class`. The plugin adds no additional attributes and performs no validation.
