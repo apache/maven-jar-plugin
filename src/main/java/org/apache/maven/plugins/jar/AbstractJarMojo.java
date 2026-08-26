@@ -42,6 +42,7 @@ import org.apache.maven.shared.archiver.MavenArchiverException;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.codehaus.plexus.archiver.Archiver;
+import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 /**
@@ -292,8 +293,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             archiver.createArchive(session, project, archive);
 
             return jarFile;
-        } catch (Exception e) {
-            // TODO: improve error handling
+        } catch (MavenArchiverException | ArchiverException e) {
             throw new MojoException("Error assembling JAR", e);
         }
     }
