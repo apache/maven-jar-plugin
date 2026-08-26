@@ -207,6 +207,7 @@
               -->
               <exclude>src/it/mjar-71-01/src/main/resources/META-INF/MANIFEST.MF</exclude>
               <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
+              <exclude>src/it/MJAR-557-detect-mjar/src/main/resources/META-INF/versions/9/test.txt</exclude>
             </excludes>
           </configuration>
         </plugin>
