@@ -19,14 +19,12 @@
 package org.apache.maven.plugins.jar;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.jar.Attributes;
-import java.util.stream.Stream;
 
 import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
@@ -38,7 +36,6 @@ import org.apache.maven.api.plugin.annotations.Parameter;
 import org.apache.maven.api.services.ProjectManager;
 import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 import org.apache.maven.shared.archiver.MavenArchiver;
-import org.apache.maven.shared.archiver.MavenArchiverException;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.codehaus.plexus.archiver.Archiver;
@@ -119,7 +116,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * This plugin can not detect the post-processing, and so leaves the post-processed JAR file in place.
      * This can lead to failures when those plugins do not expect to find their own output as an input.
      * Set this parameter to {@code true} to recreate the JAR every time.
-     * When {@link #skipIfEmpty} is {@code true} and the classes directory is empty, packaging is skipped even if
+     * When {@link #skipIfEmpty} is {@code true} and no files would be included, packaging is skipped even if
      * {@code forceCreation} is true.
      *
      * <p>Starting with <b>3.0.0</b> the property has been renamed from {@code jar.forceCreation}
@@ -130,8 +127,8 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
     /**
      * Skip creating empty archives.
-     * When {@code true}, packaging is skipped if the classes directory is empty, even if {@link #forceCreation} is also
-     * {@code true}.
+     * When {@code true}, packaging is skipped if the classes directory is empty or if no files match the configured
+     * includes/excludes, even if {@link #forceCreation} is also {@code true}.
      */
     @Parameter(defaultValue = "false")
     protected boolean skipIfEmpty;
@@ -239,13 +236,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
                 finalName != null ? finalName : project.getBuild().getFinalName();
         Path jarFile = getJarFile(basedir, resultFinalName, getClassifier());
 
-        FileSetManager fileSetManager = new FileSetManager();
-        FileSet jarContentFileSet = new FileSet();
-        jarContentFileSet.setDirectory(getClassesDirectory().toAbsolutePath().toString());
-        jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
-        jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
-
-        String[] includedFiles = fileSetManager.getIncludedFiles(jarContentFileSet);
+        String[] includedFiles = getIncludedFiles();
 
         if (detectMultiReleaseJar
                 && Arrays.stream(includedFiles)
@@ -305,7 +296,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      */
     @Override
     public void execute() throws MojoException {
-        if (skipIfEmpty && isEmpty(getClassesDirectory())) {
+        if (skipIfEmpty && hasNoFilesToInclude()) {
             getLog().info(String.format("Skipping packaging of the %s.", getType()));
         } else {
             Path jarFile = createArchive();
@@ -335,15 +326,27 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         }
     }
 
-    private static boolean isEmpty(Path directory) {
-        if (!Files.isDirectory(directory)) {
-            return true;
+    /**
+     * {@return true} if the classes directory is missing or if includes/excludes select no files.
+     */
+    private boolean hasNoFilesToInclude() {
+        return getIncludedFiles().length == 0;
+    }
+
+    /**
+     * Files under the classes directory that match {@link #includes} and {@link #excludes}.
+     */
+    private String[] getIncludedFiles() {
+        Path classesDirectory = getClassesDirectory();
+        if (!Files.isDirectory(classesDirectory)) {
+            return new String[0];
         }
-        try (Stream<Path> children = Files.list(directory)) {
-            return children.findAny().isEmpty();
-        } catch (IOException e) {
-            throw new MavenArchiverException("Unable to access directory", e);
-        }
+        FileSetManager fileSetManager = new FileSetManager();
+        FileSet jarContentFileSet = new FileSet();
+        jarContentFileSet.setDirectory(classesDirectory.toAbsolutePath().toString());
+        jarContentFileSet.setIncludes(Arrays.asList(getIncludes()));
+        jarContentFileSet.setExcludes(Arrays.asList(getExcludes()));
+        return fileSetManager.getIncludedFiles(jarContentFileSet);
     }
 
     private boolean projectHasAlreadySetAnArtifact() {
