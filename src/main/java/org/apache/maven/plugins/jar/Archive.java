@@ -533,27 +533,33 @@ final class Archive {
 
     /**
      * Adds to the given list the arguments to provide to the "jar" tool for validating the <abbr>JAR</abbr> file.
-     * The file is validated only if the validation was not done implicitly at <abbr>JAR</abbr> creation time.
-     * This is the case if no {@code --release} option was used.
-     * This method adds the following options:
+     * The file is validated only if requested or, in automatic mode, if the validation was not done implicitly at
+     * <abbr>JAR</abbr> creation time. Implicit validation happens if some {@code --release} options were used.
+     * If {@code true}, this method adds the following options:
      *
      * <ul>
      *   <li>{@code --validate} operation mode</li>
      *   <li>{@code --file} followed by the path to the <abbr>JAR</abbr> file</li>
      * </ul>
      *
+     * @param  validate whether to validate, or {@code null} for automatic based on heuristic rules
      * @param  addTo the list where to add the arguments as {@link String} or {@link Path} instances
      * @return whether a validation should be run
      */
-    boolean validate(final List<Object> addTo) {
-        if (filesetForRelease.keySet().stream().anyMatch(Objects::nonNull)) {
-            // At least one --release option was used. Validation was implicit.
-            return false;
+    boolean validate(final Boolean validate, final List<Object> addTo) {
+        boolean effective;
+        if (validate != null) {
+            effective = validate;
+        } else {
+            // If at least one --release option was used, then validation was implicit.
+            effective = !filesetForRelease.keySet().stream().anyMatch(Objects::nonNull);
         }
-        addTo.add("--validate");
-        addTo.add("--file");
-        addTo.add(jarFile);
-        return true;
+        if (effective) {
+            addTo.add("--validate");
+            addTo.add("--file");
+            addTo.add(jarFile);
+        }
+        return effective;
     }
 
     /**

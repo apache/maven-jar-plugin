@@ -25,6 +25,7 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.spi.ToolProvider;
 
@@ -170,6 +171,20 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected boolean detectMultiReleaseJar;
 
     /**
+     * Whether to validate the <abbr>JAR</abbr> files after their creation.
+     * If {@code true}, the {@code jar} tool is executed a second time with
+     * the {@code --validate} option for each created <abbr>JAR</abbr> file.
+     * This verification may slow down the build if these files are large.
+     * If {@code false} (the default), there is no second {@code jar} execution.
+     * If {@code auto}, the Maven <abbr>JAR</abbr> Plugin will decide itself whether
+     * to execute {@code jar --validate} based on heuristic rules.
+     *
+     * @since 4.0.0-beta-2
+     */
+    @Parameter(defaultValue = "false")
+    protected String validate;
+
+    /**
      * The <abbr>MOJO</abbr> logger.
      */
     @Inject
@@ -269,6 +284,16 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
+     * Returns the given elements as a list if non-null.
+     *
+     * @param elements the elements, or {@code null}
+     * @return the elements as a list, or {@code null} if the given array was null
+     */
+    private static List<String> asList(String[] elements) {
+        return (elements == null) ? List.of() : Arrays.asList(elements);
+    }
+
+    /**
      * Returns the output directory and ensures that the directory exists.
      * The returned directory will be either {@link #outputDirectory} if non-null,
      * or {@link org.apache.maven.api.model.Build#getDirectory()} otherwise.
@@ -292,13 +317,26 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
-     * Returns the given elements as a list if non-null.
-     *
-     * @param elements the elements, or {@code null}
-     * @return the elements as a list, or {@code null} if the given array was null
+     * Returns the value of the {@link #validate} parameter, or {@code null} if {@code "auto"}.
      */
-    private static List<String> asList(String[] elements) {
-        return (elements == null) ? List.of() : Arrays.asList(elements);
+    final Boolean getValidate() {
+        String value = validate;
+        if (value != null) {
+            value = value.strip();
+            if (!value.isEmpty()) {
+                switch (value.toLowerCase(Locale.ENGLISH)) {
+                    default:
+                        throw new MojoException("The 'validate' parameter value cannot be \"" + value + "\".");
+                    case "auto":
+                        return null;
+                    case "true":
+                        return Boolean.TRUE;
+                    case "false":
+                        break;
+                }
+            }
+        }
+        return Boolean.FALSE;
     }
 
     /**

@@ -97,6 +97,12 @@ final class ToolExecutor {
     private final String classifier;
 
     /**
+     * Whether to validate the <abbr>JAR</abbr> file after its creation.
+     * If {@code null}, a value will be determined automatically based on heuristic rules.
+     */
+    private final Boolean validate;
+
+    /**
      * The tool to use for creating the <abbr>JAR</abbr> files.
      */
     private final ToolProvider tool;
@@ -200,6 +206,7 @@ final class ToolExecutor {
                 (mojo.finalName != null) ? mojo.finalName : project.getBuild().getFinalName();
         forceCreation = mojo.forceCreation;
         outputTimestamp = mojo.getOutputTimestamp();
+        validate = mojo.getValidate();
         logger = mojo.log;
         tool = mojo.getJarTool();
 
@@ -422,7 +429,7 @@ final class ToolExecutor {
          * we skip the post-creation validation pass; the archive was already created
          * successfully by the `--create` pass above.
          */
-        if (archive.validate(arguments)) {
+        if (archive.validate(validate, arguments)) {
             final int version = Runtime.version().feature();
             if (version >= JDK_FIXING_JAR_VALIDATE) {
                 int status = executeJarTool();
