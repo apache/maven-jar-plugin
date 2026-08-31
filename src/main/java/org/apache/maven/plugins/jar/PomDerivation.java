@@ -99,9 +99,9 @@ final class PomDerivation {
     private final Map<URI, ModuleReference> fromURI;
 
     /**
-     * Module names associated to Maven dependencies.
+     * Module names associated with Maven dependencies.
      * This map contains {@link DependencyCoordinates#getId()} as keys and module references as values.
-     * This is used for detecting which dependencies are really used according {@code module-info.class}.
+     * This is used to detect which dependencies are really used according to {@code module-info.class}.
      *
      * @todo The keys should be instances of {@link DependencyCoordinates}. Unfortunately, as of Maven 4.0.0-rc-5
      *       that interface does not define the {@code equals} and {@code hashCode} contracts.
@@ -455,7 +455,7 @@ final class PomDerivation {
         }
 
         /**
-         * Modifies the optional and scope elements of the given dependency according the given modifiers.
+         * Modifies the optional and scope elements of the given dependency according to the given modifiers.
          *
          * @param dependency the dependency to amend
          * @param modifiers the modifiers to apply

@@ -51,7 +51,7 @@ import org.apache.maven.shared.archiver.MavenArchiver;
  */
 public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Mojo {
     /**
-     * Identifier of the tool to use. This identifier shall match the identifier of a tool
+     * Identifier of the tool to use. This identifier must match the identifier of a tool
      * registered as a {@link ToolProvider}. By default, the {@code "jar"} tool is used.
      *
      * @since 4.0.0-beta-2
@@ -150,7 +150,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * environment variable is used as a fallback value,
      * to ease forcing Reproducible Build externally when the build has not enabled it natively in <abbr>POM</abbr>.
      *
-     * <p>This property is supported only with Java Development Kit (<abbr>JDK</abbr>) version 19 or later.</p>
+     * <p>This property is supported only in Java 19 or later.</p>
      *
      * @since 3.2.0
      */
@@ -159,11 +159,17 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
 
     /**
      * Whether to detect multi-release <abbr>JAR</abbr> files.
-     * If the JAR contains the {@code META-INF/versions} directory it will be detected as a multi-release JAR file,
-     * adding the {@code Multi-Release: true} attribute to the main section of the JAR {@code MANIFEST.MF} entry.
-     * In addition, the class files in {@code META-INF/versions} will be checked for <abbr>API</abbr> compatibility
-     * with the class files in the base version. If this flag is {@code false}, then the {@code META-INF/versions}
-     * directories are included without processing.
+     * If the JAR contains the {@code META-INF/versions} directory, it is detected as a multi-release JAR file.
+     * In such case:
+     *
+     * <ul>
+     *   <li>the {@code Multi-Release: true} attribute is added
+     *       to the main section of the JAR {@code MANIFEST.MF} entry, and</li>
+     *   <li>the class files in {@code META-INF/versions} are checked for <abbr>API</abbr> compatibility
+     *       with the class files in the base version.</li>
+     * </ul>
+     *
+     * If this flag is {@code false}, then the {@code META-INF/versions} directories are included without processing.
      *
      * @since 3.4.0
      */
@@ -174,7 +180,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * Whether to validate the <abbr>JAR</abbr> files after their creation.
      * If {@code true}, the {@code jar} tool is executed a second time with
      * the {@code --validate} option for each created <abbr>JAR</abbr> file.
-     * This verification may slow down the build if these files are large.
+     * This verification can slow down the build if these files are large.
      * If {@code false} (the default), there is no second {@code jar} execution.
      * If {@code auto}, the Maven <abbr>JAR</abbr> Plugin will decide itself whether
      * to execute {@code jar --validate} based on heuristic rules.
@@ -224,7 +230,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * {@return the scope of dependencies}
      * It should be {@link PathScope#MAIN_COMPILE} or {@link PathScope#TEST_COMPILE}.
      * Note that we use compile scope rather than runtime scope because dependencies
-     * cannot appear in {@code requires} statement if they didn't had compile scope.
+     * cannot appear in {@code requires} statement if they don't have compile scope.
      */
     protected abstract PathScope getDependencyScope();
 
@@ -240,10 +246,10 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     }
 
     /**
-     * Returns the output time stamp or, as a fallback, the {@code SOURCE_DATE_EPOCH} environment variable.
-     * If the time stamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
+     * Returns the output timestamp or, as a fallback, the {@code SOURCE_DATE_EPOCH} environment variable.
+     * If the timestamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
      *
-     * @return the time stamp in presumed ISO 8601 format, or {@code null} if none
+     * @return the timestamp in presumed ISO 8601 format, or {@code null} if none
      * @throws MojoException if the timestamp looks like a number of seconds but cannot be parsed as such
      *
      * @since 4.0.0-beta-2
@@ -272,14 +278,14 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     /**
      * {@return the patterns of files to include, or an empty list if no include pattern was specified}
      */
-    protected List<String> getIncludes() {
+    final List<String> getIncludes() {
         return asList(includes);
     }
 
     /**
      * {@return the patterns of files to exclude, or an empty list if no exclude pattern was specified}
      */
-    protected List<String> getExcludes() {
+    final List<String> getExcludes() {
         return asList(excludes);
     }
 
@@ -303,7 +309,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * However, this method does not try to create the parent directory, which should be the Maven sub-project.</p>
      *
      * @return the directory containing the generated <abbr>JAR</abbr> files.
-     * @throws IOException if the output directory did not existed and could not be created
+     * @throws IOException if the output directory did not exist and could not be created
      */
     protected Path getOutputDirectory() throws IOException {
         Path dir = outputDirectory;
@@ -346,9 +352,9 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * <var>type</var> is {@code "pom"}, {@code "jar"} or {@code "test-jar"} and <var>path</var>
      * is the path to the <abbr>POM</abbr> or <abbr>JAR</abbr> file.
      *
-     * <p>Note that a null key does not necessarily means that the <abbr>JAR</abbr> is not modular.
+     * <p>Note that a null key does not necessarily mean that the <abbr>JAR</abbr> is not modular.
      * It only means that the project was not compiled with module hierarchy,
-     * i.e. {@code target/classes/} subdirectories having module names.
+     * that is {@code target/classes/} subdirectories having module names.
      * A project can be compiled with package hierarchy and still be modular.</p>
      *
      * @return the paths to the created archive files

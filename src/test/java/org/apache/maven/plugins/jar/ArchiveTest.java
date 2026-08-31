@@ -76,7 +76,7 @@ class ArchiveTest {
      * Verifies that {@link Archive#setMainClass(Manifest)} takes ownership for a module-qualified
      * {@code "module/Class"} main class.
      *
-     * Note that the {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
+     * The {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
      * The standard <abbr>JAR</abbr> specification accepts only the {@code "foo.MainFile"} class name.
      */
     @Test
@@ -92,7 +92,7 @@ class ArchiveTest {
     /**
      * Verifies that {@link Archive#setMainClass(Manifest)} does <em>not</em> take ownership fo
      * a module-qualified {@code "module/Class"} main class when the module name does not match.
-     * Note that the {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
+     * The {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
      * The standard <abbr>JAR</abbr> specification accepts only the {@code "foo.MainFile"} class name.
      */
     @Test
@@ -104,7 +104,7 @@ class ArchiveTest {
     }
 
     /**
-     * Tests that which module keeps the main class must not depend on processing order.
+     * Tests that which module keeps the main class does not depend on processing order.
      * {@link ToolExecutor} gives each module a <em>copy</em> of the shared plugin manifest;
      * this pins that the owning module (and only it) keeps the main class in either order,
      * and that the shared manifest is never consumed.
@@ -120,7 +120,7 @@ class ArchiveTest {
      * Asserts that {@link Archive#setMainClass(Manifest)} returns {@code true}
      * for the owner and {@code false} for the other module.
      *
-     * <p>Note that the {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
+     * <p>The {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
      * The standard <abbr>JAR</abbr> specification accepts only the {@code "foo.MainFile"} class name.
      * This extension is used by the plugin for identifying in which <abbr>JAR</abbr> file to add this
      * {@code Main-Class} manifest entry.</p>
@@ -166,7 +166,7 @@ class ArchiveTest {
      *
      * <h4>Historical note</h4>
      * In our tests, it seems that the first <abbr>JAR</abbr> entry after the {@code -C} option
-     * shall be relative, and only that file. Furthermore, it seems that this file shall be the
+     * must be relative, and only that file. Furthermore, it seems that this file must be the
      * shortest. We tried to apply this heuristic rules in a branch, but it does not save a lot
      * of characters compared to repeating {@code -C}.
      */

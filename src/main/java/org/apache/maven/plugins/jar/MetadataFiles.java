@@ -70,7 +70,7 @@ final class MetadataFiles implements Closeable {
 
     /**
      * All files and directories in the order that they were created.
-     * The first element of this list shall be the root temporary directory created by this class.
+     * The first element of this list must be the root temporary directory created by this class.
      */
     private final List<Path> filesToDelete;
 
@@ -178,11 +178,11 @@ final class MetadataFiles implements Closeable {
         final Path baseDir = baseDirectory();
         final Path mavenDir = createDirectories(baseDir, META_INF, MAVEN_DIR, groupId, artifactId);
         final Path pomFile = linkOrCopy(attachedPOM, mavenDir.resolve("pom.xml"));
-        filesToDelete.add(pomFile); // Add soon for deleting this file even if an exception is thrown below.
+        filesToDelete.add(pomFile); // Register now for deleting this file even if an exception is thrown below.
         /*
          * Subset of above "pom.xml" file but written as a properties file.
          * If reproducible build is enabled, we will need to reformat after
-         * writing for ensuring a deterministic order of entries.
+         * writing to ensure a deterministic order of entries.
          */
         final var properties = new Properties();
         Path propertiesFile = archive.getPomPropertiesFile();
@@ -196,7 +196,7 @@ final class MetadataFiles implements Closeable {
         properties.setProperty("version", version);
         propertiesFile = mavenDir.resolve("pom.properties");
         try (BufferedWriter out = Files.newBufferedWriter(propertiesFile)) {
-            filesToDelete.add(propertiesFile); // Add soon for deleting this file even if an exception is thrown below.
+            filesToDelete.add(propertiesFile); // Register now for deleting even if an exception is thrown below.
             properties.store(out, "Subset of pom.xml");
         }
         if (reproducible) {

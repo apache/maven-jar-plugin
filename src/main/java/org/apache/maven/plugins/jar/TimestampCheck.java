@@ -37,8 +37,8 @@ import org.apache.maven.api.plugin.Log;
 /**
  * Checks file timestamps in order to determine if anything changed compared to an existing <abbr>JAR</abbr> file.
  * This class may scan directories, but only if they have not already been visited by {@link FileCollector}.
- * Note that the latter can occur only if {@link FileCollector} has no {@code PathMatcher}.
- * Therefore, this class uses no {@code PathMatcher} neither.
+ * The latter can only occur if {@link FileCollector} has no {@code PathMatcher}.
+ * Therefore, this class uses no {@code PathMatcher}.
  *
  * <h2>Ignore files</h2>
  * The {@code META-INF/MANIFEST.MF} file and the {@code META-INF/maven/} directory are ignored.
@@ -67,13 +67,13 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
 
     /**
      * Entries of the <abbr>JAR</abbr> file. Note that getting elements from this enumeration can be costly.
-     * Therefore, we do not fetch all elements in advance but only when needed.
+     * Therefore, we only fetch elements when needed.
      */
     private Enumeration<? extends ZipEntry> entries;
 
     /**
      * Files found in the <abbr>JAR</abbr> file but not yet traversed by the file visitor.
-     * Files are added lazily only when needed, and removed as soon as they have been traversed.
+     * Files are added lazily when needed, and removed as soon as they have been traversed.
      * Path are absolute (resolved with {@link #classesDir}).
      * For each entry, the associated value is whether the path is a directory.
      */
@@ -81,7 +81,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
 
     /**
      * Some of the files in the build directory. This list contains only the files for which we have already
-     * verified the timestamp. We store them in a separated list for avoiding to check the timestamp twice.
+     * verified the timestamp. We store them in a separate list for avoiding to check the timestamp twice.
      * We need this list because we still need to verify if the files are in the {@link #jarFile}.
      * For each entry, the associated value is whether the path is a directory.
      */
@@ -138,7 +138,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
         try (ZipFile jar = new ZipFile(jarFile.toFile())) {
             entries = jar.entries();
             for (Path file : filesInBuild.keySet()) {
-                if (!isFoundInJAR(file)) {
+                if (!removeFromFilesInJAR(file)) {
                     return false;
                 }
             }
@@ -229,7 +229,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      */
     @Override
     public FileVisitResult visitFile(final Path file, final BasicFileAttributes attributes) {
-        if (jarFileTime.compareTo(attributes.lastModifiedTime()) >= 0 && isFoundInJAR(file)) {
+        if (jarFileTime.compareTo(attributes.lastModifiedTime()) >= 0 && removeFromFilesInJAR(file)) {
             return FileVisitResult.CONTINUE;
         } else {
             hasUpdates = true;
@@ -244,7 +244,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      * @param file the file to check
      * @return whether the given file was found in the <abbr>JAR</abbr> file
      */
-    private boolean isFoundInJAR(final Path file) {
+    private boolean removeFromFilesInJAR(final Path file) {
         if (filesInJAR.remove(file) != null) {
             return true;
         }

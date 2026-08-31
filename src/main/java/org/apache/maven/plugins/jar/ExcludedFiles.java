@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * A list of files to temporarily move outside the directory to package in a <abbr>JAR</abbr> archive.
- * This is used for excluding files from the <abbr>JAR</abbr> archive according include/exclude filters.
+ * This is used for excluding files from the <abbr>JAR</abbr> archive according to include/exclude filters.
  * We move these files for making possible to specify the whole directory to the {@code jar} tool.
  * This approach is used instead of enumerating files in arguments given to the {@code jar} tool because
  * such enumeration can not contain directory entries (otherwise the whole directory would be included).

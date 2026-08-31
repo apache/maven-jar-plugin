@@ -129,7 +129,7 @@ final class ToolExecutor {
 
     /**
      * A buffer for the arguments given to the "jar" tool, reused for each module.
-     * Each element of the list shall be instances of either {@link String} or {@link Path}.
+     * Each element of the list must be instances of either {@link String} or {@link Path}.
      */
     private final List<Object> arguments;
 
@@ -161,8 +161,8 @@ final class ToolExecutor {
 
     /**
      * The file from which {@link #manifestFromPlugin} has been read, or {@code null} if none.
-     * If non-null, reading that file shall produce the same manifest as {@link #manifestFromPlugin}.
-     * It implies that this field shall be {@code null} if {@link #manifestFromPlugin} is the result
+     * If non-null, reading that file must produce the same manifest as {@link #manifestFromPlugin}.
+     * It implies that this field must be {@code null} if {@link #manifestFromPlugin} is the result
      * of merging elements specified in {@code <archive>} with a file specified in the plugin configuration.
      */
     private final Path manifestFile;
@@ -174,7 +174,7 @@ final class ToolExecutor {
 
     /**
      * The timestamp in ISO-8601 extended offset date-time, or {@code null} if none.
-     * If user provided a value in seconds, it shall have been converted to ISO-8601.
+     * If user provided a value in seconds, it must have been converted to ISO-8601.
      * This is used for reproducible builds.
      */
     private final String outputTimestamp;

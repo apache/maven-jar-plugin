@@ -38,22 +38,22 @@ enum DirectoryRole {
     /**
      * The {@code "META-INF/versions"} or {@code "<module>/META-INF/versions"} directory.
      * This is part of the <abbr>JAR</abbr> specification, except the {@code <module>} prefix.
-     * The sub-directories are named according Java releases such as "21".
+     * The sub-directories are named according to Java releases such as "21".
      * The next location can only be {@link #RESOURCES}.
      */
     VERSIONS,
 
     /**
      * The Maven-specific {@code "META-INF/versions-modular"} directory.
-     * Note that {@code "<module>/META-INF/versions-modular"} is not forbidden, but does not make sense.
-     * The sub-directories are named according Java releases such as "21".
+     * {@code "<module>/META-INF/versions-modular"} is not forbidden, but does not make sense.
+     * The sub-directories are named according to Java releases such as "21".
      * The next location can only be {@link #MODULES}.
      */
     VERSIONS_MODULAR,
 
     /**
      * The Maven-specific {@code "META-INF/versions-modular"} directory.
-     * All sub-directories shall have the name of a Java module.
+     * All sub-directories must have the name of a Java module.
      * The next location can only be {@link #NAMED_MODULE}.
      */
     MODULES,
@@ -67,7 +67,7 @@ enum DirectoryRole {
 
     /**
      * The classes or other types of resources to include in a single archive.
-     * May also be other files in the {@code META-INF} directory.
+     * Can also be other files in the {@code META-INF} directory.
      */
     RESOURCES
 }

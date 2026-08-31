@@ -43,8 +43,8 @@ import org.apache.maven.api.plugin.MojoException;
 
 /**
  * Files or root directories to archive for a single module.
- * A single instance of {@code Archive} may contain many directories for different target Java releases.
- * Many instances of {@code Archive} may exist when archiving a multi-modules project.
+ * A single instance of {@code Archive} can contain many directories for different target Java releases.
+ * Many instances of {@code Archive} can exist when archiving a multi-modules project.
  */
 final class Archive {
     /**
@@ -57,8 +57,8 @@ final class Archive {
     Path pomFile;
 
     /**
-     * The <var>JAR</var> file to create. May be an existing file,
-     * in which case the file creation may be skipped if the file is still up-to-date.
+     * The <var>JAR</var> file to create. Can be an existing file,
+     * in which case the file creation can be skipped if the file is still up-to-date.
      */
     @Nonnull
     final Path jarFile;
@@ -92,7 +92,7 @@ final class Archive {
 
     /**
      * The Maven generated {@code pom.xml} and {@code pom.properties} files, or {@code null} if none.
-     * This first item shall be the base directory where the files are located.
+     * This first item must be the base directory where the files are located.
      */
     @Nullable
     List<Path> mavenFiles;
@@ -113,7 +113,7 @@ final class Archive {
 
     /**
      * Files or root directories to archive for a single target Java release of a single module.
-     * The {@link Archive} enclosing shall contain at least one instance of {@code FileSet} for
+     * The {@link Archive} enclosing must contain at least one instance of {@code FileSet} for
      * the base release, and an arbitrary amount of other instances for other target releases.
      */
     final class FileSet {
@@ -126,7 +126,7 @@ final class Archive {
 
         /**
          * The files or directories to include in the <var>JAR</var> file.
-         * May be absolute paths or paths relative to {@link #directory}.
+         * Can be absolute paths or paths relative to {@link #directory}.
          * It usually contains only the files or directories directly in
          * the root {@linkplain #directory}, not in sub-directories.
          */
@@ -194,12 +194,12 @@ final class Archive {
          * Our tests suggest that the first file after the directory specified by the {@code -C} option must
          * be relative to that directory and all files after the first one must be prefixed by the directory
          * which was specified in the {@code -C} option. This behavior is not very intuitive and replying on
-         * it may be fragile. Furthermore, it seems that the relativized file needs to be the shortest one,
+         * it can be fragile. Furthermore, it seems that the relativized file needs to be the shortest one,
          * otherwise the {@code jar} tool rejects files after the first one with "names do not match".
          * Which file is first depends on the unspecified directory-iteration order.
          * Repeating the {@code -C} option for each file seems safer.
          *
-         * @param addTo the list where to add the arguments as {@link String} or {@link Path} instances
+         * @param addTo the list to add the arguments as {@link String} or {@link Path} instances to
          * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
          * @throws IllegalArgumentException if a path cannot be made relative to the base directory
          */
@@ -299,7 +299,7 @@ final class Archive {
 
     /**
      * Returns the {@code module-info.class} files. Conceptually, there is at most once such file per module.
-     * However, more than one file may exist if additional files are provided for additional Java releases.
+     * However, more than one file can exist if additional files are provided for additional Java releases.
      * This method returns only the files that exist.
      *
      * @return all {@code module-info.class} files found for all target Java releases
@@ -361,8 +361,8 @@ final class Archive {
 
     /**
      * {@return whether this archive has nothing to archive}
-     * Note that this method may return {@code false} even when there is zero file to archive.
-     * It may happen if {@link AbstractJarMojo#skipIfEmpty} is {@code false}. In such case, the
+     * This method can return {@code false} even when there is zero file to archive.
+     * It can happen if {@link AbstractJarMojo#skipIfEmpty} is {@code false}. In such case, the
      * "empty" <abbr>JAR</abbr> file will still contain at {@code META-INF/MANIFEST.MF} file.
      *
      * <h4>Prerequisites</h4>
@@ -408,7 +408,7 @@ final class Archive {
      * Java tools). If a module is specified, the main class is kept only if the module match. The intent is to
      * allow users to specify on which module the main class applies when they use plugin configuration.
      *
-     * <p>This method may modify the {@code content} manifest. Caller shall ensure that the given manifest
+     * <p>This method may modify the {@code content} manifest. Caller must ensure that the given manifest
      * is not a shared instance. This method returns whether a change has actually been done.</p>
      *
      * @param content combination of existing {@code MANIFEST.MF} and manifest inferred from configuration, or null
@@ -486,7 +486,7 @@ final class Archive {
 
     /**
      * Adds to the given list the arguments to provide to the "jar" tool for each version.
-     * Elements added to the list shall be instances of {@link String} or {@link Path}.
+     * Elements added to the list must be instances of {@link String} or {@link Path}.
      * Callers should have added the following options (if applicable) before to invoke this method:
      *
      * <ul>
@@ -543,7 +543,7 @@ final class Archive {
      * </ul>
      *
      * @param  validate whether to validate, or {@code null} for automatic based on heuristic rules
-     * @param  addTo the list where to add the arguments as {@link String} or {@link Path} instances
+     * @param  addTo the list to add the arguments as {@link String} or {@link Path} instances to
      * @return whether a validation should be run
      */
     boolean validate(final Boolean validate, final List<Object> addTo) {
@@ -620,7 +620,7 @@ final class Archive {
     }
 
     /**
-     * Stores in the given map the paths to the artifacts produced for this archive.
+     * Stores the paths to the artifacts produced for this archive in the given map.
      *
      * @param artifactType {@code "jar"} or {@code "test-jar"}
      * @param addTo the map where to add the results
