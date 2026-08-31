@@ -31,34 +31,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>4.0.0-beta-3</version>
+        <version>4.0.0-beta-5</version>
         <configuration>
           <!-- TODO: remove source and target after we identified where Maven inherits those values. -->
           <source />
           <target />
           <release>17</release>
         </configuration>
-      </plugin>
-
-      <!-- Temporary hack until compiler beta-4 is deployed. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
-        <executions>
-          <execution>
-            <id>move</id>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <target>
-                <move file="${project.build.outputDirectory}/META-INF/versions" tofile="${project.build.outputDirectory}/META-INF/versions-modular" />
-              </target>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
