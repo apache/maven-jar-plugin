@@ -44,7 +44,7 @@ import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 import org.apache.maven.shared.archiver.MavenArchiver;
 
 /**
- * Base class for creating a <abbr>JAR</abbr> file from project classes.
+ * Base class for creating a <abbr title="Java Archive">JAR</abbr> file from project classes.
  *
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @author Martin Desruisseaux
@@ -74,13 +74,13 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected String[] excludes;
 
     /**
-     * Directory containing the generated <abbr>JAR</abbr> files.
+     * Directory containing the generated <abbr title="Java Archive">JAR</abbr> files.
      */
     @Parameter(defaultValue = "${project.build.directory}", required = true)
     protected Path outputDirectory;
 
     /**
-     * Name of the generated <abbr>JAR</abbr> file.
+     * Name of the generated <abbr title="Java Archive">JAR</abbr> file.
      * The default value is {@code "${project.build.finalName}"},
      * which itself defaults to {@code "${artifactId}-${version}"}.
      * Ignored if the Maven sub-project to archive uses module hierarchy.
@@ -124,7 +124,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * By default, this plugin looks to see if the output <abbr>JAR</abbr> files exist and inputs have not changed.
      * If these conditions are true, the plugin skips creation of the <abbr>JAR</abbr> files.
      * This does not work when other plugins, like the maven-shade-plugin, are configured to post-process the JAR.
-     * This plugin can not detect the post-processing, and so leaves the post-processed JAR file in place.
+     * This plugin cannot detect the post-processing, and so leaves the post-processed JAR file in place.
      * This can lead to failures when those plugins do not expect to find their own output as an input.
      * Set this parameter to {@code true} to avoid these problems by forcing this plugin to recreate the JAR every time.
      *
@@ -148,7 +148,8 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * If not configured or disabled,
      * the <a href="https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>
      * environment variable is used as a fallback value,
-     * to ease forcing Reproducible Build externally when the build has not enabled it natively in <abbr>POM</abbr>.
+     * to ease forcing Reproducible Build externally when the build has not enabled it natively in
+     * <abbr title="Project Object Model">POM</abbr>.
      *
      * <p>This property is supported only in Java 19 or later.</p>
      *
@@ -402,9 +403,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         final Map<String, Map<String, Path>> artifactFiles;
         try {
             artifactFiles = createArchives();
-        } catch (MojoException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new MojoException("Error while assembling the JAR file.", e);
         }
         if (artifactFiles.isEmpty()) {

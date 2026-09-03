@@ -57,7 +57,7 @@ final class Archive {
     Path pomFile;
 
     /**
-     * The <var>JAR</var> file to create. Can be an existing file,
+     * The <abbr title="Java Archive">JAR</abbr> file to create. Can be an existing file,
      * in which case the file creation can be skipped if the file is still up-to-date.
      */
     @Nonnull
@@ -125,7 +125,7 @@ final class Archive {
         final Path directory;
 
         /**
-         * The files or directories to include in the <var>JAR</var> file.
+         * The files or directories to include in the JAR file.
          * Can be absolute paths or paths relative to {@link #directory}.
          * It usually contains only the files or directories directly in
          * the root {@linkplain #directory}, not in sub-directories.
@@ -178,8 +178,7 @@ final class Archive {
          * @param isDirectory whether the file is a directory
          */
         void add(Path item, BasicFileAttributes attributes, boolean isDirectory) {
-            TimestampCheck tc = existingJAR;
-            if (tc != null && tc.isUpdated(item, attributes, isDirectory)) {
+            if (existingJAR != null && existingJAR.isUpdated(item, attributes, isDirectory)) {
                 existingJAR = null; // Signal that the existing file is outdated.
             }
             files.add(item);
@@ -203,7 +202,7 @@ final class Archive {
          * @param version the target Java release, or {@code null} for the base version of the <abbr>JAR</abbr> file
          * @throws IllegalArgumentException if a path cannot be made relative to the base directory
          */
-        private void arguments(List<Object> addTo, Runtime.Version version) {
+        private void addArgumentsTo(List<Object> addTo, Runtime.Version version) {
             if (files.isEmpty()) {
                 return;
             }
@@ -298,7 +297,7 @@ final class Archive {
     }
 
     /**
-     * Returns the {@code module-info.class} files. Conceptually, there is at most once such file per module.
+     * Returns the {@code module-info.class} files. Conceptually, there is at most one such file per module.
      * However, more than one file can exist if additional files are provided for additional Java releases.
      * This method returns only the files that exist.
      *
@@ -361,12 +360,12 @@ final class Archive {
 
     /**
      * {@return whether this archive has nothing to archive}
-     * This method can return {@code false} even when there is zero file to archive.
-     * It can happen if {@link AbstractJarMojo#skipIfEmpty} is {@code false}. In such case, the
-     * "empty" <abbr>JAR</abbr> file will still contain at {@code META-INF/MANIFEST.MF} file.
+     * This method can return {@code false} even when there are no file to archive.
+     * It can happen if {@link AbstractJarMojo#skipIfEmpty} is {@code false}. In this case,
+     * the "empty" <abbr>JAR</abbr> file will still contain at {@code META-INF/MANIFEST.MF} file.
      *
-     * <h4>Prerequisites</h4>
-     * The {@link #prune(boolean)} method should be invoked before this method for accurate result.
+     * <p><b>Prerequisites:</b>
+     * The {@link #prune(boolean)} method should be invoked before this method for accurate result.</p>
      */
     public boolean isEmpty() {
         return filesetForRelease.isEmpty();
@@ -375,20 +374,20 @@ final class Archive {
     /**
      * Checks whether the <abbr>JAR</abbr> file already exists and can be reused.
      * This method verifies that the <abbr>JAR</abbr> file contains all the files to archive,
-     * contains no extra file, and no file to archive is newer than the <abbr>JAR</abbr> file.
+     * contains no extra files, and no file to archive is newer than the <abbr>JAR</abbr> file.
      *
      * <p>This method can be invoked only once.
-     * If invoked more often, it returns {@code false} on all subsequent invocations.</p>
+     * If invoked more than once, it returns {@code false} on all subsequent invocations.</p>
      *
      * @return whether the <abbr>JAR</abbr> file already exists and can be reused
      */
     public boolean isUpToDateJAR() {
-        final TimestampCheck tc = existingJAR;
-        if (tc == null) {
+        final TimestampCheck candidate = existingJAR;
+        if (candidate == null) {
             return false;
         }
         existingJAR = null; // Let GC do its job.
-        return tc.isUpToDateJAR(filesetForRelease.values());
+        return candidate.isUpToDateJAR(filesetForRelease.values());
     }
 
     /**
@@ -408,8 +407,8 @@ final class Archive {
      * Java tools). If a module is specified, the main class is kept only if the module match. The intent is to
      * allow users to specify on which module the main class applies when they use plugin configuration.
      *
-     * <p>This method may modify the {@code content} manifest. Caller must ensure that the given manifest
-     * is not a shared instance. This method returns whether a change has actually been done.</p>
+     * <p>This method can modify the {@code content} manifest. Caller must ensure that the given manifest
+     * is not a shared instance. This method returns whether a change has been done.</p>
      *
      * @param content combination of existing {@code MANIFEST.MF} and manifest inferred from configuration, or null
      * @return whether the given manifest has been modified by this method
@@ -453,7 +452,7 @@ final class Archive {
      * If both {@code file} and {@code content} are non-null, then {@code content} must be the
      * result of reading {@code file}.
      *
-     * <p>This method never modifies the given {@code content} object. If manifest are merged,
+     * <p>This method never modifies the given {@code content} object. If manifests are merged,
      * a new {@link Manifest} instance is created. Therefore, caller can check whether this
      * method returned a new instance as a way to recognize that a merge occurred.</p>
      *
@@ -511,7 +510,7 @@ final class Archive {
      *
      * @param addTo the list where to add the arguments as {@link String} or {@link Path} instances
      */
-    void arguments(final List<Object> addTo) {
+    void addArgumentsTo(final List<Object> addTo) {
         addTo.add("--file");
         addTo.add(jarFile);
         if (manifest != null) {
@@ -527,7 +526,7 @@ final class Archive {
             addTo.addAll(mavenFiles);
         }
         for (Map.Entry<Runtime.Version, FileSet> entry : filesetForRelease.entrySet()) {
-            entry.getValue().arguments(addTo, entry.getKey());
+            entry.getValue().addArgumentsTo(addTo, entry.getKey());
         }
     }
 
@@ -546,7 +545,7 @@ final class Archive {
      * @param  addTo the list to add the arguments as {@link String} or {@link Path} instances to
      * @return whether a validation should be run
      */
-    boolean validate(final Boolean validate, final List<Object> addTo) {
+    boolean addValidateArgumentsTo(final Boolean validate, final List<Object> addTo) {
         boolean effective;
         if (validate != null) {
             effective = validate;
@@ -571,7 +570,7 @@ final class Archive {
      * @param baseDir project base directory for relativizing the arguments
      * @param debugDirectory the directory where to write the debug file
      * @param classifier the classifier (e.g. "tests"), or {@code null} if none
-     * @param arguments the arguments formatted by {@link #arguments(List)}
+     * @param arguments the arguments formatted by {@link #addArgumentsTo(List)}
      * @return the debug file where arguments have been written
      * @throws IOException if an error occurred while writing the debug file
      */

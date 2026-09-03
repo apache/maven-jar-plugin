@@ -74,14 +74,14 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
     /**
      * Files found in the <abbr>JAR</abbr> file but not yet traversed by the file visitor.
      * Files are added lazily when needed, and removed as soon as they have been traversed.
-     * Path are absolute (resolved with {@link #classesDir}).
+     * Paths are absolute (resolved with {@link #classesDir}).
      * For each entry, the associated value is whether the path is a directory.
      */
     private final Map<Path, Boolean> filesInJAR;
 
     /**
      * Some of the files in the build directory. This list contains only the files for which we have already
-     * verified the timestamp. We store them in a separate list for avoiding to check the timestamp twice.
+     * verified the timestamp. We store them in a separate list to avoid checking to check the timestamp twice.
      * We need this list because we still need to verify if the files are in the {@link #jarFile}.
      * For each entry, the associated value is whether the path is a directory.
      */
@@ -89,7 +89,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
 
     /**
      * Whether at least one file is more recent than the <abbr>JAR</abbr> file.
-     * The scan of files will stop quickly after this flag become {@code true}.
+     * The scan of files will stop soon after this flag become {@code true}.
      */
     private boolean hasUpdates;
 
@@ -128,7 +128,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
     }
 
     /**
-     * Checks if the <abbr>JAR</abbr> file contains all the given files, no extra entry, and no outdated entry.
+     * Checks if the <abbr>JAR</abbr> file contains all the given files, no extra entries, and no outdated entry.
      *
      * @param fileSets pairs of base directory and files potentially relative to the base directory
      * @return whether the <abbr>JAR</abbr> file is up-to-date

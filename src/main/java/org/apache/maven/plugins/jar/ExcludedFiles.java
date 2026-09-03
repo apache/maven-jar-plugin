@@ -27,10 +27,11 @@ import java.util.List;
 
 /**
  * A list of files to temporarily move outside the directory to package in a <abbr>JAR</abbr> archive.
- * This is used for excluding files from the <abbr>JAR</abbr> archive according to include/exclude filters.
+ * This class is needed when the {@link AbstractJarMojo} configuration has include or exclude filters.
+ * Excluded files are temporarily moved outside the directory to archive.
  * We move these files for making possible to specify the whole directory to the {@code jar} tool.
  * This approach is used instead of enumerating files in arguments given to the {@code jar} tool because
- * such enumeration can not contain directory entries (otherwise the whole directory would be included).
+ * such enumeration cannot contain directory entries (otherwise the whole directory would be included).
  * Some software such as Spring applications component scan relies on the presence of directory entries.
  */
 final class ExcludedFiles implements Closeable {
@@ -69,9 +70,9 @@ final class ExcludedFiles implements Closeable {
      */
     ExcludedFiles(Path directory, List<Path> excludedFiles, List<Path> excludedDirectories) throws IOException {
         indexOfFirstDirectory = excludedFiles.size();
-        final int nd = excludedDirectories.size();
-        original = excludedFiles.toArray(new Path[indexOfFirstDirectory + nd]);
-        System.arraycopy(excludedDirectories.toArray(), 0, original, indexOfFirstDirectory, nd);
+        final int numDirs = excludedDirectories.size();
+        original = excludedFiles.toArray(new Path[indexOfFirstDirectory + numDirs]);
+        System.arraycopy(excludedDirectories.toArray(), 0, original, indexOfFirstDirectory, numDirs);
         moved = new Path[original.length];
         temporaryDirectory = Files.createTempDirectory(directory, "excluded-");
     }
@@ -113,7 +114,7 @@ final class ExcludedFiles implements Closeable {
     /**
      * Moves the temporary files back to their original locations.
      * This method can be invoked even if only a subset of the files were moved.
-     * The latter may happen if an error occurred in the middle of {@link #move()} execution.
+     * The latter can happen if an error occurred in the middle of {@link #move()} execution.
      *
      * @throws IOException if an error occurred while moving a temporary files or deleting the temporary directory.
      */

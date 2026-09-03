@@ -306,8 +306,8 @@ final class ToolExecutor {
      * The derived <abbr>POM</abbr> files are the intersections of the project <abbr>POM</abbr> with the
      * content of {@code module-info.class} files.
      *
-     * <h4>Prerequisites</h4>
-     * The {@link FileCollector#prune(boolean)} method should have been invoked once before to invoke this method.
+     * <p><b>Prerequisites:</b>
+     * The {@link FileCollector#prune(boolean)} method should have been invoked once before to invoke this method.</p>
      *
      * @param files the result of scanning the build directory for listing the files or directories to archive
      * @return the paths to the created archive files
@@ -402,7 +402,7 @@ final class ToolExecutor {
                     logger.warn("Reproducible build requires Java " + JDK_SUPPORT_DATE + " or later.");
                 }
             }
-            archive.arguments(arguments);
+            archive.addArgumentsTo(arguments);
             /*
              * Execute the `jar` tool with arguments determined by the values dispatched
              * in the various fields of the `Archive`. Information and error essages are logged.
@@ -429,7 +429,7 @@ final class ToolExecutor {
          * we skip the post-creation validation pass; the archive was already created
          * successfully by the `--create` pass above.
          */
-        if (archive.validate(validate, arguments)) {
+        if (archive.addValidateArgumentsTo(validate, arguments)) {
             final int version = Runtime.version().feature();
             if (version >= JDK_FIXING_JAR_VALIDATE) {
                 int status = executeJarTool();

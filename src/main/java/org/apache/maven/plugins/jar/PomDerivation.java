@@ -137,14 +137,14 @@ final class PomDerivation {
         rethrow(result);
         final Map<org.apache.maven.api.Dependency, Path> dependencies = result.getDependencies();
         final Path[] allModulePaths = toRealPaths(moduleRoots, dependencies.values());
-        fromURI = new HashMap<>(allModulePaths.length); // TODO: use newHashMap with JDK19.
+        fromURI = new HashMap<>(allModulePaths.length);
         moduleFinder = ModuleFinder.of(allModulePaths);
         if (moduleFinder != null) {
             for (ModuleReference reference : moduleFinder.findAll()) {
                 reference.location().ifPresent((location) -> fromURI.put(location, reference));
             }
         }
-        fromDependency = new HashMap<>(dependencies.size()); // TODO: use newHashMap with JDK19.
+        fromDependency = new HashMap<>(dependencies.size());
         for (Map.Entry<org.apache.maven.api.Dependency, Path> entry : dependencies.entrySet()) {
             Path modulePath = entry.getValue().toRealPath();
             ModuleReference reference = fromURI.get(modulePath.toUri());
@@ -484,6 +484,7 @@ final class PomDerivation {
      *
      * @see ForModule#writeModulePOM()
      */
+    @SuppressWarnings("deprecation")
     Path writeParentPOM(final Archive packageHierarchy) throws IOException {
         Path pomFile = derivePathToPOM(packageHierarchy.jarFile);
         Model.Builder builder = Model.newBuilder(projectModel, true);
@@ -520,9 +521,9 @@ final class PomDerivation {
      */
     private static void writePOM(Model model, Path file) throws IOException, XMLStreamException {
         try (BufferedWriter out = Files.newBufferedWriter(file)) {
-            var sw = new MavenStaxWriter();
-            sw.setAddLocationInformation(false);
-            sw.write(out, model);
+            var xmlWriter = new MavenStaxWriter();
+            xmlWriter.setAddLocationInformation(false);
+            xmlWriter.write(out, model);
             out.newLine();
         }
     }

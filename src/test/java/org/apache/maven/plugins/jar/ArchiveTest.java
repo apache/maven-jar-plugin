@@ -90,7 +90,7 @@ class ArchiveTest {
     }
 
     /**
-     * Verifies that {@link Archive#setMainClass(Manifest)} does <em>not</em> take ownership fo
+     * Verifies that {@link Archive#setMainClass(Manifest)} does <em>not</em> take ownership of
      * a module-qualified {@code "module/Class"} main class when the module name does not match.
      * The {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
      * The standard <abbr>JAR</abbr> specification accepts only the {@code "foo.MainFile"} class name.
@@ -139,7 +139,7 @@ class ArchiveTest {
     }
 
     /**
-     * Tests that {@code FileSet} association to target release is consistent regardless creation order.
+     * Tests that {@code FileSet} association to target release is consistent regardless of creation order.
      * Verifies that the base (version-less) release binds to the true {@code <module>} directory even
      * when the {@link Archive} was first created from a {@code META-INF/versions-modular/<n>/<module>}
      * directory (which happens when the file-tree walk visits the version directory first).
@@ -219,7 +219,7 @@ class ArchiveTest {
             base.add(f, null, false);
         }
         var args = new ArrayList<Object>();
-        archive.arguments(args);
+        archive.addArgumentsTo(args);
         return args;
     }
 
