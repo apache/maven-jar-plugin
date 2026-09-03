@@ -44,7 +44,7 @@ import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 import org.apache.maven.shared.archiver.MavenArchiver;
 
 /**
- * Base class for creating a <abbr title="Java Archive">JAR</abbr> file from project classes.
+ * Base class for creating a <abbr>JAR</abbr> file from project classes.
  *
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @author Martin Desruisseaux
@@ -74,13 +74,13 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected String[] excludes;
 
     /**
-     * Directory containing the generated <abbr title="Java Archive">JAR</abbr> files.
+     * Directory containing the generated <abbr>JAR</abbr> files.
      */
     @Parameter(defaultValue = "${project.build.directory}", required = true)
     protected Path outputDirectory;
 
     /**
-     * Name of the generated <abbr title="Java Archive">JAR</abbr> file.
+     * Name of the generated <abbr>JAR</abbr> file.
      * The default value is {@code "${project.build.finalName}"},
      * which itself defaults to {@code "${artifactId}-${version}"}.
      * Ignored if the Maven sub-project to archive uses module hierarchy.
@@ -149,7 +149,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * the <a href="https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>
      * environment variable is used as a fallback value,
      * to ease forcing Reproducible Build externally when the build has not enabled it natively in
-     * <abbr title="Project Object Model">POM</abbr>.
+     * <abbr>POM</abbr>.
      *
      * <p>This property is supported only in Java 19 or later.</p>
      *

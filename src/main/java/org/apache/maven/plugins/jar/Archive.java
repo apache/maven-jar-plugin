@@ -57,7 +57,7 @@ final class Archive {
     Path pomFile;
 
     /**
-     * The <abbr title="Java Archive">JAR</abbr> file to create. Can be an existing file,
+     * The <abbr>JAR</abbr> file to create. Can be an existing file,
      * in which case the file creation can be skipped if the file is still up-to-date.
      */
     @Nonnull
