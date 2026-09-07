@@ -37,8 +37,8 @@ import org.apache.maven.api.annotations.Nullable;
 import org.apache.maven.api.services.PathMatcherFactory;
 
 /**
- * Dispatch the files from the output directory into the <abbr>JAR</abbr> files to create.
- * Instead of just archiving as-is the content of the output directory, this class separates
+ * Distributes the files from the output directory into the <abbr>JAR</abbr> files to create.
+ * Instead of just archiving the content of the output directory as-is, this class separates
  * the following subdirectories to the options listed below:
  *
  * <ul>
@@ -52,13 +52,13 @@ import org.apache.maven.api.services.PathMatcherFactory;
  *   </li>
  * </ul>
  *
- * The reason for using the {@code --release} and {@code --manifest} options instead of adding explicitly
- * the entries is because the options allow the {@code jar} tool to perform additional verifications.
- * For example, when using the {@code --release} option, {@code jar} verifies the <abbr>API</abbr> compatibility.
+ * The reason for using the {@code --release} and {@code --manifest} options instead of adding the
+ * entries explicitly is because the options allow the {@code jar} tool to perform additional verifications.
+ * For example, when using the {@code --release} option, {@code jar} verifies <abbr>API</abbr> compatibility.
  */
 final class FileCollector extends SimpleFileVisitor<Path> {
     /**
-     * The file to check for deciding whether the <abbr>JAR</abbr> is modular.
+     * The file to check to decide whether the <abbr>JAR</abbr> is modular.
      */
     static final String MODULE_DESCRIPTOR_FILE_NAME = "module-info.class";
 
@@ -106,7 +106,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
 
     /**
      * Files to exclude. These files will be moved to a temporary location
-     * for allowing {@link ToolExecutor} to specify whole directories to the {@code jar} tool.
+     * to allow {@link ToolExecutor} to specify whole directories to the {@code jar} tool.
      * Specifying whole directories is preferable to enumerating the files because otherwise,
      * the generated <abbr>JAR</abbr> file contains only entries for the files and is missing
      * entries for the directories.
@@ -119,7 +119,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
 
     /**
      * Directories to exclude. This field serves the same purpose as {@link #excludedFiles},
-     * but where the sources a directories instead of files.
+     * but where the sources are directories instead of files.
      */
     @Nullable
     private final List<Path> excludedDirectories;
@@ -146,7 +146,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     private Archive currentModule;
 
     /**
-     * The module and target Java release currently being scanned. This field is updated every times that
+     * The module and target Java release currently being scanned. This field is updated every time that
      * {@code FileCollector} visits a new module directory or in a new target Java release for a given module.
      */
     @Nonnull

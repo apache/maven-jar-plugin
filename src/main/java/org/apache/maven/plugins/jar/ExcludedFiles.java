@@ -29,14 +29,14 @@ import java.util.List;
  * A list of files to temporarily move outside the directory to package in a <abbr>JAR</abbr> archive.
  * This class is needed when the {@link AbstractJarMojo} configuration has include or exclude filters.
  * Excluded files are temporarily moved outside the directory to archive.
- * We move these files for making possible to specify the whole directory to the {@code jar} tool.
+ * We move these files to make it possible to pass an entire directory to the {@code jar} tool.
  * This approach is used instead of enumerating files in arguments given to the {@code jar} tool because
  * such enumeration cannot contain directory entries (otherwise the whole directory would be included).
  * Some software such as Spring applications component scan relies on the presence of directory entries.
  */
 final class ExcludedFiles implements Closeable {
     /**
-     * The paths of files or directories to temporarily move in another directory.
+     * The paths of files or directories to temporarily move to another directory.
      */
     private final Path[] original;
 
@@ -61,11 +61,11 @@ final class ExcludedFiles implements Closeable {
     private final int indexOfFirstDirectory;
 
     /**
-     * Creates a new list of files to move in a temporary directory.
+     * Creates a new list of files to move to a temporary directory.
      *
      * @param directory the directory which was scanned for files to include in the <abbr>JAR</abbr>
-     * @param excludedFiles paths of files to temporarily move in another directory
-     * @param excludedDirectories paths of directories to temporarily move in another directory
+     * @param excludedFiles paths of files to temporarily move to another directory
+     * @param excludedDirectories paths of directories to temporarily move to another directory
      * @throws IOException if an error occurred while creating the temporary directory.
      */
     ExcludedFiles(Path directory, List<Path> excludedFiles, List<Path> excludedDirectories) throws IOException {

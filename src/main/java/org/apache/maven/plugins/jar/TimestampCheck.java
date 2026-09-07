@@ -40,9 +40,8 @@ import org.apache.maven.api.plugin.Log;
  * The latter can only occur if {@link FileCollector} has no {@code PathMatcher}.
  * Therefore, this class uses no {@code PathMatcher}.
  *
- * <h2>Ignore files</h2>
- * The {@code META-INF/MANIFEST.MF} file and the {@code META-INF/maven/} directory are ignored.
- * See {@link #isIgnored(Path)} for the rational.
+ * <p>The {@code META-INF/MANIFEST.MF} file and the {@code META-INF/maven/} directory are ignored.
+ * See {@link #isIgnored(Path)} for the rational.</p>
  */
 final class TimestampCheck extends SimpleFileVisitor<Path> {
     /**

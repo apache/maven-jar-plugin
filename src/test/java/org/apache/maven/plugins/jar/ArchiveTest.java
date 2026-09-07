@@ -55,21 +55,21 @@ class ArchiveTest {
      * @return a new manifest with the given attribute value
      */
     private static Manifest manifestWithMainClass(String value) {
-        Manifest m = new Manifest();
-        Attributes attributes = m.getMainAttributes();
+        Manifest manifest = new Manifest();
+        Attributes attributes = manifest.getMainAttributes();
         attributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
         attributes.put(Attributes.Name.MAIN_CLASS, value);
-        return m;
+        return manifest;
     }
 
     /**
      * Returns the value of the main class attribute.
      *
-     * @param m the manifest from which to get the value
+     * @param manifest the manifest from which to get the value
      * @return the main class attribute value, or {@code null} if none
      */
-    private static Object mainClassOf(Manifest m) {
-        return m.getMainAttributes().get(Attributes.Name.MAIN_CLASS);
+    private static Object mainClassOf(Manifest manifest) {
+        return manifest.getMainAttributes().get(Attributes.Name.MAIN_CLASS);
     }
 
     /**
@@ -122,16 +122,17 @@ class ArchiveTest {
      *
      * <p>The {@code "foo.bar/"} prefix in this test (the module name) is a Maven extension.
      * The standard <abbr>JAR</abbr> specification accepts only the {@code "foo.MainFile"} class name.
-     * This extension is used by the plugin for identifying in which <abbr>JAR</abbr> file to add this
+     * This extension is used by the plugin to identify which <abbr>JAR</abbr> file to add this
      * {@code Main-Class} manifest entry.</p>
      */
     private static void assertOwnership(String first, String second, boolean ownerIsFirst) {
+        boolean ownerIsSecond = !ownerIsFirst;
         final Path path = Path.of(".");
         final Manifest shared = manifestWithMainClass("foo.bar/foo.MainFile");
         final Manifest m1 = new Manifest(shared);
         final Manifest m2 = new Manifest(shared);
         assertEquals(ownerIsFirst, archive(first, null, path).setMainClass(m1));
-        assertEquals(!ownerIsFirst, archive(second, null, path).setMainClass(m2));
+        assertEquals(ownerIsSecond, archive(second, null, path).setMainClass(m2));
         // Per-module copies must leave the shared plugin manifest untouched.
         assertEquals("foo.bar/foo.MainFile", mainClassOf(shared));
         assertNull(mainClassOf(m1));
@@ -166,7 +167,7 @@ class ArchiveTest {
      *
      * <h4>Historical note</h4>
      * In our tests, it seems that the first <abbr>JAR</abbr> entry after the {@code -C} option
-     * must be relative, and only that file. Furthermore, it seems that this file must be the
+     * must be relative, and only that file. Furthermore, it seems that this filename must be the
      * shortest. We tried to apply this heuristic rules in a branch, but it does not save a lot
      * of characters compared to repeating {@code -C}.
      */

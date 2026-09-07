@@ -27,7 +27,7 @@
   <description>This project has neither `src/main` nor `src/test`, so nothing is compiled
     and the `target` directory is never created by an earlier lifecycle phase.
     Versions 3.x of the JAR plugin still produced an empty, manifest-only JAR in that case.
-    This IT verifies that versions 4.x of the JAR plugin has the same behavior for compatibility purposes.
+    This IT verifies that versions 4.x of the JAR plugin have the same behavior for compatibility purposes.
 
     NOTE: it does not mean that it is a good idea to produce an empty JAR in such case.
     It would also be a reasonable choice if a future version decide to fail the build instead.</description>
