@@ -1,6 +1,6 @@
 ---
 title: How to create a jar with test classes
-author: 
+author:
   - Karl Heinz Marbaise
 date: 2014-06-16
 ---
@@ -26,9 +26,11 @@ under the License.
 
 # How to Create a JAR With Test Classes
 
-When you create a JAR with test classes, you probably want to reuse those classes. There are two ways to do this:
+When you create a JAR with test classes, you probably want to reuse those classes.
+There are two ways to do this:
 
-- Create an attached JAR with the test classes from the current project. This JAR does not include the transitive `test`-scoped dependencies.
+- Create an attached JAR with the test classes from the current project.
+  This JAR does not include the transitive `test`-scoped dependencies.
 - Create a separate project with the test classes.
 
 The easy way
@@ -80,11 +82,18 @@ To reuse this artifact in another project, declare the dependency with `type` se
 </project>
 ```
 
-This configuration generates two JAR files. The first contains the classes from `src/main/java`. The second contains the classes from `src/test/java`. The JAR names follow the schema `artifactId-version.jar` and `artifactId-version-classifier.jar`.
+This configuration generates two JAR files.
+The first contains the classes from `src/main/java`.
+The second contains the classes from `src/test/java`.
+The JAR names follow the schema `artifactId-version.jar` and `artifactId-version-classifier.jar`.
 
-The values of `artifactId` and `version` come from your `pom.xml` file. The default `classifier` is `tests`. You can change it in the [jar goal configuration](../test-jar-mojo.html).
+The values of `artifactId` and `version` come from your `pom.xml` file.
+The default `classifier` is `tests`.
+You can change it in the [jar goal configuration](../test-jar-mojo.html).
 
-**Note:** This solution does not include the transitive `test`-scoped dependencies automatically. Maven resolves only the `compile`-time dependencies. Add all other required `test`-scoped dependencies by hand.
+**Note:** This solution does not include the transitive `test`-scoped dependencies automatically.
+Maven resolves only the `compile`-time dependencies.
+Add all other required `test`-scoped dependencies by hand.
 
 The preferred way
 -----------------
@@ -100,8 +109,10 @@ To let Maven resolve all `test`-scoped transitive dependencies, create a separat
 </project>
 ```
 
-- Move the source files you want to share from `src/test/java` in the original project to `src/main/java` in this project. Move the resources in the same way.
-- Move the required `test`-scoped dependencies from the original project to this project. Remove their `test` scope. The test framework dependency, for example junit, gets the default scope too. Add any project specific dependencies that the code needs.
+- Move the source files you want to share from `src/test/java` in the original project to `src/main/java` in this project.
+  Move the resources in the same way.
+- Move the required `test`-scoped dependencies from the original project to this project. Remove their `test` scope.
+  The test framework dependency, for example junit, gets the default scope too. Add any project specific dependencies that the code needs.
 
 Add this dependency to use the reusable test classes in another project:
 

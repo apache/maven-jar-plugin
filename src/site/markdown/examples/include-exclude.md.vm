@@ -1,6 +1,6 @@
 ---
 title: Howto include/exclude content from a jar archive
-author: 
+author:
   - Karl Heinz Marbaise
 date: 2014-06-16
 ---
@@ -26,7 +26,8 @@ under the License.
 
 # How to Include or Exclude Content from a JAR Artifact
 
-Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`. These elements specify the fileset patterns to include or exclude.
+Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`.
+These elements specify the fileset patterns to include or exclude.
 
 ```unknown
 <project>

@@ -1,6 +1,6 @@
 ---
 title: How to create an additional attached jar artifact from the project
-author: 
+author:
   - Karl Heinz Marbaise
 date: 2014-06-16
 ---
@@ -26,9 +26,12 @@ under the License.
 
 # How to Create an Additional Attached JAR Artifact
 
-Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`. Add a `classifier` as well.
+Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`.
+Add a `classifier` as well.
 
-**Note:** Define the JAR Plugin in a new execution. Otherwise, it replaces the default use of the JAR Plugin. It does not add a second artifact. The `classifier` is also required to create more than one artifact.
+**Note:** Define the JAR Plugin in a new execution.
+Otherwise, it replaces the default use of the JAR Plugin. It does not add a second artifact.
+The `classifier` is also required to create more than one artifact.
 
 ```unknown
 <project>

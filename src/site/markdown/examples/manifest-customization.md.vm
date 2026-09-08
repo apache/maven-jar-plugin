@@ -1,6 +1,6 @@
 ---
 title: Manifest customization
-author: 
+author:
   - Dennis Lundberg
 date: 2006-07-12
 ---
@@ -31,12 +31,17 @@ The Default Manifest
 
 The documentation for [Maven Archiver](/shared/maven-archiver/examples/manifest.html) describes the default contents of the manifest.
 
-Since version 2.1, the Maven JAR Plugin uses Maven Archiver ${mavenArchiverVersion}. It no longer creates the Specification and Implementation details in the manifest by default. To add them, specify them explicitly in your plugin configuration. The documentation for [Maven Archiver](/shared/maven-archiver/examples/manifest.html) describes this as well.
+Since version 2.1, the Maven JAR Plugin uses Maven Archiver ${mavenArchiverVersion}.
+It no longer creates the Specification and Implementation details in the manifest by default.
+To add them, specify them explicitly in your plugin configuration.
+The documentation for [Maven Archiver](/shared/maven-archiver/examples/manifest.html) describes this as well.
 
 Manifest Customization
 ----------------------
 
-You can alter the default manifest with the `archive` configuration element. The example below shows some of the available configuration options. For more information, see the [Maven Archiver reference](/shared/maven-archiver/index.html).
+You can alter the default manifest with the `archive` configuration element.
+The example below shows some of the available configuration options.
+For more information, see the [Maven Archiver reference](/shared/maven-archiver/index.html).
 
 ```unknown
 <project>

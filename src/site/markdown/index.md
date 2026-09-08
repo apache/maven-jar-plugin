@@ -1,6 +1,6 @@
 ---
 title: Introduction
-author: 
+author:
   - Dennis Lundberg
 date: 2013-07-22
 ---
@@ -35,15 +35,27 @@ This plugin builds JAR files. To sign JAR files, use the [Maven Jarsigner Plugin
 
 ## Usage
 
-General instructions for the JAR Plugin are on the [usage page](./usage.html). The examples below describe more specific use cases.
+General instructions for the JAR Plugin are on the [usage page](./usage.html).
+The examples below describe more specific use cases.
 
-If you have questions about the plugin, see the [FAQ](./faq.html) or contact the [user mailing list](./mailing-lists.html). The mailing list stores all posts in an archive. An older thread can contain the answer to your question. You can search the [mail archive](./mailing-lists.html) for the answer.
+If you have questions about the plugin, see the [FAQ](./faq.html) or contact the [user mailing list](./mailing-lists.html).
+The mailing list stores all posts in an archive.
+An older thread can contain the answer to your question.
+You can search the [mail archive](./mailing-lists.html) for the answer.
 
-If the plugin is missing a feature or has a defect, file a feature request or bug report in the [issue tracker](https://github.com/apache/maven-jar-plugin/issues). When you create a new issue, describe your concern in detail. The developers must reproduce the problem to fix a bug. Attach entire debug logs, POMs, or small demo projects to the issue. Patches are welcome. Contributors can check out the project from the [source repository](./scm.html) and find supplementary information in the [guide to helping with Maven](https://maven.apache.org/guides/development/guide-helping.html).
+If the plugin is missing a feature or has a defect,
+file a feature request or bug report in the [issue tracker](https://github.com/apache/maven-jar-plugin/issues).
+When you create a new issue, describe your concern in detail.
+The developers must reproduce the problem to fix a bug.
+Attach entire debug logs, POMs, or small demo projects to the issue. Patches are welcome.
+Contributors can check out the project from the [source repository](./scm.html) and find supplementary information
+in the [guide to helping with Maven](https://maven.apache.org/guides/development/guide-helping.html).
 
 ## Archiver Configuration
 
-The plugin uses Maven Archiver to handle JAR content and manifest configuration. See the [Maven Archiver Documentation](/shared/maven-archiver/) to learn how to set it up. You can also see the [Guide to Working with Manifests](/guides/mini/guide-manifest.html).
+The plugin uses Maven Archiver to handle JAR content and manifest configuration.
+See the [Maven Archiver Documentation](/shared/maven-archiver/) to learn how to set it up.
+You can also see the [Guide to Working with Manifests](/guides/mini/guide-manifest.html).
 
 ## Examples
 
