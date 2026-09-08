@@ -53,7 +53,8 @@ in the [guide to helping with Maven](https://maven.apache.org/guides/development
 
 ## Archiver Configuration
 
-The plugin uses Maven Archiver to handle JAR content and manifest configuration.
+The plugin uses the JDK `jar` tool internally to create and verify the JAR file.
+The plugin uses Maven Archiver to handle manifest configuration.
 See the [Maven Archiver Documentation](/shared/maven-archiver/) to learn how to set it up.
 You can also see the [Guide to Working with Manifests](/guides/mini/guide-manifest.html).
 

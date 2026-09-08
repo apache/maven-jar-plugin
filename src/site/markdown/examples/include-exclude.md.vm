@@ -53,3 +53,6 @@ These elements specify the fileset patterns to include or exclude.
 ```
 
 The patterns must be relative to the path for the plugin's `classesDirectory` parameter.
+By default, the syntax is the same as Maven 3, where `**` can match any number of directories including zero.
+An alternative syntax can be specified by prefixing the pattern with `glob:`, `regex:` or any other syntax added
+through the service provider mechanism. See `FileSystem.getPathMatcher(String)` in Java NIO for more information.
