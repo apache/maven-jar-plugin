@@ -307,7 +307,7 @@ final class ToolExecutor {
      * content of {@code module-info.class} files.
      *
      * <p><b>Prerequisites:</b>
-     * The {@link FileCollector#prune(boolean)} method should have been invoked once before to invoke this method.</p>
+     * The {@link FileCollector#prune()} method should have been invoked once before to invoke this method.</p>
      *
      * @param files the result of scanning the build directory for listing the files or directories to archive
      * @return the paths to the created archive files
