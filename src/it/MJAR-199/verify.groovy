@@ -40,7 +40,7 @@ try
         return false;
     }
 
-    File artifact = new File( target, "maven-jar-plugin-test-mjar-199-1.0-SNAPSHOT-tests.jar" );
+    artifact = new File( target, "maven-jar-plugin-test-mjar-199-1.0-SNAPSHOT-tests.jar" );
     if ( !artifact.exists() )
     {
         System.err.println( "test artifact should exist." );
