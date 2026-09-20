@@ -42,11 +42,11 @@ try
     }
 
     String log = new String(Files.readAllBytes(basedir.toPath().resolve("build.log")), "UTF-8");
-    String[] snippets = new String[] {
+    String[] snippets = [
       "[INFO] BUILD FAILURE",
       "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin",
       "Caused by: org.apache.maven.api.plugin.MojoException: Invalid automatic module name: \"in-valid.name.with.new.keyword\"."
-    };
+    ];
 
     System.out.println("\nVerifying log snippets...");
     for (String snippet : snippets) {
