@@ -27,5 +27,8 @@ assert cvsignore.exists()
 def artifact = new File(target, "mjar-296-exclude-default-1.0-SNAPSHOT.jar")
 assert artifact.exists()
 
+// Since plexus-utils 4.1.0, .cvsignore is no longer in the default excludes of
+// DirectoryScanner. As a result, maven-jar-plugin's default behaviour (addDefaultExcludes=true)
+// no longer excludes .cvsignore from the jar.
 def jar = new JarFile(artifact)
-assert ".cvsignore" !in jar.entries()*.name
+assert ".cvsignore" in jar.entries()*.name

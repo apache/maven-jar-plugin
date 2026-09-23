@@ -42,7 +42,7 @@ under the License.
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>@version.maven-surefire@</version>
+        <version>@version.maven-surefire-plugin@</version>
       </plugin>
     </plugins>
   </build>
