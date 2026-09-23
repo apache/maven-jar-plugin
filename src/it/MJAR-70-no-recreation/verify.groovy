@@ -40,10 +40,8 @@ if ( !refFile.isFile() )
 }
 
 long referenceTimestamp = refFile.lastModified();
-System.out.println( "Reference timestamp: " + referenceTimestamp );
 
 long actualTimestamp = jarFile.lastModified();
-System.out.println( "Actual timestamp   : " + actualTimestamp );
 
 if ( referenceTimestamp != actualTimestamp)
 {

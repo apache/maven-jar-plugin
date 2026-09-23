@@ -47,13 +47,10 @@ try
     Commandline commandline = new Commandline();
     commandline.setExecutable( "java" );
     commandline.setWorkingDirectory( localRepoPath );
-    System.out.println(" localRepoPath " + localRepoPath );
     commandline.createArg().setLine( "-jar MJAR-82-1.0-SNAPSHOT.jar" );
     CommandLineUtils.StringStreamConsumer consumer = new CommandLineUtils.StringStreamConsumer();
     int res = CommandLineUtils.executeCommandLine( commandline, consumer, consumer );
     String output = consumer.getOutput();
-    System.out.println( "res " + res );
-    System.out.println( output );
     if ( res != 0 )
     {
         System.err.println( "commandline execution return code != 0 " + res );
