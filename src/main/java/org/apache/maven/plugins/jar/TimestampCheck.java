@@ -81,7 +81,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
 
     /**
      * Some of the files in the build directory. This list contains only the files for which we have already
-     * verified the timestamp. We store them in a separate map to avoid to check the timestamp twice.
+     * verified the timestamp. We store them in a separate map to avoid checking the timestamp twice.
      * We need this map because we still need to verify if the files are in the {@link #jarFile}.
      * For each entry, the associated value is the file size, or -1 if unknown,
      * or {@value #ENTRY_IS_DIRECTORY} if the path is a directory.
