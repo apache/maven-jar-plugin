@@ -24,8 +24,8 @@
 
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>mjar-296-exclude-default</artifactId>
-  <name>mjar-296-suppress-default-excludes</name>
-  <description>Verifies that the resulting jar not includes files excluded by default</description>
+  <name>mjar-296-exclude-default</name>
+  <description>Verifies that .cvsignore is included by default since plexus-utils 4.1.0 removed it from the default excludes</description>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 

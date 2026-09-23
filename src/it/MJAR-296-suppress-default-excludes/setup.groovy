@@ -24,6 +24,9 @@ import java.nio.file.Paths
 // excluded files are not copied by m-invoker-p - so we need create one
 def resDir = basedir.toPath().resolve("src/main/resources")
 Files.createDirectories(resDir)
-Files.createFile(resDir.resolve(".cvsignore"))
+def cvsignore = resDir.resolve(".cvsignore")
+if (!Files.exists(cvsignore)) {
+    Files.createFile(cvsignore)
+}
 
 return true
