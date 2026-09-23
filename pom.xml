@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-plugins</artifactId>
-    <version>49</version>
+    <version>50</version>
     <relativePath />
   </parent>
 
@@ -249,7 +249,7 @@
               </goals>
               <showErrors>true</showErrors>
               <filterProperties>
-                <pluginPropertyUsedForFiltering>version.maven-surefire</pluginPropertyUsedForFiltering>
+                <pluginPropertyUsedForFiltering>version.maven-surefire-plugin</pluginPropertyUsedForFiltering>
               </filterProperties>
             </configuration>
             <executions>
