@@ -94,7 +94,7 @@
 
   <properties>
     <javaVersion>17</javaVersion>
-    <mavenVersion>4.0.0-rc-6</mavenVersion>
+    <mavenVersion>4.0.0-rc-7</mavenVersion>
 
     <guiceVersion>5.1.0</guiceVersion>
     <junitVersion>5.14.4</junitVersion>
