@@ -51,6 +51,21 @@ import org.apache.maven.shared.archiver.MavenArchiver;
  */
 public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Mojo {
     /**
+     * Minimum Unix time (seconds since epoch) accepted by the {@code jar} tool.
+     * The {@code jar} tool enforces that all ZIP entry timestamps fall within the range
+     * {@code 1980-01-01T00:00:02Z} to {@code 2099-12-31T23:59:59Z}.
+     * The lower bound is {@code T00:00:02Z} rather than {@code T00:00:00Z} because
+     * {@code 1980-01-01T00:00:00Z} is a sentinel value ({@code DOSTIME_BEFORE_1980}) in the
+     * JDK ZIP implementation that caused extra timezone metadata to be written, breaking
+     * reproducibility (fixed in JDK 15, see JDK-8246129). The value {@code T00:00:01Z} is not
+     * representable in MS-DOS time (2-second granularity), so {@code T00:00:02Z} is the lowest
+     * safe value.
+     * A JUnit test verifies that this constant equals
+     * {@code Instant.parse("1980-01-01T00:00:02Z").getEpochSecond()}.
+     */
+    static final long EPOCH_MIN = 315532802L;
+
+    /**
      * Identifier of the tool to use. This identifier must match the identifier of a tool
      * registered as a {@link ToolProvider}. By default, the {@code "jar"} tool is used.
      *
@@ -254,6 +269,14 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * Returns the output timestamp or, as a fallback, the {@code SOURCE_DATE_EPOCH} environment variable.
      * If the timestamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
      *
+     * <p>When the timestamp is given as a number of seconds and resolves to a date before {@code EPOCH_MIN}
+     * (1980-01-01T00:00:02Z — the minimum accepted by the {@code jar} tool; see {@link #EPOCH_MIN}),
+     * it is automatically clamped to that minimum and a warning is logged.
+     * This handles the common {@code SOURCE_DATE_EPOCH=0} convention used by Debian and other
+     * reproducible-build environments.</p>
+     *
+     * <p>ISO 8601 strings are returned as-is and validated by the {@code jar} tool directly.</p>
+     *
      * @return the timestamp in presumed ISO 8601 format, or {@code null} if none
      * @throws MojoException if the timestamp looks like a number of seconds but cannot be parsed as such
      *
@@ -270,13 +293,31 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         for (int i = time.length(); --i >= 0; ) {
             char c = time.charAt(i);
             if ((c < '0' || c > '9') && (i != 0 || c != '-')) {
+                // Not a plain integer — treat as ISO 8601 and pass through as-is.
                 return time;
             }
         }
+        // Plain integer: convert from seconds to ISO 8601, clamping to EPOCH_MIN if needed.
         try {
-            return Instant.ofEpochSecond(Long.parseLong(time)).toString();
+            long seconds = Long.parseLong(time);
+            if (seconds < EPOCH_MIN) {
+                String instant = Instant.ofEpochSecond(seconds).toString();
+                String minValid = Instant.ofEpochSecond(EPOCH_MIN).toString();
+                log.warn("Output timestamp \""
+                        + time
+                        + "\" (resolved to "
+                        + instant
+                        + ") is before the minimum value accepted by the jar tool ("
+                        + minValid
+                        + "). Clamping to minimum. "
+                        + "If you use SOURCE_DATE_EPOCH=0, set it to at least "
+                        + minValid
+                        + '.');
+                return minValid;
+            }
+            return Instant.ofEpochSecond(seconds).toString();
         } catch (NumberFormatException | DateTimeException e) {
-            throw new MojoException("Timestamp \"" + time + "\" is not a number of seconds.", e);
+            throw new MojoException("Timestamp \"" + time + "\" is not a valid number of seconds.", e);
         }
     }
 
