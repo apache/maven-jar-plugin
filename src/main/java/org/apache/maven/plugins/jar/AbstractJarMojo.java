@@ -51,12 +51,6 @@ import org.apache.maven.shared.archiver.MavenArchiver;
  */
 public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Mojo {
     /**
-     * Minimum timestamp accepted by the {@code jar} tool (ZIP format constraint: entries must be ≥ 1980-01-01).
-     * Timestamps before this value are automatically clamped to this minimum with a warning.
-     */
-    static final Instant DATE_MIN = Instant.parse("1980-01-01T00:00:02Z");
-
-    /**
      * Identifier of the tool to use. This identifier must match the identifier of a tool
      * registered as a {@link ToolProvider}. By default, the {@code "jar"} tool is used.
      *
@@ -260,14 +254,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * Returns the output timestamp or, as a fallback, the {@code SOURCE_DATE_EPOCH} environment variable.
      * If the timestamp is expressed in seconds, it is converted to ISO 8601 format. Otherwise it is returned as-is.
      *
-     * <p>When the timestamp is given as a number of seconds and resolves to a date before {@code DATE_MIN}
-     * (1980-01-01T00:00:02Z — the minimum accepted by the {@code jar} tool due to the ZIP format constraint),
-     * it is automatically clamped to that minimum and a warning is logged.
-     * This handles the common {@code SOURCE_DATE_EPOCH=0} convention used by Debian and other
-     * reproducible-build environments.</p>
-     *
-     * <p>ISO 8601 strings are returned as-is and validated by the {@code jar} tool directly.</p>
-     *
      * @return the timestamp in presumed ISO 8601 format, or {@code null} if none
      * @throws MojoException if the timestamp looks like a number of seconds but cannot be parsed as such
      *
@@ -284,25 +270,11 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         for (int i = time.length(); --i >= 0; ) {
             char c = time.charAt(i);
             if ((c < '0' || c > '9') && (i != 0 || c != '-')) {
-                // Not a plain integer — treat as ISO 8601 and pass through as-is.
                 return time;
             }
         }
-        // Plain integer: convert from seconds to ISO 8601, clamping to DATE_MIN if needed.
         try {
-            Instant instant = Instant.ofEpochSecond(Long.parseLong(time));
-            if (instant.isBefore(DATE_MIN)) {
-                log.warn("Output timestamp \""
-                        + time
-                        + "\" (resolved to "
-                        + instant
-                        + ") is before the minimum value accepted by the jar tool ("
-                        + DATE_MIN
-                        + "). Clamping to minimum. "
-                        + "If you use SOURCE_DATE_EPOCH=0, set it to at least 315532802 (1980-01-01T00:00:02Z).");
-                return DATE_MIN.toString();
-            }
-            return instant.toString();
+            return Instant.ofEpochSecond(Long.parseLong(time)).toString();
         } catch (NumberFormatException | DateTimeException e) {
             throw new MojoException("Timestamp \"" + time + "\" is not a number of seconds.", e);
         }
