@@ -88,7 +88,7 @@ final class FileCollector extends SimpleFileVisitor<Path> {
     private final boolean detectMultiReleaseJar;
 
     /**
-     * Wether to skip creating empty archives.
+     * Whether to skip creating empty archives.
      * If {@code true}, the {@code FileCollector} needs to check if at least one regular file exists.
      * If {@code false} and there are no include/exclude filters, it is okay to visit only directories.
      * The default value is {@code false}.
@@ -447,8 +447,8 @@ final class FileCollector extends SimpleFileVisitor<Path> {
                 }
                 currentFilesToArchive.add(file, attributes, false);
             }
-        } else if (excludedFiles != null) {
-            excludedFiles.add(file);
+        } else {
+            excludedFiles.add(file); // Cannot be null if excluded files may exist.
         }
         return FileVisitResult.CONTINUE;
     }
