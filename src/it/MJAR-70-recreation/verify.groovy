@@ -60,11 +60,9 @@ String[] lines = buildLogContent.split( "\n" );
 for ( String line : lines ) {
     if ( line.contains( "Building JAR:" ) && line.contains( "MJAR-70-recreation-1.0-SNAPSHOT.jar" ) ) {
         jarPluginExecutions++;
-        System.out.println( "Found JAR creation: " + line );
     }
 }
 
-System.out.println( "JAR plugin executions found: " + jarPluginExecutions );
 
 // With forceCreation=true, the JAR should be built twice:
 // 1. During the first package phase
@@ -77,19 +75,11 @@ if ( jarPluginExecutions < 2 ) {
 long referenceTimestamp = refFile.lastModified();
 long actualTimestamp = jarFile.lastModified();
 
-System.out.println( "Reference timestamp: " + referenceTimestamp );
-System.out.println( "Actual timestamp   : " + actualTimestamp );
 
 // With forceCreation=true, the second build should create a new JAR file
 // even if the content is identical, so the timestamp should be different
 if ( referenceTimestamp >= actualTimestamp ) {
     // This might fail with reproducible builds, so let's make it a warning instead of an error
-    System.out.println( "WARNING: Timestamps are the same, but this might be expected with reproducible builds" );
-    System.out.println( "The important check is that the JAR plugin executed multiple times, which it did." );
-} else {
-    System.out.println( "SUCCESS: JAR timestamp changed, confirming recreation" );
 }
-
-System.out.println( "SUCCESS: JAR was recreated as expected with forceCreation=true" );
 
 return true;

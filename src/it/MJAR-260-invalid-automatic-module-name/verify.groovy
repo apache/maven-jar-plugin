@@ -48,14 +48,12 @@ try
       "Caused by: org.apache.maven.api.plugin.MojoException: Invalid automatic module name: \"in-valid.name.with.new.keyword\"."
     ];
 
-    System.out.println("\nVerifying log snippets...");
     for (String snippet : snippets) {
       if (!log.contains(snippet)) {
         System.err.println("XXX| Snippet `" + snippet + "` not found");
         result = false;
         continue;
       }
-      System.out.println("   | `" + snippet + "` found in log");
     }
 }
 catch( Throwable e )
