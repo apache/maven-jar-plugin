@@ -25,7 +25,7 @@ under the License.
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>it-mjar-71</name>
-  <description>Test that the default manifest is added by default if found under target/classes. Can also be overriden.</description>
+  <description>Test that the specified manifest is used.</description>
   <url>http://maven.apache.org</url>
 
   <build>
@@ -36,7 +36,7 @@ under the License.
         <version>@project.version@</version>
         <configuration>
           <archive>
-            <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+            <manifestFile>src/main/my-custom-dir/some-manifest.mf</manifestFile>
           </archive>
         </configuration>
       </plugin>

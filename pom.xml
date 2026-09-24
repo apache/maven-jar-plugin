@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-plugins</artifactId>
-    <version>49</version>
+    <version>50</version>
     <relativePath />
   </parent>
 
@@ -34,6 +34,26 @@
   <name>Apache Maven JAR Plugin</name>
   <description>Builds a Java Archive (JAR) file from the compiled project classes and resources.</description>
 
+  <developers>
+    <developer>
+      <id>evenisse</id>
+      <name>Emmanuel Venisse</name>
+      <email>evenisse@apache.org</email>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>desruisseaux</id>
+      <name>Martin Desruisseaux</name>
+      <email>desruisseaux@apache.org</email>
+      <organization>Geomatys</organization>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
   <contributors>
     <contributor>
       <name>Jerome Lacoste</name>
@@ -74,7 +94,7 @@
 
   <properties>
     <javaVersion>17</javaVersion>
-    <mavenVersion>4.0.0-rc-4</mavenVersion>
+    <mavenVersion>4.0.0-rc-6</mavenVersion>
 
     <guiceVersion>5.1.0</guiceVersion>
     <junitVersion>5.14.4</junitVersion>
@@ -82,7 +102,7 @@
     <mavenFileManagementVersion>3.2.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
     <mavenPluginTestingVersion>4.0.0-beta-4</mavenPluginTestingVersion>
-    <plexusArchiverVersion>4.12.0</plexusArchiverVersion>
+    <plexusArchiverVersion>4.14.0</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
     <version.plexus-xml>4.0.3</version.plexus-xml>
@@ -95,7 +115,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.6.0-jre</version>
+        <version>33.7.1-jre</version>
       </dependency>
       <dependency>
         <groupId>org.junit</groupId>
@@ -134,20 +154,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-api-xml</artifactId>
+      <artifactId>maven-support</artifactId>
       <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-xml</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>file-management</artifactId>
-      <version>${mavenFileManagementVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
@@ -169,12 +177,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-testing</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
       <version>${mavenVersion}</version>
       <scope>test</scope>
     </dependency>
@@ -207,6 +209,15 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <configuration>
+            <ignoredUnusedDeclaredDependencies>
+              <ignoredUnusedDeclaredDependency>com.google.inject:guice:classes</ignoredUnusedDeclaredDependency>
+            </ignoredUnusedDeclaredDependencies>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
@@ -214,8 +225,9 @@
               <!--
                 ! The manifest specification does not describe any method for writing comments into the manifest.
               -->
-              <exclude>src/it/mjar-71-01/src/main/resources/META-INF/MANIFEST.MF</exclude>
+              <exclude>src/it/mjar-71-01/src/main/my-custom-dir/some-manifest.mf</exclude>
               <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
+              <exclude>src/it/MJAR-557-detect-mjar/src/main/resources/META-INF/versions/9/test.txt</exclude>
             </excludes>
           </configuration>
         </plugin>
@@ -238,7 +250,7 @@
               </goals>
               <showErrors>true</showErrors>
               <filterProperties>
-                <pluginPropertyUsedForFiltering>version.maven-surefire</pluginPropertyUsedForFiltering>
+                <pluginPropertyUsedForFiltering>version.maven-surefire-plugin</pluginPropertyUsedForFiltering>
               </filterProperties>
             </configuration>
             <executions>

@@ -33,3 +33,9 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "maven-jar-plugin-3.x"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "maven-jar-plugin-3.x"

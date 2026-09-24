@@ -20,6 +20,7 @@ package org.apache.maven.plugins.jar;
 
 import java.nio.file.Path;
 
+import org.apache.maven.api.PathScope;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
 
@@ -67,5 +68,15 @@ public class JarMojo extends AbstractJarMojo {
     @Override
     protected Path getClassesDirectory() {
         return classesDirectory;
+    }
+
+    /**
+     * Returns the scope of dependencies for main code.
+     *
+     * @return {@link PathScope#MAIN_COMPILE}
+     */
+    @Override
+    protected PathScope getDependencyScope() {
+        return PathScope.MAIN_COMPILE;
     }
 }

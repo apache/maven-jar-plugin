@@ -25,7 +25,7 @@ under the License.
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>it-mjar-71-02</name>
-  <description>Test that the default manifest is not added when found under target/classes but support is disabled.</description>
+  <description>Test that the manifest found under target/classes is automatically used.</description>
   <url>http://maven.apache.org</url>
 
   <build>
