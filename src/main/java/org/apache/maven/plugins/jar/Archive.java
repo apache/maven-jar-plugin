@@ -134,6 +134,12 @@ final class Archive {
         final List<Path> files;
 
         /**
+         * Whether the list of files contain at least one regular file.
+         * This is read and updated by {@link FileCollector}.
+         */
+        boolean hasRegularFiles;
+
+        /**
          * Creates an initially empty set of files or directories for a specific target Java release.
          *
          * @param directory the base directory of the files or directories to archive
@@ -141,6 +147,18 @@ final class Archive {
         private FileSet(Path directory) {
             this.directory = directory;
             this.files = new ArrayList<>();
+        }
+
+        /**
+         * Returns whether this file set is empty.
+         * If {@code wantRegularFiles} is {@code true}, this method returns {@code true}
+         * even for a non-empty file set if all paths are directories with no regular files.
+         *
+         * @param wantRegularFiles whether the file set should contain at least one regular file
+         * @return whether this file set is empty
+         */
+        boolean isEmpty(boolean wantRegularFiles) {
+            return wantRegularFiles ? !hasRegularFiles : files.isEmpty();
         }
 
         /**
@@ -342,7 +360,7 @@ final class Archive {
         FileSet keep = (skipIfEmpty || isEmpty())
                 ? null
                 : filesetForRelease.firstEntry().getValue();
-        filesetForRelease.values().removeIf((fs) -> fs.files.isEmpty());
+        filesetForRelease.values().removeIf((fs) -> fs.isEmpty(skipIfEmpty));
         Iterator<Map.Entry<Runtime.Version, FileSet>> it =
                 filesetForRelease.entrySet().iterator();
         if (it.hasNext()) {
@@ -362,7 +380,7 @@ final class Archive {
      * {@return whether this archive has nothing to archive}
      * This method can return {@code false} even when there are no file to archive.
      * It can happen if {@link AbstractJarMojo#skipIfEmpty} is {@code false}. In this case,
-     * the "empty" <abbr>JAR</abbr> file will still contain at {@code META-INF/MANIFEST.MF} file.
+     * the "empty" <abbr>JAR</abbr> file will still contain a {@code META-INF/MANIFEST.MF} file.
      *
      * <p><b>Prerequisites:</b>
      * The {@link #prune(boolean)} method should be invoked before this method for accurate result.</p>

@@ -388,7 +388,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         if (!notExists) {
             Files.walkFileTree(classesDirectory, files);
         }
-        files.prune(skipIfEmpty);
+        files.prune();
         List<Path> moduleRoots = files.getModuleHierarchyRoots();
         if (!moduleRoots.isEmpty()) {
             executor.pomDerivation = new PomDerivation(this, moduleRoots);
