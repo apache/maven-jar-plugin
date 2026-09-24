@@ -132,7 +132,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * can lead to failures when those plugins do not expect to find their own output as an input.
      * Setting this parameter to {@code true} avoids this problem.
      * Starting with <b>4.0.0-beta-2</b>, setting this parameter can be unnecessary because the JAR plugin
-     * compares also the file lengths and checks if the JAR file contains additional entries.
+     * also compares the file lengths and checks if the JAR file contains additional entries.
      * Nevertheless, it can be safer to set this parameter to {@code true} anyway
      * when it is certain that post-processing will be applied.</p>
      *
