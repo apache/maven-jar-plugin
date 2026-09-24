@@ -74,17 +74,47 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      * Files found in the <abbr>JAR</abbr> file but not yet traversed by the file visitor.
      * Files are added lazily when needed, and removed as soon as they have been traversed.
      * Paths are absolute (resolved with {@link #classesDir}).
-     * For each entry, the associated value is whether the path is a directory.
+     * For each entry, the associated value is the file size, or -1 if unknown,
+     * or {@value #ENTRY_IS_DIRECTORY} if the path is a directory.
      */
-    private final Map<Path, Boolean> filesInJAR;
+    private final Map<Path, Long> filesInJAR;
 
     /**
      * Some of the files in the build directory. This list contains only the files for which we have already
-     * verified the timestamp. We store them in a separate list to avoid checking to check the timestamp twice.
-     * We need this list because we still need to verify if the files are in the {@link #jarFile}.
-     * For each entry, the associated value is whether the path is a directory.
+     * verified the timestamp. We store them in a separate map to avoid checking the timestamp twice.
+     * We need this map because we still need to verify if the files are in the {@link #jarFile}.
+     * For each entry, the associated value is the file size, or -1 if unknown,
+     * or {@value #ENTRY_IS_DIRECTORY} if the path is a directory.
      */
-    private final Map<Path, Boolean> filesInBuild;
+    private final Map<Path, Long> filesInBuild;
+
+    /**
+     * Sentinel length stored in {@link #filesInJAR}/{@link #filesInBuild} for entries that are directories.
+     * Directories have no meaningful length to compare.
+     */
+    private static final long ENTRY_IS_DIRECTORY = -2;
+
+    /**
+     * {@return whether the given encoded length denotes a directory entry}
+     *
+     * @param size an encoded length from {@link #filesInJAR} or {@link #filesInBuild}
+     */
+    private static boolean isDirectory(final long size) {
+        return size == ENTRY_IS_DIRECTORY;
+    }
+
+    /**
+     * {@return whether two entry lengths are considered equal for change detection}
+     * A negative length cannot be compared — it denotes either a directory ({@value #ENTRY_IS_DIRECTORY})
+     * or an unknown size (e.g. {@link ZipEntry#getSize()} returned -1) — so it is treated as a match.
+     * Two known (non-negative) lengths must be equal.
+     *
+     * @param a the length of the file in the build directory, or a negative sentinel
+     * @param b the length of the corresponding entry in the <abbr>JAR</abbr>, or a negative sentinel
+     */
+    private static boolean sizesMatch(final long a, final long b) {
+        return a < 0 || b < 0 || a == b;
+    }
 
     /**
      * Whether at least one file is more recent than the <abbr>JAR</abbr> file.
@@ -122,7 +152,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
         if (jarFileTime.compareTo(attributes.lastModifiedTime()) < 0) {
             return true;
         }
-        filesInBuild.put(file, isDirectory);
+        filesInBuild.put(file, isDirectory ? ENTRY_IS_DIRECTORY : attributes.size());
         return false;
     }
 
@@ -136,22 +166,22 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
         // No need to use JarFile because no need to handle META-INF in a special way.
         try (ZipFile jar = new ZipFile(jarFile.toFile())) {
             entries = jar.entries();
-            for (Path file : filesInBuild.keySet()) {
-                if (!removeFromFilesInJAR(file)) {
+            for (Map.Entry<Path, Long> entry : filesInBuild.entrySet()) {
+                if (!removeFromFilesInJAR(entry.getKey(), entry.getValue())) {
                     return false;
                 }
             }
-            // Verify the timestamps of files that were not verified by `isUpdate(…)`.
+            // Verify the timestamps of files that were not verified by `isUpdated(…)`.
             for (Archive.FileSet fileSet : fileSets) {
                 Path directory = null;
                 for (Path file : fileSet.files) {
-                    final Boolean isDirectory = filesInBuild.remove(file);
-                    if (isDirectory == null) { // For skipping the files already verified by the first loop.
+                    final Long size = filesInBuild.remove(file);
+                    if (size == null) { // For skipping the files already verified by the first loop.
                         if (hasUpdatedInSubdir(directory)) {
                             return false;
                         }
                         directory = null;
-                    } else if (isDirectory) {
+                    } else if (isDirectory(size)) {
                         // Because of files order, it is sufficient to remember only the last directory.
                         directory = file;
                     }
@@ -161,8 +191,8 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
                 }
             }
             // Check for remaining files in the JAR which were not in the build directory.
-            for (Map.Entry<Path, Boolean> entry : filesInJAR.entrySet()) {
-                if (!(entry.getValue() || isIgnored(classesDir.relativize(entry.getKey())))) {
+            for (Map.Entry<Path, Long> entry : filesInJAR.entrySet()) {
+                if (!(isDirectory(entry.getValue()) || isIgnored(classesDir.relativize(entry.getKey())))) {
                     return false;
                 }
             }
@@ -228,7 +258,8 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      */
     @Override
     public FileVisitResult visitFile(final Path file, final BasicFileAttributes attributes) {
-        if (jarFileTime.compareTo(attributes.lastModifiedTime()) >= 0 && removeFromFilesInJAR(file)) {
+        if (jarFileTime.compareTo(attributes.lastModifiedTime()) >= 0
+                && removeFromFilesInJAR(file, attributes.size())) {
             return FileVisitResult.CONTINUE;
         } else {
             hasUpdates = true;
@@ -239,21 +270,25 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
     /**
      * Returns whether the given file is found in the <abbr>JAR</abbr> file.
      * If the file is found, it is removed from the {@link #filesInJAR} map.
+     * This method also verifies that the file in the JAR has the expected length.
      *
      * @param file the file to check
+     * @param size file size in bytes, or negative if unknown or not applicable
      * @return whether the given file was found in the <abbr>JAR</abbr> file
      */
-    private boolean removeFromFilesInJAR(final Path file) {
-        if (filesInJAR.remove(file) != null) {
-            return true;
+    private boolean removeFromFilesInJAR(final Path file, final long size) {
+        Long sizeInJAR = filesInJAR.remove(file);
+        if (sizeInJAR != null) {
+            return sizesMatch(size, sizeInJAR);
         }
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
             Path p = classesDir.resolve(entry.getName());
+            long entrySize = entry.isDirectory() ? ENTRY_IS_DIRECTORY : entry.getSize();
             if (p.equals(file)) {
-                return true;
+                return sizesMatch(size, entrySize);
             }
-            filesInJAR.put(p, entry.isDirectory());
+            filesInJAR.put(p, entrySize);
         }
         return false;
     }
