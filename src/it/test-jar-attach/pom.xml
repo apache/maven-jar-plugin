@@ -28,7 +28,6 @@
   <description>Verifies that setting the attach property to false will not install it in the local repository</description>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputTimestamp>2023-11-19T13:25:58Z</project.build.outputTimestamp>
   </properties>
 

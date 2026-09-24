@@ -27,7 +27,6 @@
   <description>Verifies that the modular descriptor is reproducible (timestamp is set)</description>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputTimestamp>2022-06-26T13:25:58Z</project.build.outputTimestamp>
   </properties>
 

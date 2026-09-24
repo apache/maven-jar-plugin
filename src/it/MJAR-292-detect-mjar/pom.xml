@@ -28,7 +28,6 @@
   <description>Verifies that the multi-release jar contains the manifest entry</description>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputTimestamp>2022-12-22T13:25:58Z</project.build.outputTimestamp>
   </properties>
 
