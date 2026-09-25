@@ -42,7 +42,7 @@ public class TestJarMojo extends AbstractJarMojo {
      * Use {@code -DskipTests} or, with Maven&nbsp;4.1+, {@code --skip-tests} to skip test
      * <em>execution</em> without preventing the test-jar from being built.</p>
      *
-     * @since 2.2
+     * @since 4.0.0-beta-2
      */
     @Parameter(property = "maven.test.jar.skip", defaultValue = "false")
     private boolean skip;
