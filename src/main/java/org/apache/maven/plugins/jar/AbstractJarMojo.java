@@ -123,6 +123,28 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
     /**
+     * Whether to add default implementation entries ({@code Implementation-Title},
+     * {@code Implementation-Version}, {@code Implementation-Vendor}) to the {@code MANIFEST.MF}.
+     * When set on the command line or via a system property, this overrides the value configured
+     * inside {@code <archive><manifest><addDefaultImplementationEntries>}.
+     *
+     * @since 3.4.3
+     */
+    @Parameter(property = "maven.jar.manifest.addDefaultImplementationEntries")
+    private Boolean addDefaultImplementationEntries;
+
+    /**
+     * Whether to add default specification entries ({@code Specification-Title},
+     * {@code Specification-Version}, {@code Specification-Vendor}) to the {@code MANIFEST.MF}.
+     * When set on the command line or via a system property, this overrides the value configured
+     * inside {@code <archive><manifest><addDefaultSpecificationEntries>}.
+     *
+     * @since 3.4.3
+     */
+    @Parameter(property = "maven.jar.manifest.addDefaultSpecificationEntries")
+    private Boolean addDefaultSpecificationEntries;
+
+    /**
      * The service to use for attaching the artifacts produced by this plugin.
      */
     @Inject
@@ -426,6 +448,12 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             }
         }
         archive.setForced(forceCreation);
+        if (addDefaultImplementationEntries != null) {
+            archive.getManifest().setAddDefaultImplementationEntries(addDefaultImplementationEntries);
+        }
+        if (addDefaultSpecificationEntries != null) {
+            archive.getManifest().setAddDefaultSpecificationEntries(addDefaultSpecificationEntries);
+        }
         // TODO: we want a null manifest if there is no <archive> configuration.
         final var archiver = new MavenArchiver();
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
