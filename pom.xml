@@ -221,7 +221,7 @@
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
-            <inputExcludes>
+            <inputExcludes combine.children="append">
               <!--
                 ! The manifest specification does not describe any method for writing comments into the manifest.
               -->
