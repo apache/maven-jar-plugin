@@ -451,6 +451,15 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     @Override
     @SuppressWarnings("UseSpecificCatch")
     public void execute() throws MojoException {
+        if (project.getMainArtifact().isEmpty()) {
+            log.warn("Project packaging '"
+                    + project.getPackaging().id()
+                    + "' does not produce a main artifact. "
+                    + "Skipping JAR creation. "
+                    + "If this goal was invoked directly or via a plugin binding, "
+                    + "consider removing the binding or switching to a packaging that produces a JAR.");
+            return;
+        }
         final Map<String, Map<String, Path>> artifactFiles;
         try {
             artifactFiles = createArchives();
