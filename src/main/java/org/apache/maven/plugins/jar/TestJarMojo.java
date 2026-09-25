@@ -35,9 +35,16 @@ public class TestJarMojo extends AbstractJarMojo {
 
     /**
      * Set this to {@code true} to bypass test-jar generation.
-     * Its use is not recommended, but quite convenient on occasion.
+     *
+     * <p>Note: unlike {@code -Dmaven.test.skip=true} (which also skips test compilation and makes
+     * the test-jar unavailable to downstream modules), this flag suppresses only the packaging step
+     * while leaving test classes compiled and accessible within the reactor.
+     * Use {@code -DskipTests} or, with Maven&nbsp;4.1+, {@code --skip-tests} to skip test
+     * <em>execution</em> without preventing the test-jar from being built.</p>
+     *
+     * @since 2.2
      */
-    @Parameter(property = "maven.test.skip")
+    @Parameter(property = "maven.test.jar.skip", defaultValue = "false")
     private boolean skip;
 
     /**
