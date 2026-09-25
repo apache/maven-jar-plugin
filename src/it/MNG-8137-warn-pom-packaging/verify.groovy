@@ -19,9 +19,6 @@
 
 import java.nio.file.*;
 
-// Build must succeed — the plugin should warn and skip, not fail.
-assert new File(basedir, "target").exists() || !new File(basedir, "target").exists() : "sanity"
-
 // No JAR should be created.
 File jar = new File(basedir, "target/maven-jar-plugin-test-mng-8137-1.0.jar")
 assert !jar.exists() : "JAR must NOT be created for pom packaging, but found: " + jar
