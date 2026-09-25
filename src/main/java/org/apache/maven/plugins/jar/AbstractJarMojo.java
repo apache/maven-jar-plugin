@@ -128,7 +128,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * When set on the command line or via a system property, this overrides the value configured
      * inside {@code <archive><manifest><addDefaultImplementationEntries>}.
      *
-     * @since 3.4.3
+     * @since 4.0.0-beta-2
      */
     @Parameter(property = "maven.jar.manifest.addDefaultImplementationEntries")
     private Boolean addDefaultImplementationEntries;
@@ -139,7 +139,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * When set on the command line or via a system property, this overrides the value configured
      * inside {@code <archive><manifest><addDefaultSpecificationEntries>}.
      *
-     * @since 3.4.3
+     * @since 4.0.0-beta-2
      */
     @Parameter(property = "maven.jar.manifest.addDefaultSpecificationEntries")
     private Boolean addDefaultSpecificationEntries;
