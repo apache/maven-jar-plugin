@@ -21,27 +21,10 @@
 // The model module's test-jar must be produced so the client module can
 // resolve it as a reactor artifact and compile its test sources against it.
 
-import java.io.*;
+// 1. The model test-jar must have been produced despite -DskipTests.
+File testJar = new File(basedir, "model/target/model-1.0-SNAPSHOT-tests.jar");
+assert testJar.isFile(), "MJAR-138: model test-jar is missing: " + testJar
 
-boolean result = true;
-
-try {
-    // 1. The model test-jar must have been produced despite -DskipTests.
-    File testJar = new File(basedir, "model/target/model-1.0-SNAPSHOT-tests.jar");
-    if (!testJar.isFile()) {
-        System.err.println("MJAR-138: model test-jar is missing: " + testJar);
-        return false;
-    }
-
-    // 2. The client's test classes must have compiled (they depend on TestComponent from the test-jar).
-    File clientTestClasses = new File(basedir, "client/target/test-classes/org/apache/maven/its/mjar138/ClientTest.class");
-    if (!clientTestClasses.isFile()) {
-        System.err.println("MJAR-138: client test classes not compiled (test-jar was not available in reactor): " + clientTestClasses);
-        return false;
-    }
-} catch (Throwable e) {
-    e.printStackTrace();
-    result = false;
-}
-
-return result;
+// 2. The client's test classes must have compiled (they depend on TestComponent from the test-jar).
+File clientTestClasses = new File(basedir, "client/target/test-classes/org/apache/maven/its/mjar138/ClientTest.class");
+assert clientTestClasses.isFile(), "MJAR-138: client test classes not compiled (test-jar was not available in reactor): " + clientTestClasses
