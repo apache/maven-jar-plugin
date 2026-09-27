@@ -28,14 +28,14 @@ boolean result = true;
 try {
     // 1. The model test-jar must have been produced despite -DskipTests.
     File testJar = new File(basedir, "model/target/model-1.0-SNAPSHOT-tests.jar");
-    if (!testJar.exists() || testJar.isDirectory()) {
+    if (!testJar.isFile()) {
         System.err.println("MJAR-138: model test-jar is missing: " + testJar);
         return false;
     }
 
     // 2. The client's test classes must have compiled (they depend on TestComponent from the test-jar).
     File clientTestClasses = new File(basedir, "client/target/test-classes/org/apache/maven/its/mjar138/ClientTest.class");
-    if (!clientTestClasses.exists()) {
+    if (!clientTestClasses.isFile()) {
         System.err.println("MJAR-138: client test classes not compiled (test-jar was not available in reactor): " + clientTestClasses);
         return false;
     }
