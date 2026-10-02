@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 import java.util.spi.ToolProvider;
 
 import org.apache.maven.api.Project;
@@ -68,6 +69,104 @@ final class ToolExecutor {
      * for strictly reproducible builds.
      */
     private static final String CREATED_BY = "Created-By";
+
+    /**
+     * Matches any character that is not an ASCII letter or digit.
+     * Used by {@link #cleanModuleName(String)} to mirror the JDK's {@code ModulePath.cleanModuleName()} algorithm.
+     */
+    private static final Pattern NON_ALPHANUM = Pattern.compile("[^A-Za-z0-9]");
+
+    /**
+     * Matches two or more consecutive dots.
+     * Used by {@link #cleanModuleName(String)} to collapse repeated separators.
+     */
+    private static final Pattern REPEATING_DOTS = Pattern.compile("\\.{2,}");
+
+    /**
+     * Sanitizes a candidate automatic module name by applying the same algorithm that the JDK uses
+     * to derive an automatic module name from a JAR file name
+     * (see {@code jdk.internal.module.ModulePath.cleanModuleName()}):
+     * non-alphanumeric characters (including hyphens) are replaced with {@code '.'}, repeated dots
+     * are collapsed to a single dot, and leading/trailing dots are stripped.
+     *
+     * @param  name the raw, potentially invalid module name
+     * @return the sanitized name, or an empty string if nothing remains after sanitization
+     */
+    private static String cleanModuleName(String name) {
+        name = NON_ALPHANUM.matcher(name).replaceAll(".");
+        name = REPEATING_DOTS.matcher(name).replaceAll(".");
+        int len = name.length();
+        if (len > 0 && name.charAt(0) == '.') {
+            name = name.replaceFirst("^\\.+", "");
+        }
+        len = name.length();
+        if (len > 0 && name.charAt(len - 1) == '.') {
+            name = name.replaceFirst("\\.+$", "");
+        }
+        return name;
+    }
+
+    /**
+     * Validates the {@code Automatic-Module-Name} attribute in the given manifest.
+     * If the attribute is absent or already valid, this method does nothing and returns {@code false}.
+     *
+     * <p>If the name is invalid and was explicitly declared in the POM via
+     * {@code <archive><manifestEntries><Automatic-Module-Name>}, the build fails immediately
+     * (the developer chose that name and must fix it).</p>
+     *
+     * <p>If the name is invalid and was read from a {@code MANIFEST.MF} file (e.g. from the
+     * compiled output directory), the {@linkplain #cleanModuleName(String) JDK sanitization
+     * algorithm} is applied and a warning is logged.  If the sanitized name is still invalid
+     * the attribute is removed and a warning is logged (MJAR-596).</p>
+     *
+     * @param  manifest the merged manifest to inspect and potentially modify
+     * @return {@code true} if the manifest was modified and a temporary manifest file must be written
+     * @throws MojoException if the name was explicitly declared in POM configuration and is invalid
+     */
+    private boolean sanitizeAutomaticModuleName(Manifest manifest) {
+        String name = manifest.getMainAttributes().getValue("Automatic-Module-Name");
+        if (name == null || SourceVersion.isName(name)) {
+            return false;
+        }
+        /*
+         * If the invalid name originates from an explicit <archive><manifestEntries> declaration
+         * in the POM, fail the build so that the developer is alerted immediately — they set an
+         * invalid name on purpose and should fix it.  This matches the historical maven-archiver
+         * behaviour (MJAR-260).
+         *
+         * If the name was read from a MANIFEST.MF file (either from the compiled output directory
+         * or from <archive><manifestFile>), apply the same sanitization algorithm the JDK uses
+         * when deriving an automatic module name from a JAR filename
+         * (ModulePath.cleanModuleName): replace non-alphanumeric characters with '.', collapse
+         * repeated dots, strip leading/trailing dots.  This handles the common case where a
+         * project sets Automatic-Module-Name to "${project.groupId}.${project.artifactId}" and
+         * the artifactId contains hyphens (MJAR-596).
+         */
+        String pluginName = (manifestFromPlugin != null)
+                ? manifestFromPlugin.getMainAttributes().getValue("Automatic-Module-Name")
+                : null;
+        if (name.equals(pluginName)) {
+            throw new MojoException("Invalid automatic module name: \"" + name + "\".");
+        }
+        String sanitized = cleanModuleName(name);
+        if (!sanitized.isEmpty() && SourceVersion.isName(sanitized)) {
+            logger.warn("Automatic-Module-Name \"" + name + "\" is not a valid Java module name."
+                    + " It has been sanitized to \"" + sanitized + "\""
+                    + " using the same algorithm the JDK uses to derive automatic module names"
+                    + " from JAR file names."
+                    + " Consider setting a valid name explicitly"
+                    + " in <archive><manifestEntries><Automatic-Module-Name>.");
+            manifest.getMainAttributes().putValue("Automatic-Module-Name", sanitized);
+        } else {
+            logger.warn("Automatic-Module-Name \"" + name + "\" is not a valid Java module name"
+                    + " and cannot be sanitized to a valid name."
+                    + " The attribute will be omitted from the manifest."
+                    + " Consider setting a valid name explicitly"
+                    + " in <archive><manifestEntries><Automatic-Module-Name>.");
+            manifest.getMainAttributes().remove(new Attributes.Name("Automatic-Module-Name"));
+        }
+        return true;
+    }
 
     /**
      * The Maven project for which to create an archive.
@@ -367,10 +466,7 @@ final class ToolExecutor {
         }
         writeTemporaryManifest |= archive.setMainClass(manifest);
         if (manifest != null) {
-            String name = manifest.getMainAttributes().getValue("Automatic-Module-Name");
-            if (name != null && !SourceVersion.isName(name)) {
-                throw new MojoException("Invalid automatic module name: \"" + name + "\".");
-            }
+            writeTemporaryManifest |= sanitizeAutomaticModuleName(manifest);
         }
         /*
          * Creates temporary files for META-INF (if the existing file cannot be used directly)
