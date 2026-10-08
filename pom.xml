@@ -193,13 +193,13 @@
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
-            <excludes combine.children="append">
+            <inputExcludes>
               <!--
                 ! The manifest specification does not describe any method for writing comments into the manifest.
               -->
               <exclude>src/it/mjar-71-01/src/main/resources/META-INF/MANIFEST.MF</exclude>
               <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
-            </excludes>
+            </inputExcludes>
           </configuration>
         </plugin>
       </plugins>
