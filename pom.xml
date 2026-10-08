@@ -98,11 +98,9 @@
 
     <guiceVersion>5.1.0</guiceVersion>
     <junitVersion>5.14.4</junitVersion>
-    <mavenArchiverVersion>4.0.0-beta-5</mavenArchiverVersion>
     <mavenFileManagementVersion>3.2.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
     <mavenPluginTestingVersion>4.0.0-beta-4</mavenPluginTestingVersion>
-    <plexusArchiverVersion>4.14.0</plexusArchiverVersion>
 
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
     <version.plexus-xml>4.0.3</version.plexus-xml>
@@ -136,6 +134,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
+      <artifactId>maven-api-xml</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
       <artifactId>maven-api-di</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
@@ -156,16 +160,6 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-support</artifactId>
       <version>${mavenVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-archiver</artifactId>
-      <version>${mavenArchiverVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-archiver</artifactId>
-      <version>${plexusArchiverVersion}</version>
     </dependency>
 
     <!-- Test -->

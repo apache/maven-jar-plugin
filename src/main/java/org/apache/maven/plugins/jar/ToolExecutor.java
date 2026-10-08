@@ -40,7 +40,6 @@ import org.apache.maven.api.Project;
 import org.apache.maven.api.Type;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
-import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 
 /**
  * Writer of <abbr>JAR</abbr> files using the information collected by {@link FileCollector}.
@@ -170,7 +169,7 @@ final class ToolExecutor {
     /**
      * The archive configuration to use.
      */
-    private final MavenArchiveConfiguration archiveConfiguration;
+    private final ArchiveConfiguration archiveConfiguration;
 
     /**
      * The timestamp in ISO-8601 extended offset date-time, or {@code null} if none.
@@ -197,7 +196,7 @@ final class ToolExecutor {
      * @param archive the archive configuration
      * @throws IOException if an error occurred while reading the manifest file
      */
-    ToolExecutor(AbstractJarMojo mojo, Manifest manifest, MavenArchiveConfiguration archive) throws IOException {
+    ToolExecutor(AbstractJarMojo mojo, Manifest manifest, ArchiveConfiguration archive) throws IOException {
         project = mojo.project;
         artifactType = mojo.getType();
         outputDirectory = mojo.getOutputDirectory();
@@ -222,7 +221,7 @@ final class ToolExecutor {
         result = new LinkedHashMap<>();
         archiveConfiguration = archive;
 
-        Path file = archive.getManifestFile();
+        Path file = archive.manifestFile;
         if (file != null) {
             try (InputStream in = Files.newInputStream(file)) {
                 // No need to wrap in `BufferedInputStream`.
@@ -384,14 +383,14 @@ final class ToolExecutor {
             if (archive.moduleName != null) {
                 metadata.deriveModulePOM(this, archive, manifest);
             }
-            if (archiveConfiguration.isAddMavenDescriptor()) {
+            if (archiveConfiguration.addMavenDescriptor) {
                 archive.mavenFiles = metadata.addPOM(archiveConfiguration, isReproducible());
             }
             /*
              * Prepare the arguments to send to the `jar` tool and log a message.
              */
             arguments.add("--create");
-            if (!archiveConfiguration.isCompress()) {
+            if (!archiveConfiguration.compress) {
                 arguments.add("--no-compress");
             }
             if (outputTimestamp != null) {
