@@ -70,6 +70,11 @@ final class ToolExecutor {
     private static final String CREATED_BY = "Created-By";
 
     /**
+     * The {@value} attribute.
+     */
+    private static final String AUTOMATIC_MODULE_NAME = "Automatic-Module-Name";
+
+    /**
      * Sanitizes a candidate automatic module name by replacing all characters that are neither
      * valid Java identifier start/part characters nor {@code '.'} separators, then collapsing
      * consecutive separators and stripping leading/trailing dots.
@@ -112,7 +117,7 @@ final class ToolExecutor {
     }
 
     /**
-     * Validates the {@code Automatic-Module-Name} attribute in the given manifest.
+     * Validates the {@value #AUTOMATIC_MODULE_NAME} attribute in the given manifest.
      * If the attribute is absent or already valid, this method does nothing and returns {@code false}.
      *
      * <p>If the name is invalid and was explicitly declared in the POM via
@@ -129,7 +134,8 @@ final class ToolExecutor {
      * @throws MojoException if the name was explicitly declared in POM configuration and is invalid
      */
     private boolean sanitizeAutomaticModuleName(Manifest manifest) {
-        String name = manifest.getMainAttributes().getValue("Automatic-Module-Name");
+        final Attributes mainAttributes = manifest.getMainAttributes();
+        final String name = mainAttributes.getValue(AUTOMATIC_MODULE_NAME);
         if (name == null || SourceVersion.isName(name)) {
             return false;
         }
@@ -146,28 +152,32 @@ final class ToolExecutor {
          * "${project.groupId}.${project.artifactId}" and the artifactId contains hyphens (MJAR-596).
          */
         String pluginName = (manifestFromPlugin != null)
-                ? manifestFromPlugin.getMainAttributes().getValue("Automatic-Module-Name")
+                ? manifestFromPlugin.getMainAttributes().getValue(AUTOMATIC_MODULE_NAME)
                 : null;
         if (name.equals(pluginName)) {
             throw new MojoException("Invalid automatic module name: \"" + name + "\".");
         }
+        StringBuilder message = new StringBuilder(400)
+                .append(AUTOMATIC_MODULE_NAME)
+                .append(" \"")
+                .append(name)
+                .append("\" is not a valid Java module name");
         String sanitized = cleanModuleName(name);
-        if (!sanitized.isEmpty() && SourceVersion.isName(sanitized)) {
-            logger.warn("Automatic-Module-Name \"" + name + "\" is not a valid Java module name."
-                    + " It has been sanitized to \"" + sanitized + "\""
-                    + " using an algorithm similar to the one the JDK uses to derive automatic module names"
-                    + " from JAR file names."
-                    + " Consider setting a valid name explicitly"
-                    + " in <archive><manifestEntries><Automatic-Module-Name>.");
-            manifest.getMainAttributes().putValue("Automatic-Module-Name", sanitized);
+        if (SourceVersion.isName(sanitized)) {
+            message.append(". It has been sanitized to \"")
+                    .append(sanitized)
+                    .append("\" using an algorithm similar to the one the JDK uses"
+                            + " to derive automatic module names from JAR file names.");
+            mainAttributes.putValue(AUTOMATIC_MODULE_NAME, sanitized);
         } else {
-            logger.warn("Automatic-Module-Name \"" + name + "\" is not a valid Java module name"
-                    + " and cannot be sanitized to a valid name."
-                    + " The attribute will be omitted from the manifest."
-                    + " Consider setting a valid name explicitly"
-                    + " in <archive><manifestEntries><Automatic-Module-Name>.");
-            manifest.getMainAttributes().remove(new Attributes.Name("Automatic-Module-Name"));
+            message.append(
+                    " and cannot be sanitized to a valid name. The attribute will be omitted from the manifest.");
+            mainAttributes.remove(new Attributes.Name(AUTOMATIC_MODULE_NAME));
         }
+        message.append(" Consider setting a valid name explicitly in <archive><manifestEntries><")
+                .append(AUTOMATIC_MODULE_NAME)
+                .append(">.");
+        logger.warn(message);
         return true;
     }
 
