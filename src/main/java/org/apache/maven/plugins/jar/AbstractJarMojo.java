@@ -40,8 +40,6 @@ import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Parameter;
 import org.apache.maven.api.services.PathMatcherFactory;
 import org.apache.maven.api.services.ProjectManager;
-import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
-import org.apache.maven.shared.archiver.MavenArchiver;
 
 /**
  * Base class for creating a <abbr>JAR</abbr> file from project classes.
@@ -116,11 +114,32 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected Session session;
 
     /**
-     * The archive configuration to use. See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven
-     * Archiver Reference</a>.
+     * The archive configuration to use.
      */
     @Parameter
-    protected MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
+    protected ArchiveConfiguration archive = new ArchiveConfiguration();
+
+    /**
+     * Whether to add default implementation entries ({@code Implementation-Title},
+     * {@code Implementation-Version}, {@code Implementation-Vendor}) to the {@code MANIFEST.MF}.
+     * When set on the command line or via a system property, this overrides the value configured
+     * inside {@code <archive><manifest><addDefaultImplementationEntries>}.
+     *
+     * @since 4.0.0-beta-2
+     */
+    @Parameter(property = "maven.jar.manifest.addDefaultImplementationEntries")
+    private Boolean addDefaultImplementationEntries;
+
+    /**
+     * Whether to add default specification entries ({@code Specification-Title},
+     * {@code Specification-Version}, {@code Specification-Vendor}) to the {@code MANIFEST.MF}.
+     * When set on the command line or via a system property, this overrides the value configured
+     * inside {@code <archive><manifest><addDefaultSpecificationEntries>}.
+     *
+     * @since 4.0.0-beta-2
+     */
+    @Parameter(property = "maven.jar.manifest.addDefaultSpecificationEntries")
+    private Boolean addDefaultSpecificationEntries;
 
     /**
      * The service to use for attaching the artifacts produced by this plugin.
@@ -426,11 +445,17 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             }
         }
         archive.setForced(forceCreation);
+        if (addDefaultImplementationEntries != null) {
+            archive.getManifest().setAddDefaultImplementationEntries(addDefaultImplementationEntries);
+        }
+        if (addDefaultSpecificationEntries != null) {
+            archive.getManifest().setAddDefaultSpecificationEntries(addDefaultSpecificationEntries);
+        }
         // TODO: we want a null manifest if there is no <archive> configuration.
-        final var archiver = new MavenArchiver();
-        archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
-        archiver.setBuildJdkSpecDefaultEntry(archive.getManifest().isAddBuildEnvironmentEntries());
-        var executor = new ToolExecutor(this, archiver.getManifest(session, project, archive), archive);
+        final var manifestBuilder = new ManifestBuilder(session, project, archive);
+        manifestBuilder.setCreatedBy("Maven JAR Plugin");
+        manifestBuilder.setBuildJdkSpecDefaultEntry(archive.getManifest().isAddBuildEnvironmentEntries());
+        var executor = new ToolExecutor(this, manifestBuilder.build(), archive);
         var files = new FileCollector(this, executor, classesDirectory, matcherFactory);
         if (!notExists) {
             Files.walkFileTree(classesDirectory, files);

@@ -40,7 +40,6 @@ import org.apache.maven.api.Project;
 import org.apache.maven.api.Type;
 import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
-import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 
 /**
  * Writer of <abbr>JAR</abbr> files using the information collected by {@link FileCollector}.
@@ -282,7 +281,7 @@ final class ToolExecutor {
     /**
      * The archive configuration to use.
      */
-    private final MavenArchiveConfiguration archiveConfiguration;
+    private final ArchiveConfiguration archiveConfiguration;
 
     /**
      * The timestamp in ISO-8601 extended offset date-time, or {@code null} if none.
@@ -309,7 +308,7 @@ final class ToolExecutor {
      * @param archive the archive configuration
      * @throws IOException if an error occurred while reading the manifest file
      */
-    ToolExecutor(AbstractJarMojo mojo, Manifest manifest, MavenArchiveConfiguration archive) throws IOException {
+    ToolExecutor(AbstractJarMojo mojo, Manifest manifest, ArchiveConfiguration archive) throws IOException {
         project = mojo.project;
         artifactType = mojo.getType();
         outputDirectory = mojo.getOutputDirectory();
