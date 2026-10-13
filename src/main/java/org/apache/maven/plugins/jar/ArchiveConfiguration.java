@@ -30,6 +30,10 @@ import java.util.Map;
  * <p>This class replaces {@code org.apache.maven.shared.archiver.MavenArchiveConfiguration},
  * removing the dependency on {@code maven-archiver} and {@code plexus-archiver}.</p>
  *
+ * <p><strong>Note:</strong> This class and its inner classes must remain {@code public} until
+ * <a href="https://github.com/apache/maven/pull/13470">apache/maven#13470</a> is released,
+ * as Maven's XML/DI binding requires public visibility to inject nested configuration objects.</p>
+ *
  * @since 4.0.0-beta-3
  */
 public class ArchiveConfiguration {
@@ -62,6 +66,8 @@ public class ArchiveConfiguration {
 
     /**
      * Manifest configuration, provided through the {@code <archive><manifest>} plugin parameter.
+     *
+     * <p><strong>Note:</strong> Must remain {@code public}; see {@link ArchiveConfiguration} for details.</p>
      */
     public static class ManifestConfig {
 
@@ -88,6 +94,8 @@ public class ArchiveConfiguration {
 
     /**
      * An additional manifest section, provided through the {@code <archive><manifestSections>} plugin parameter.
+     *
+     * <p><strong>Note:</strong> Must remain {@code public}; see {@link ArchiveConfiguration} for details.</p>
      */
     public static class ManifestSection {
 
