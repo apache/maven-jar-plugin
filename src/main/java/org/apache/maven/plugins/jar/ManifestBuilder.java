@@ -70,7 +70,7 @@ final class ManifestBuilder {
 
     /**
      * Whether to add the {@code Build-Jdk-Spec} entry (from {@code java.specification.version})
-     * when {@link ArchiveConfiguration.ManifestConfig#isAddBuildEnvironmentEntries()} is {@code true}.
+     * when {@link ArchiveConfiguration.ManifestConfig#addBuildEnvironmentEntries} is {@code true}.
      * Set by {@code AbstractJarMojo} to the value of that flag.
      */
     private boolean buildJdkSpecDefaultEntry = true;
@@ -124,6 +124,9 @@ final class ManifestBuilder {
                     for (Map.Entry<String, String> e : section.manifestEntries.entrySet()) {
                         attrs.putValue(e.getKey(), sanitize(e.getValue()));
                     }
+                }
+                if (section.name == null || section.name.isEmpty()) {
+                    throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
                 }
                 manifest.getEntries().put(section.name, attrs);
             }
