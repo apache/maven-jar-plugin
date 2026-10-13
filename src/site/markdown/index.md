@@ -51,11 +51,10 @@ Attach entire debug logs, POMs, or small demo projects to the issue. Patches are
 Contributors can check out the project from the [source repository](./scm.html) and find supplementary information
 in the [guide to helping with Maven](https://maven.apache.org/guides/development/guide-helping.html).
 
-## Archiver Configuration
+## Archive Configuration
 
 The plugin uses the JDK `jar` tool internally to create and verify the JAR file.
-The plugin uses Maven Archiver to handle manifest configuration.
-See the [Maven Archiver Documentation](/shared/maven-archiver/) to learn how to set it up.
+Manifest configuration is handled directly by the plugin via `ArchiveConfiguration` and `ManifestBuilder`.
 You can also see the [Guide to Working with Manifests](/guides/mini/guide-manifest.html).
 
 ## Examples
