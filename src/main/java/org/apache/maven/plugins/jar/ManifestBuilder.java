@@ -119,14 +119,14 @@ final class ManifestBuilder {
         // Extra manifest sections from <archive><manifestSections>
         if (!archive.manifestSections.isEmpty()) {
             for (ArchiveConfiguration.ManifestSection section : archive.manifestSections) {
+                if (section.name == null || section.name.isEmpty()) {
+                    throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
+                }
                 Attributes attrs = new Attributes();
                 if (!section.manifestEntries.isEmpty()) {
                     for (Map.Entry<String, String> e : section.manifestEntries.entrySet()) {
                         attrs.putValue(e.getKey(), sanitize(e.getValue()));
                     }
-                }
-                if (section.name == null || section.name.isEmpty()) {
-                    throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
                 }
                 manifest.getEntries().put(section.name, attrs);
             }
