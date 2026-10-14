@@ -20,6 +20,7 @@ package org.apache.maven.plugins.jar;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -186,7 +187,11 @@ final class ManifestBuilder {
     }
 
     private void addSpecificationEntries(Attributes main, Map<String, String> extra) {
-        putIfAbsentNonEmpty(main, extra, Attributes.Name.SPECIFICATION_TITLE.toString(), project.getModel().getName());
+        putIfAbsentNonEmpty(
+                main,
+                extra,
+                Attributes.Name.SPECIFICATION_TITLE.toString(),
+                project.getModel().getName());
         String version = specificationVersion();
         if (version != null) {
             putIfAbsent(main, extra, Attributes.Name.SPECIFICATION_VERSION.toString(), version);
@@ -199,14 +204,18 @@ final class ManifestBuilder {
 
     private void addImplementationEntries(Attributes main, Map<String, String> extra) {
         putIfAbsentNonEmpty(
-                main, extra, Attributes.Name.IMPLEMENTATION_TITLE.toString(), project.getModel().getName());
+                main,
+                extra,
+                Attributes.Name.IMPLEMENTATION_TITLE.toString(),
+                project.getModel().getName());
         putIfAbsent(main, extra, Attributes.Name.IMPLEMENTATION_VERSION.toString(), project.getVersion());
         var org = project.getModel().getOrganization();
         if (org != null) {
             putIfAbsentNonEmpty(main, extra, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), org.getName());
         }
         putIfAbsent(main, extra, "Implementation-Vendor-Id", project.getGroupId());
-        putIfAbsentNonEmpty(main, extra, "Implementation-URL", project.getModel().getUrl());
+        putIfAbsentNonEmpty(
+                main, extra, "Implementation-URL", project.getModel().getUrl());
     }
 
     /**
@@ -252,8 +261,7 @@ final class ManifestBuilder {
     private static String resolveLayout(String layoutType, String customLayout, boolean uniqueVersions) {
         return switch (layoutType == null ? CLASSPATH_LAYOUT_TYPE_SIMPLE : layoutType) {
             case CLASSPATH_LAYOUT_TYPE_SIMPLE -> uniqueVersions ? SIMPLE_LAYOUT : SIMPLE_LAYOUT_NONUNIQUE;
-            case CLASSPATH_LAYOUT_TYPE_REPOSITORY ->
-                    uniqueVersions ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
+            case CLASSPATH_LAYOUT_TYPE_REPOSITORY -> uniqueVersions ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
             case CLASSPATH_LAYOUT_TYPE_CUSTOM -> {
                 if (customLayout == null) {
                     throw new MojoException("Classpath layout type 'custom' requires a <customClasspathLayout> value.");
@@ -293,8 +301,8 @@ final class ManifestBuilder {
      * (either in the attributes or in the user-supplied extra entries map).
      */
     private static void putIfAbsent(Attributes attrs, Map<String, String> extra, String key, String value) {
-        if (!extra.containsKey(key) && attrs.getValue(key) == null) {
-            attrs.putValue(key, sanitize(value));
+        if (!extra.containsKey(key)) {
+            attrs.merge(new Attributes.Name(key), sanitize(value), (existing, v) -> existing);
         }
     }
 
@@ -349,7 +357,7 @@ final class ManifestBuilder {
     // Inlined from org.apache.maven.shared.archiver.BuildHelper
     // -----------------------------------------------------------------------
 
-    private static final java.util.Set<String> LEGACY_JDK_VERSIONS = java.util.Set.of("1.5", "1.6", "1.7", "1.8");
+    private static final Set<String> LEGACY_JDK_VERSIONS = Set.of("1.5", "1.6", "1.7", "1.8");
 
     /**
      * Tries to determine the target Java release from the compiler plugin configuration.
