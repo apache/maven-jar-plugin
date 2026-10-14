@@ -64,11 +64,6 @@ final class ManifestBuilder {
     private final ArchiveConfiguration archive;
 
     /**
-     * The {@code Created-By} manifest value, e.g. {@code "Maven JAR Plugin 4.0.0"}.
-     */
-    private String createdBy;
-
-    /**
      * Whether to add the {@code Build-Jdk-Spec} entry (from {@code java.specification.version})
      * when {@link ArchiveConfiguration.ManifestConfig#addBuildEnvironmentEntries} is {@code true}.
      * Set by {@code AbstractJarMojo} to the value of that flag.
@@ -79,10 +74,6 @@ final class ManifestBuilder {
         this.session = session;
         this.project = project;
         this.archive = archive;
-    }
-
-    void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
     }
 
     void setBuildJdkSpecDefaultEntry(boolean buildJdkSpecDefaultEntry) {
@@ -133,8 +124,6 @@ final class ManifestBuilder {
     private Manifest buildManifest(ArchiveConfiguration.ManifestConfig config, Map<String, String> extraEntries) {
         Manifest m = new Manifest();
         Attributes main = m.getMainAttributes();
-        // Manifest-Version is required; java.util.jar.Manifest does not add it automatically.
-        main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 
         if (config.addDefaultEntries) {
             addDefaultEntries(main, extraEntries);
@@ -168,8 +157,6 @@ final class ManifestBuilder {
     }
 
     private void addDefaultEntries(Attributes main, Map<String, String> extra) {
-        putIfAbsent(main, extra, "Created-By", createdBy != null ? createdBy : "Maven JAR Plugin");
-
         // Java-Version reflects the compiler target (e.g. "11"), as set by maven-compiler-plugin.
         String jdk = discoverJavaRelease(project.getModel());
         if (jdk != null) {

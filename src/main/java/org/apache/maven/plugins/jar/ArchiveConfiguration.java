@@ -81,6 +81,6 @@ public class ArchiveConfiguration {
     public static class ManifestSection {
 
         String name;
-        Map<String, String> manifestEntries = new LinkedHashMap<>();
+        final Map<String, String> manifestEntries = new LinkedHashMap<>();
     }
 }

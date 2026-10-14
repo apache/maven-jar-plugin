@@ -206,6 +206,7 @@ class ManifestBuilderTest {
         ArchiveConfiguration.ManifestSection section = new ArchiveConfiguration.ManifestSection();
         section.name = "com/example/MyClass.class";
         section.manifestEntries.put("Sealed", "true");
+        section.manifestEntries.put("Description", "line1\nline2");
         archive.manifestSections.add(section);
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
@@ -214,46 +215,10 @@ class ManifestBuilderTest {
         Attributes sectionAttrs = manifest.getEntries().get("com/example/MyClass.class");
         assertNotNull(sectionAttrs, "Manifest should contain the named section");
         assertEquals("true", sectionAttrs.getValue("Sealed"));
-    }
-
-    // -----------------------------------------------------------------------
-    // Manifest-Version is always present
-    // -----------------------------------------------------------------------
-
-    @Test
-    void manifestVersionIsAlwaysPresent() {
-        ManifestBuilder builder = new ManifestBuilder(session, project, new ArchiveConfiguration());
-        Manifest manifest = builder.build();
-
         assertEquals(
-                "1.0",
-                manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION),
-                "Manifest-Version must always be 1.0");
-    }
-
-    // -----------------------------------------------------------------------
-    // createdBy
-    // -----------------------------------------------------------------------
-
-    @Test
-    void createdByIsSetWhenProvided() {
-        ArchiveConfiguration archive = new ArchiveConfiguration();
-        ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setCreatedBy("Maven JAR Plugin 4.0.0");
-        Manifest manifest = builder.build();
-
-        assertEquals("Maven JAR Plugin 4.0.0", manifest.getMainAttributes().getValue("Created-By"));
-    }
-
-    @Test
-    void createdByDefaultsToMavenJarPlugin() {
-        ManifestBuilder builder = new ManifestBuilder(session, project, new ArchiveConfiguration());
-        Manifest manifest = builder.build();
-
-        assertEquals(
-                "Maven JAR Plugin",
-                manifest.getMainAttributes().getValue("Created-By"),
-                "Created-By should default to 'Maven JAR Plugin' when not explicitly set");
+                "line1 line2",
+                sectionAttrs.getValue("Description"),
+                "Newlines in section entries should be replaced with spaces");
     }
 
     // -----------------------------------------------------------------------
@@ -569,5 +534,35 @@ class ManifestBuilderTest {
         String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
         assertNotNull(classPath, "Class-Path should be present");
         assertEquals("lib/lib-c-3.0.jar", classPath);
+    }
+
+    @Test
+    void classpathMergesUserEntryFirst() throws Exception {
+        Dependency dep = dep("com.example", "lib-a", "1.0", "jar");
+        java.io.File tmp = java.io.File.createTempFile("lib-a-1.0", ".jar");
+        tmp.deleteOnExit();
+
+        Map<Dependency, Path> deps = new LinkedHashMap<>();
+        deps.put(dep, tmp.toPath());
+
+        SessionWithServices session = new SessionWithServices(deps);
+        ProjectStub project = new ProjectStub();
+
+        ArchiveConfiguration archive = new ArchiveConfiguration();
+        archive.getManifest().addClasspath = true;
+        archive.getManifest().classpathLayoutType = "simple";
+        archive.getManifest().useUniqueVersions = true;
+        archive.manifestEntries.put("Class-Path", "user-lib.jar");
+
+        ManifestBuilder builder = new ManifestBuilder(session, project, archive);
+        builder.setBuildJdkSpecDefaultEntry(false);
+        Manifest manifest = builder.build();
+
+        String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+        assertNotNull(classPath, "Class-Path should be present");
+        assertEquals(
+                "user-lib.jar lib-a-1.0.jar",
+                classPath,
+                "User-supplied Class-Path entry must come before the programmatic classpath");
     }
 }

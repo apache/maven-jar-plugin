@@ -120,12 +120,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected ArchiveConfiguration archive = new ArchiveConfiguration();
 
     /**
-     * The version of this plugin, used to set the {@code Created-By} manifest entry.
-     */
-    @Parameter(defaultValue = "${plugin.version}", readonly = true)
-    private String pluginVersion;
-
-    /**
      * The service to use for attaching the artifacts produced by this plugin.
      */
     @Inject
@@ -431,7 +425,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
         archive.forced = forceCreation;
         // TODO: we want a null manifest if there is no <archive> configuration.
         final var manifestBuilder = new ManifestBuilder(session, project, archive);
-        manifestBuilder.setCreatedBy("Maven JAR Plugin " + pluginVersion);
         manifestBuilder.setBuildJdkSpecDefaultEntry(archive.getManifest().addBuildEnvironmentEntries);
         var executor = new ToolExecutor(this, manifestBuilder.build(), archive);
         var files = new FileCollector(this, executor, classesDirectory, matcherFactory);

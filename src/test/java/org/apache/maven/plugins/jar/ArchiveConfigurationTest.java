@@ -49,7 +49,7 @@ class ArchiveConfigurationTest {
     }
 
     @Test
-    void manifestLazyInitReturnsSameInstance() {
+    void manifestGetterReturnsSameInstance() {
         ArchiveConfiguration config = new ArchiveConfiguration();
         ArchiveConfiguration.ManifestConfig first = config.getManifest();
         assertNotNull(first, "getManifest() should never return null");
