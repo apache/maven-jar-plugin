@@ -48,13 +48,6 @@ public class ArchiveConfiguration {
     Path pomPropertiesFile;
 
     /**
-     * Returns the manifest configuration.
-     */
-    ManifestConfig getManifest() {
-        return manifest;
-    }
-
-    /**
      * Manifest configuration, provided through the {@code <archive><manifest>} plugin parameter.
      *
      * <p><strong>Note:</strong> Must remain {@code public}; see {@link ArchiveConfiguration} for details.</p>

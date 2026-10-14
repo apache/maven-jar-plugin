@@ -75,10 +75,10 @@ class ManifestBuilderTest {
     void buildJdkSpecPresentWhenFieldDefaultIsTrue() {
         // Tests the field-level default of ManifestBuilder (buildJdkSpecDefaultEntry = true).
         // Note: in production, AbstractJarMojo always overrides this with
-        // archive.getManifest().addBuildEnvironmentEntries (default: false), so
+        // archive.manifest.addBuildEnvironmentEntries (default: false), so
         // Build-Jdk-Spec is NOT present by default in production usage.
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addBuildEnvironmentEntries = false;
+        archive.manifest.addBuildEnvironmentEntries = false;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         Manifest manifest = builder.build();
@@ -93,7 +93,7 @@ class ManifestBuilderTest {
     @Test
     void buildJdkSpecAbsentWhenDisabled() {
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addBuildEnvironmentEntries = false;
+        archive.manifest.addBuildEnvironmentEntries = false;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         builder.setBuildJdkSpecDefaultEntry(false);
@@ -107,7 +107,7 @@ class ManifestBuilderTest {
     @Test
     void buildJdkEntryPresentWhenBuildEnvironmentEntriesEnabled() {
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addBuildEnvironmentEntries = true;
+        archive.manifest.addBuildEnvironmentEntries = true;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         Manifest manifest = builder.build();
@@ -468,9 +468,9 @@ class ManifestBuilderTest {
         ProjectStub project = new ProjectStub();
 
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addClasspath = true;
-        archive.getManifest().classpathLayoutType = "simple";
-        archive.getManifest().useUniqueVersions = true;
+        archive.manifest.addClasspath = true;
+        archive.manifest.classpathLayoutType = "simple";
+        archive.manifest.useUniqueVersions = true;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         builder.setBuildJdkSpecDefaultEntry(false);
@@ -495,9 +495,9 @@ class ManifestBuilderTest {
         ProjectStub project = new ProjectStub();
 
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addClasspath = true;
-        archive.getManifest().classpathLayoutType = "repository";
-        archive.getManifest().useUniqueVersions = true;
+        archive.manifest.addClasspath = true;
+        archive.manifest.classpathLayoutType = "repository";
+        archive.manifest.useUniqueVersions = true;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         builder.setBuildJdkSpecDefaultEntry(false);
@@ -522,10 +522,10 @@ class ManifestBuilderTest {
         ProjectStub project = new ProjectStub();
 
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addClasspath = true;
-        archive.getManifest().classpathLayoutType = "simple";
-        archive.getManifest().useUniqueVersions = true;
-        archive.getManifest().classpathPrefix = "lib/";
+        archive.manifest.addClasspath = true;
+        archive.manifest.classpathLayoutType = "simple";
+        archive.manifest.useUniqueVersions = true;
+        archive.manifest.classpathPrefix = "lib/";
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         builder.setBuildJdkSpecDefaultEntry(false);
@@ -549,9 +549,9 @@ class ManifestBuilderTest {
         ProjectStub project = new ProjectStub();
 
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.getManifest().addClasspath = true;
-        archive.getManifest().classpathLayoutType = "simple";
-        archive.getManifest().useUniqueVersions = true;
+        archive.manifest.addClasspath = true;
+        archive.manifest.classpathLayoutType = "simple";
+        archive.manifest.useUniqueVersions = true;
         archive.manifestEntries.put("Class-Path", "user-lib.jar");
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);

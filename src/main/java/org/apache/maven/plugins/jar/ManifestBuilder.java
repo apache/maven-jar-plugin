@@ -88,7 +88,7 @@ final class ManifestBuilder {
      * @throws MojoException if the manifest cannot be built
      */
     Manifest build() {
-        ArchiveConfiguration.ManifestConfig config = archive.getManifest();
+        ArchiveConfiguration.ManifestConfig config = archive.manifest;
         Map<String, String> extraEntries = archive.manifestEntries;
 
         Manifest manifest = buildManifest(config, extraEntries);

@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -49,13 +50,12 @@ class ArchiveConfigurationTest {
     }
 
     @Test
-    void manifestGetterReturnsSameInstance() {
+    void manifestFieldReturnsSameInstance() {
         ArchiveConfiguration config = new ArchiveConfiguration();
-        ArchiveConfiguration.ManifestConfig first = config.getManifest();
-        assertNotNull(first, "getManifest() should never return null");
-        assertNotSame(new ArchiveConfiguration().getManifest(), first, "different instances for different configs");
-        // second call on same config returns the same object
-        assertEquals(first, config.getManifest(), "getManifest() should return the same instance on repeated calls");
+        ArchiveConfiguration.ManifestConfig first = config.manifest;
+        assertNotNull(first, "manifest should never be null");
+        assertNotSame(new ArchiveConfiguration().manifest, first, "different instances for different configs");
+        assertSame(first, config.manifest, "manifest field should return the same instance on repeated access");
     }
 
     // -----------------------------------------------------------------------
