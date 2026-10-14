@@ -18,6 +18,7 @@
  */
 package org.apache.maven.plugins.jar;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link ManifestBuilder}.
@@ -102,6 +104,32 @@ class ManifestBuilderTest {
         assertNull(
                 manifest.getMainAttributes().getValue("Build-Jdk-Spec"),
                 "Build-Jdk-Spec should be absent when buildJdkSpecDefaultEntry is false");
+    }
+
+    @Test
+    void manifestVersionPresentAndWriteProducesNonEmptyOutput() throws Exception {
+        // Regression test: java.util.jar.Manifest.write() silently drops all main attributes
+        // when Manifest-Version is absent. Verify the fix in buildManifest() holds.
+        ArchiveConfiguration archive = new ArchiveConfiguration();
+        archive.manifest.addBuildEnvironmentEntries = false;
+        archive.manifestEntries.put("Main-Class", "com.example.Main");
+
+        ManifestBuilder builder = new ManifestBuilder(session, project, archive);
+        builder.setBuildJdkSpecDefaultEntry(false);
+        Manifest manifest = builder.build();
+
+        assertEquals(
+                "1.0",
+                manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION),
+                "Manifest-Version must be 1.0 — absence causes manifest.write() to silently drop all attributes");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        manifest.write(out);
+        String written = out.toString("UTF-8");
+
+        assertTrue(written.contains("Manifest-Version: 1.0"), "Serialized manifest must contain Manifest-Version");
+        assertTrue(written.contains("Main-Class: com.example.Main"), "Serialized manifest must contain Main-Class");
+        assertTrue(written.length() > 2, "manifest.write() must produce more than 2 bytes (\\r\\n)");
     }
 
     @Test

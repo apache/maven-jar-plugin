@@ -125,6 +125,8 @@ final class ManifestBuilder {
     private Manifest buildManifest(ArchiveConfiguration.ManifestConfig config, Map<String, String> extraEntries) {
         Manifest m = new Manifest();
         Attributes main = m.getMainAttributes();
+        // Manifest-Version must be present or java.util.jar.Manifest.write() silently drops all main attributes.
+        main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 
         if (config.addDefaultEntries) {
             addDefaultEntries(main, extraEntries);
