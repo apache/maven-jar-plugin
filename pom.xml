@@ -28,7 +28,7 @@
   </parent>
 
   <artifactId>maven-jar-plugin</artifactId>
-  <version>4.0.0-beta-2-SNAPSHOT</version>
+  <version>4.0.0-beta-3-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven JAR Plugin</name>
@@ -98,6 +98,7 @@
 
     <guiceVersion>5.1.0</guiceVersion>
     <junitVersion>5.14.4</junitVersion>
+
     <mavenFileManagementVersion>3.2.0</mavenFileManagementVersion>
     <mavenPluginPluginVersion>4.0.0-beta-1</mavenPluginPluginVersion>
     <mavenPluginTestingVersion>4.0.0-beta-4</mavenPluginTestingVersion>
@@ -105,7 +106,7 @@
     <version.maven-plugin-tools>${mavenPluginPluginVersion}</version.maven-plugin-tools>
     <version.plexus-xml>4.0.3</version.plexus-xml>
 
-    <project.build.outputTimestamp>2024-06-26T08:28:51Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-13T19:25:39Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
@@ -215,14 +216,14 @@
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
-            <excludes combine.children="append">
+            <inputExcludes>
               <!--
                 ! The manifest specification does not describe any method for writing comments into the manifest.
               -->
               <exclude>src/it/mjar-71-01/src/main/my-custom-dir/some-manifest.mf</exclude>
               <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
               <exclude>src/it/MJAR-557-detect-mjar/src/main/resources/META-INF/versions/9/test.txt</exclude>
-            </excludes>
+            </inputExcludes>
           </configuration>
         </plugin>
       </plugins>
