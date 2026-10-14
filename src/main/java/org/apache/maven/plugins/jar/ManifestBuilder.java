@@ -97,39 +97,34 @@ final class ManifestBuilder {
      */
     Manifest build() {
         ArchiveConfiguration.ManifestConfig config = archive.getManifest();
-        Map<String, String> extraEntries = archive.manifestEntries.isEmpty() ? Map.of() : archive.manifestEntries;
+        Map<String, String> extraEntries = archive.manifestEntries;
 
         Manifest manifest = buildManifest(config, extraEntries);
 
         // Merge any extra entries from <archive><manifestEntries>
-        if (!extraEntries.isEmpty()) {
-            Attributes main = manifest.getMainAttributes();
-            for (Map.Entry<String, String> entry : extraEntries.entrySet()) {
-                String key = entry.getKey();
-                String value = sanitize(entry.getValue());
-                if (key.equals(Attributes.Name.CLASS_PATH.toString()) && main.getValue(key) != null) {
-                    // User-supplied value goes first (takes precedence), then programmatic one.
-                    main.putValue(key, value + " " + main.getValue(key));
-                } else {
-                    main.putValue(key, value);
-                }
+        Attributes main = manifest.getMainAttributes();
+        for (Map.Entry<String, String> entry : extraEntries.entrySet()) {
+            String key = entry.getKey();
+            String value = sanitize(entry.getValue());
+            if (key.equals(Attributes.Name.CLASS_PATH.toString())) {
+                // User-supplied value goes first (takes precedence), then programmatic one.
+                main.merge(
+                        Attributes.Name.CLASS_PATH, value, (existing, supplied) -> (String) supplied + ' ' + existing);
+            } else {
+                main.putValue(key, value);
             }
         }
 
         // Extra manifest sections from <archive><manifestSections>
-        if (!archive.manifestSections.isEmpty()) {
-            for (ArchiveConfiguration.ManifestSection section : archive.manifestSections) {
-                if (section.name == null || section.name.isEmpty()) {
-                    throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
-                }
-                Attributes attrs = new Attributes();
-                if (!section.manifestEntries.isEmpty()) {
-                    for (Map.Entry<String, String> e : section.manifestEntries.entrySet()) {
-                        attrs.putValue(e.getKey(), sanitize(e.getValue()));
-                    }
-                }
-                manifest.getEntries().put(section.name, attrs);
+        for (ArchiveConfiguration.ManifestSection section : archive.manifestSections) {
+            if (section.name == null || section.name.isEmpty()) {
+                throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
             }
+            Attributes attrs = new Attributes();
+            for (Map.Entry<String, String> e : section.manifestEntries.entrySet()) {
+                attrs.putValue(e.getKey(), sanitize(e.getValue()));
+            }
+            manifest.getEntries().put(section.name, attrs);
         }
 
         return manifest;
@@ -263,7 +258,7 @@ final class ManifestBuilder {
             if (!classpath.isEmpty()) {
                 classpath.append(' ');
             }
-            if (prefix != null) {
+            if (!prefix.isEmpty()) {
                 classpath.append(prefix);
             }
             String interpolated = interpolator.interpolate(layout, key -> resolveArtifactExpression(dep, key));

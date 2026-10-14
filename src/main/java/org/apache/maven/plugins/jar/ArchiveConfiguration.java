@@ -39,28 +39,18 @@ import java.util.Map;
 public class ArchiveConfiguration {
 
     boolean compress = true;
-
     boolean addMavenDescriptor = true;
-
     Path manifestFile;
-
-    ManifestConfig manifest;
-
-    Map<String, String> manifestEntries = new LinkedHashMap<>();
-
-    List<ManifestSection> manifestSections = new ArrayList<>();
-
+    ManifestConfig manifest = new ManifestConfig();
+    final Map<String, String> manifestEntries = new LinkedHashMap<>();
+    final List<ManifestSection> manifestSections = new ArrayList<>();
     boolean forced = true;
-
     Path pomPropertiesFile;
 
     /**
-     * Lazily initialises and returns the manifest configuration.
+     * Returns the manifest configuration.
      */
     ManifestConfig getManifest() {
-        if (manifest == null) {
-            manifest = new ManifestConfig();
-        }
         return manifest;
     }
 
@@ -72,23 +62,14 @@ public class ArchiveConfiguration {
     public static class ManifestConfig {
 
         String mainClass;
-
         boolean addClasspath;
-
         String classpathPrefix = "";
-
         boolean addDefaultEntries = true;
-
         boolean addBuildEnvironmentEntries;
-
         boolean addDefaultSpecificationEntries;
-
         boolean addDefaultImplementationEntries;
-
         String classpathLayoutType = "simple";
-
         String customClasspathLayout;
-
         boolean useUniqueVersions = true;
     }
 
@@ -100,7 +81,6 @@ public class ArchiveConfiguration {
     public static class ManifestSection {
 
         String name;
-
         Map<String, String> manifestEntries = new LinkedHashMap<>();
     }
 }
