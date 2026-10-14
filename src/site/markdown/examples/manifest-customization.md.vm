@@ -30,7 +30,8 @@ The Default Manifest
 --------------------
 
 The default manifest is built by `ManifestBuilder` based on the `<archive>` configuration.
-By default, it includes the `Created-By` attribute (and `Java-Version` when the compiler target is discoverable).
+By default, it includes the `Java-Version` attribute (when the compiler target is discoverable from the POM).
+`Created-By` is always present in the final JAR — set by `ToolExecutor` to a JDK-independent string for reproducible builds, or supplied by the `jar` tool itself otherwise.
 When `addBuildEnvironmentEntries` is enabled, `Built-By`, `Build-Jdk`, and `Build-Jdk-Spec` are also added.
 To add Specification and Implementation details or a classpath, configure them explicitly in the `<archive>` element.
 

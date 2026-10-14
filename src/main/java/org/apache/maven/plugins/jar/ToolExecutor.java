@@ -358,7 +358,7 @@ final class ToolExecutor {
                 }
             } else {
                 // If reproducible build was not requested, let the tool declares itself.
-                // This is a workaround until we port Maven archiver to this JAR plugin.
+                // Remove any value set by ManifestBuilder so that the `jar` tool can add its own JDK-stamped value.
                 mainAttributes.remove(CREATED_BY);
             }
         }

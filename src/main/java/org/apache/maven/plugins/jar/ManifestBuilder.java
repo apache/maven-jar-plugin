@@ -186,39 +186,27 @@ final class ManifestBuilder {
     }
 
     private void addSpecificationEntries(Attributes main, Map<String, String> extra) {
-        String title = project.getModel().getName();
-        if (title != null && !title.isEmpty()) {
-            putIfAbsent(main, extra, Attributes.Name.SPECIFICATION_TITLE.toString(), title);
-        }
+        putIfAbsentNonEmpty(main, extra, Attributes.Name.SPECIFICATION_TITLE.toString(), project.getModel().getName());
         String version = specificationVersion();
         if (version != null) {
             putIfAbsent(main, extra, Attributes.Name.SPECIFICATION_VERSION.toString(), version);
         }
-        String vendor = project.getModel().getOrganization() != null
-                ? project.getModel().getOrganization().getName()
-                : null;
-        if (vendor != null) {
-            putIfAbsent(main, extra, Attributes.Name.SPECIFICATION_VENDOR.toString(), vendor);
+        var org = project.getModel().getOrganization();
+        if (org != null) {
+            putIfAbsentNonEmpty(main, extra, Attributes.Name.SPECIFICATION_VENDOR.toString(), org.getName());
         }
     }
 
     private void addImplementationEntries(Attributes main, Map<String, String> extra) {
-        String title = project.getModel().getName();
-        if (title != null && !title.isEmpty()) {
-            putIfAbsent(main, extra, Attributes.Name.IMPLEMENTATION_TITLE.toString(), title);
-        }
+        putIfAbsentNonEmpty(
+                main, extra, Attributes.Name.IMPLEMENTATION_TITLE.toString(), project.getModel().getName());
         putIfAbsent(main, extra, Attributes.Name.IMPLEMENTATION_VERSION.toString(), project.getVersion());
-        String vendor = project.getModel().getOrganization() != null
-                ? project.getModel().getOrganization().getName()
-                : null;
-        if (vendor != null) {
-            putIfAbsent(main, extra, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), vendor);
+        var org = project.getModel().getOrganization();
+        if (org != null) {
+            putIfAbsentNonEmpty(main, extra, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), org.getName());
         }
         putIfAbsent(main, extra, "Implementation-Vendor-Id", project.getGroupId());
-        String url = project.getModel().getUrl();
-        if (url != null && !url.isEmpty()) {
-            putIfAbsent(main, extra, "Implementation-URL", url);
-        }
+        putIfAbsentNonEmpty(main, extra, "Implementation-URL", project.getModel().getUrl());
     }
 
     /**
@@ -262,18 +250,18 @@ final class ManifestBuilder {
      * Returns the layout template to use based on the configuration.
      */
     private static String resolveLayout(String layoutType, String customLayout, boolean uniqueVersions) {
-        if (layoutType == null || CLASSPATH_LAYOUT_TYPE_SIMPLE.equals(layoutType)) {
-            return uniqueVersions ? SIMPLE_LAYOUT : SIMPLE_LAYOUT_NONUNIQUE;
-        } else if (CLASSPATH_LAYOUT_TYPE_REPOSITORY.equals(layoutType)) {
-            return uniqueVersions ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
-        } else if (CLASSPATH_LAYOUT_TYPE_CUSTOM.equals(layoutType)) {
-            if (customLayout == null) {
-                throw new MojoException("Classpath layout type 'custom' requires a <customClasspathLayout> value.");
+        return switch (layoutType == null ? CLASSPATH_LAYOUT_TYPE_SIMPLE : layoutType) {
+            case CLASSPATH_LAYOUT_TYPE_SIMPLE -> uniqueVersions ? SIMPLE_LAYOUT : SIMPLE_LAYOUT_NONUNIQUE;
+            case CLASSPATH_LAYOUT_TYPE_REPOSITORY ->
+                    uniqueVersions ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
+            case CLASSPATH_LAYOUT_TYPE_CUSTOM -> {
+                if (customLayout == null) {
+                    throw new MojoException("Classpath layout type 'custom' requires a <customClasspathLayout> value.");
+                }
+                yield customLayout;
             }
-            return customLayout;
-        } else {
-            throw new MojoException("Unknown classpath layout type: '" + layoutType + "'.");
-        }
+            default -> throw new MojoException("Unknown classpath layout type: '" + layoutType + "'.");
+        };
     }
 
     /**
@@ -307,6 +295,15 @@ final class ManifestBuilder {
     private static void putIfAbsent(Attributes attrs, Map<String, String> extra, String key, String value) {
         if (!extra.containsKey(key) && attrs.getValue(key) == null) {
             attrs.putValue(key, sanitize(value));
+        }
+    }
+
+    /**
+     * Like {@link #putIfAbsent}, but also skips null or empty values.
+     */
+    private static void putIfAbsentNonEmpty(Attributes attrs, Map<String, String> extra, String key, String value) {
+        if (value != null && !value.isEmpty()) {
+            putIfAbsent(attrs, extra, key, value);
         }
     }
 
