@@ -18,6 +18,7 @@
  */
 package org.apache.maven.plugins.jar;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
@@ -123,8 +124,8 @@ final class ManifestBuilder {
     }
 
     private Manifest buildManifest(ArchiveConfiguration.ManifestConfig config, Map<String, String> extraEntries) {
-        Manifest m = new Manifest();
-        Attributes main = m.getMainAttributes();
+        Manifest manifest = new Manifest();
+        Attributes main = manifest.getMainAttributes();
         // Manifest-Version must be present or java.util.jar.Manifest.write() silently drops all main attributes.
         main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 
@@ -156,7 +157,7 @@ final class ManifestBuilder {
             putIfAbsent(main, extraEntries, Attributes.Name.MAIN_CLASS.toString(), mainClass);
         }
 
-        return m;
+        return manifest;
     }
 
     private void addDefaultEntries(Attributes main, Map<String, String> extra) {
@@ -198,9 +199,9 @@ final class ManifestBuilder {
         if (version != null) {
             putIfAbsent(main, extra, Attributes.Name.SPECIFICATION_VERSION.toString(), version);
         }
-        var org = project.getModel().getOrganization();
-        if (org != null) {
-            putIfAbsentNonEmpty(main, extra, Attributes.Name.SPECIFICATION_VENDOR.toString(), org.getName());
+        var organization = project.getModel().getOrganization();
+        if (organization != null) {
+            putIfAbsentNonEmpty(main, extra, Attributes.Name.SPECIFICATION_VENDOR.toString(), organization.getName());
         }
     }
 
@@ -211,9 +212,9 @@ final class ManifestBuilder {
                 Attributes.Name.IMPLEMENTATION_TITLE.toString(),
                 project.getModel().getName());
         putIfAbsent(main, extra, Attributes.Name.IMPLEMENTATION_VERSION.toString(), project.getVersion());
-        var org = project.getModel().getOrganization();
-        if (org != null) {
-            putIfAbsentNonEmpty(main, extra, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), org.getName());
+        var organization = project.getModel().getOrganization();
+        if (organization != null) {
+            putIfAbsentNonEmpty(main, extra, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), organization.getName());
         }
         putIfAbsent(main, extra, "Implementation-Vendor-Id", project.getGroupId());
         putIfAbsentNonEmpty(
@@ -237,7 +238,7 @@ final class ManifestBuilder {
         String layout = resolveLayout(layoutType, customLayout, uniqueVersions);
         for (Map.Entry<Dependency, Path> entry : result.getDependencies().entrySet()) {
             Path artifactFile = entry.getValue();
-            if (artifactFile == null || !java.nio.file.Files.isRegularFile(artifactFile.toAbsolutePath())) {
+            if (artifactFile == null || !Files.isRegularFile(artifactFile.toAbsolutePath())) {
                 continue;
             }
             Dependency dep = entry.getKey();
@@ -383,14 +384,14 @@ final class ManifestBuilder {
         if (build != null) {
             var plugins = build.getPluginsAsMap();
             if (plugins != null) {
-                Plugin p = plugins.get(pluginGa);
-                if (p != null) {
-                    return p;
+                Plugin plugin = plugins.get(pluginGa);
+                if (plugin != null) {
+                    return plugin;
                 }
             }
-            var mgmt = build.getPluginManagement();
-            if (mgmt != null) {
-                var mgmtPlugins = mgmt.getPluginsAsMap();
+            var pluginManagement = build.getPluginManagement();
+            if (pluginManagement != null) {
+                var mgmtPlugins = pluginManagement.getPluginsAsMap();
                 if (mgmtPlugins != null) {
                     return mgmtPlugins.get(pluginGa);
                 }
@@ -401,9 +402,9 @@ final class ManifestBuilder {
 
     private static String getPluginParameter(Model model, Plugin plugin, String parameter, String property) {
         if (plugin != null) {
-            XmlNode conf = plugin.getConfiguration();
-            if (conf != null) {
-                XmlNode child = conf.child(parameter);
+            XmlNode configuration = plugin.getConfiguration();
+            if (configuration != null) {
+                XmlNode child = configuration.child(parameter);
                 if (child != null) {
                     return child.value();
                 }
