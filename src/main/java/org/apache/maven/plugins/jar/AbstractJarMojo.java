@@ -423,7 +423,6 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             }
         }
         archive.forced = forceCreation;
-        // TODO: we want a null manifest if there is no <archive> configuration.
         final var manifestBuilder = new ManifestBuilder(session, project, archive);
         var executor = new ToolExecutor(this, manifestBuilder.build(), archive);
         var files = new FileCollector(this, executor, classesDirectory, matcherFactory);

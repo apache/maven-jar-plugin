@@ -38,17 +38,19 @@ import org.apache.maven.api.services.Interpolator;
 import org.apache.maven.api.xml.XmlNode;
 
 /**
- * Builds a {@link Manifest} from the Maven project and plugin configuration,
- * without depending on {@code maven-archiver} or {@code plexus-archiver}.
- *
- * <p>This class replaces the use of {@code MavenArchiver#getManifest}
- * in this plugin, allowing removal of the {@code maven-archiver} and {@code plexus-archiver} dependencies.</p>
+ * Builds a {@link Manifest} from the Maven project and plugin configuration.
  */
 final class ManifestBuilder {
 
     static final String CLASSPATH_LAYOUT_TYPE_SIMPLE = "simple";
     private static final String CLASSPATH_LAYOUT_TYPE_REPOSITORY = "repository";
     private static final String CLASSPATH_LAYOUT_TYPE_CUSTOM = "custom";
+
+    // Attribute name constants not predefined in java.util.jar.Attributes.Name
+    private static final Attributes.Name JAVA_VERSION = new Attributes.Name("Java-Version");
+    private static final Attributes.Name BUILD_JDK_SPEC = new Attributes.Name("Build-Jdk-Spec");
+    private static final Attributes.Name BUILD_JDK = new Attributes.Name("Build-Jdk");
+    private static final Attributes.Name BUILT_BY = new Attributes.Name("Built-By");
 
     private static final String SIMPLE_LAYOUT =
             "${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}";
@@ -141,7 +143,7 @@ final class ManifestBuilder {
 
         String mainClass = config.mainClass;
         if (mainClass != null && !mainClass.isEmpty()) {
-            putIfAbsent(main, Attributes.Name.MAIN_CLASS.toString(), mainClass);
+            putIfAbsent(main, Attributes.Name.MAIN_CLASS, mainClass);
         }
 
         return manifest;
@@ -151,7 +153,7 @@ final class ManifestBuilder {
         // Java-Version reflects the compiler target (e.g. "11"), as set by maven-compiler-plugin.
         String jdk = discoverJavaRelease(project.getModel());
         if (jdk != null) {
-            putIfAbsent(main, "Java-Version", jdk);
+            putIfAbsent(main, JAVA_VERSION, jdk);
         }
     }
 
@@ -159,45 +161,45 @@ final class ManifestBuilder {
         // Build-Jdk-Spec reflects the runtime JDK specification version.
         String specVersion = System.getProperty("java.specification.version");
         if (specVersion != null) {
-            putIfAbsent(main, "Build-Jdk-Spec", specVersion);
+            putIfAbsent(main, BUILD_JDK_SPEC, specVersion);
         }
         String javaVersion = System.getProperty("java.version");
         if (javaVersion != null) {
-            putIfAbsent(main, "Build-Jdk", javaVersion);
+            putIfAbsent(main, BUILD_JDK, javaVersion);
         }
         String user = System.getProperty("user.name");
         if (user != null) {
-            putIfAbsent(main, "Built-By", user);
+            putIfAbsent(main, BUILT_BY, user);
         }
     }
 
     private void addSpecificationEntries(Attributes main) {
         putIfAbsentNonEmpty(
                 main,
-                Attributes.Name.SPECIFICATION_TITLE.toString(),
+                Attributes.Name.SPECIFICATION_TITLE,
                 project.getModel().getName());
         String version = specificationVersion();
         if (version != null) {
-            putIfAbsent(main, Attributes.Name.SPECIFICATION_VERSION.toString(), version);
+            putIfAbsent(main, Attributes.Name.SPECIFICATION_VERSION, version);
         }
         var organization = project.getModel().getOrganization();
         if (organization != null) {
-            putIfAbsentNonEmpty(main, Attributes.Name.SPECIFICATION_VENDOR.toString(), organization.getName());
+            putIfAbsentNonEmpty(main, Attributes.Name.SPECIFICATION_VENDOR, organization.getName());
         }
     }
 
     private void addImplementationEntries(Attributes main) {
         putIfAbsentNonEmpty(
                 main,
-                Attributes.Name.IMPLEMENTATION_TITLE.toString(),
+                Attributes.Name.IMPLEMENTATION_TITLE,
                 project.getModel().getName());
-        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VERSION.toString(), project.getVersion());
+        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VERSION, project.getVersion());
         var organization = project.getModel().getOrganization();
         if (organization != null) {
-            putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), organization.getName());
+            putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_VENDOR, organization.getName());
         }
-        putIfAbsent(main, "Implementation-Vendor-Id", project.getGroupId());
-        putIfAbsentNonEmpty(main, "Implementation-URL", project.getModel().getUrl());
+        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VENDOR_ID, project.getGroupId());
+        putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_URL, project.getModel().getUrl());
     }
 
     /**
@@ -283,16 +285,16 @@ final class ManifestBuilder {
      * Puts a value in the manifest attributes only if the key is not already present
      * in the attributes or in the user-supplied extra entries ({@link ArchiveConfiguration#manifestEntries}).
      */
-    private void putIfAbsent(Attributes attrs, String key, String value) {
-        if (!archive.manifestEntries.containsKey(key)) {
-            attrs.merge(new Attributes.Name(key), sanitize(value), (existing, v) -> existing);
+    private void putIfAbsent(Attributes attrs, Attributes.Name key, String value) {
+        if (!archive.manifestEntries.containsKey(key.toString())) {
+            attrs.merge(key, sanitize(value), (existing, v) -> existing);
         }
     }
 
     /**
      * Like {@link #putIfAbsent}, but also skips null or empty values.
      */
-    private void putIfAbsentNonEmpty(Attributes attrs, String key, String value) {
+    private void putIfAbsentNonEmpty(Attributes attrs, Attributes.Name key, String value) {
         if (value != null && !value.isEmpty()) {
             putIfAbsent(attrs, key, value);
         }
@@ -313,27 +315,28 @@ final class ManifestBuilder {
      * Returns the specification version from the project version, keeping only the {@code major.minor} part.
      */
     private String specificationVersion() {
-        String v = project.getVersion();
-        if (v == null) {
+        String projectVersion = project.getVersion();
+        if (projectVersion == null) {
             return null;
         }
         // Keep only "major.minor" (digits and dots up to the second dot or first non-digit).
-        var sb = new StringBuilder();
+        var specificationVersion = new StringBuilder();
         int dots = 0;
-        for (int i = 0; i < v.length(); i++) {
-            char c = v.charAt(i);
+        for (int i = 0; i < projectVersion.length(); i++) {
+            char c = projectVersion.charAt(i);
             if (c == '.') {
-                if (++dots == 2) {
+                dots++;
+                if (dots == 2) {
                     break;
                 }
-                sb.append(c);
+                specificationVersion.append(c);
             } else if (Character.isDigit(c)) {
-                sb.append(c);
+                specificationVersion.append(c);
             } else {
                 break;
             }
         }
-        return sb.isEmpty() ? null : sb.toString();
+        return specificationVersion.isEmpty() ? null : specificationVersion.toString();
     }
 
     // -----------------------------------------------------------------------
