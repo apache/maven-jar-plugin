@@ -109,7 +109,7 @@ final class ManifestBuilder {
             addImplementationEntries(main);
         }
 
-        putIfAbsentNonEmpty(main, Attributes.Name.MAIN_CLASS, config.mainClass);
+        putIfAbsent(main, Attributes.Name.MAIN_CLASS, config.mainClass);
 
         // Merge any extra entries from <archive><manifestEntries>
         for (Map.Entry<String, String> entry : archive.manifestEntries.entrySet()) {
@@ -141,49 +141,36 @@ final class ManifestBuilder {
 
     private void addDefaultEntries(Attributes main) {
         // Java-Version reflects the compiler target (e.g. "11"), as set by maven-compiler-plugin.
-        putIfAbsentNonEmpty(main, JAVA_VERSION, discoverJavaRelease(project.getModel()));
+        putIfAbsent(main, JAVA_VERSION, discoverJavaRelease(project.getModel()));
     }
 
     private void addBuildEnvironmentEntries(Attributes main) {
         // Build-Jdk-Spec reflects the runtime JDK specification version.
-        String specVersion = System.getProperty("java.specification.version");
-        if (specVersion != null) {
-            putIfAbsent(main, BUILD_JDK_SPEC, specVersion);
-        }
-        String javaVersion = System.getProperty("java.version");
-        if (javaVersion != null) {
-            putIfAbsent(main, BUILD_JDK, javaVersion);
-        }
-        String user = System.getProperty("user.name");
-        if (user != null) {
-            putIfAbsent(main, BUILT_BY, user);
-        }
+        putIfAbsent(main, BUILD_JDK_SPEC, System.getProperty("java.specification.version"));
+        putIfAbsent(main, BUILD_JDK, System.getProperty("java.version"));
+        putIfAbsent(main, BUILT_BY, System.getProperty("user.name"));
     }
 
     private void addSpecificationEntries(Attributes main) {
-        putIfAbsentNonEmpty(
+        putIfAbsent(
                 main, Attributes.Name.SPECIFICATION_TITLE, project.getModel().getName());
-        String version = specificationVersion();
-        if (version != null) {
-            putIfAbsent(main, Attributes.Name.SPECIFICATION_VERSION, version);
-        }
+        putIfAbsent(main, Attributes.Name.SPECIFICATION_VERSION, specificationVersion());
         var organization = project.getModel().getOrganization();
         if (organization != null) {
-            putIfAbsentNonEmpty(main, Attributes.Name.SPECIFICATION_VENDOR, organization.getName());
+            putIfAbsent(main, Attributes.Name.SPECIFICATION_VENDOR, organization.getName());
         }
     }
 
     private void addImplementationEntries(Attributes main) {
-        putIfAbsentNonEmpty(
+        putIfAbsent(
                 main, Attributes.Name.IMPLEMENTATION_TITLE, project.getModel().getName());
         putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VERSION, project.getVersion());
         var organization = project.getModel().getOrganization();
         if (organization != null) {
-            putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_VENDOR, organization.getName());
+            putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VENDOR, organization.getName());
         }
         putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VENDOR_ID, project.getGroupId());
-        putIfAbsentNonEmpty(
-                main, Attributes.Name.IMPLEMENTATION_URL, project.getModel().getUrl());
+        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_URL, project.getModel().getUrl());
     }
 
     /**
@@ -267,20 +254,12 @@ final class ManifestBuilder {
 
     /**
      * Puts a value in the manifest attributes only if the key is not already present
-     * in the attributes or in the user-supplied extra entries ({@link ArchiveConfiguration#manifestEntries}).
+     * in the attributes or in the user-supplied extra entries ({@link ArchiveConfiguration#manifestEntries}),
+     * and only if the value is non-null and non-blank.
      */
     private void putIfAbsent(Attributes attrs, Attributes.Name key, String value) {
-        if (!archive.manifestEntries.containsKey(key.toString())) {
+        if (value != null && !value.isBlank() && !archive.manifestEntries.containsKey(key.toString())) {
             attrs.merge(key, sanitize(value), (existing, v) -> existing);
-        }
-    }
-
-    /**
-     * Like {@link #putIfAbsent}, but also skips null or empty values.
-     */
-    private void putIfAbsentNonEmpty(Attributes attrs, Attributes.Name key, String value) {
-        if (value != null && !value.isEmpty()) {
-            putIfAbsent(attrs, key, value);
         }
     }
 
