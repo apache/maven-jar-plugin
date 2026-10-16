@@ -175,9 +175,7 @@ final class ManifestBuilder {
 
     private void addSpecificationEntries(Attributes main) {
         putIfAbsentNonEmpty(
-                main,
-                Attributes.Name.SPECIFICATION_TITLE,
-                project.getModel().getName());
+                main, Attributes.Name.SPECIFICATION_TITLE, project.getModel().getName());
         String version = specificationVersion();
         if (version != null) {
             putIfAbsent(main, Attributes.Name.SPECIFICATION_VERSION, version);
@@ -190,16 +188,15 @@ final class ManifestBuilder {
 
     private void addImplementationEntries(Attributes main) {
         putIfAbsentNonEmpty(
-                main,
-                Attributes.Name.IMPLEMENTATION_TITLE,
-                project.getModel().getName());
+                main, Attributes.Name.IMPLEMENTATION_TITLE, project.getModel().getName());
         putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VERSION, project.getVersion());
         var organization = project.getModel().getOrganization();
         if (organization != null) {
             putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_VENDOR, organization.getName());
         }
         putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VENDOR_ID, project.getGroupId());
-        putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_URL, project.getModel().getUrl());
+        putIfAbsentNonEmpty(
+                main, Attributes.Name.IMPLEMENTATION_URL, project.getModel().getUrl());
     }
 
     /**
