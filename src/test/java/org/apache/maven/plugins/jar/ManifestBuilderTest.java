@@ -74,18 +74,15 @@ class ManifestBuilderTest {
     // -----------------------------------------------------------------------
 
     @Test
-    void buildJdkSpecPresentWhenFieldDefaultIsTrue() {
-        // Tests the field-level default of ManifestBuilder (buildJdkSpecDefaultEntry = true).
-        // Note: in production, AbstractJarMojo always overrides this with
-        // archive.manifest.addBuildEnvironmentEntries (default: false), so
-        // Build-Jdk-Spec is NOT present by default in production usage.
+    void buildJdkSpecPresentWhenBuildEnvironmentEntriesEnabled() {
+        // Build-Jdk-Spec is added when addBuildEnvironmentEntries is true.
         ArchiveConfiguration archive = new ArchiveConfiguration();
-        archive.manifest.addBuildEnvironmentEntries = false;
+        archive.manifest.addBuildEnvironmentEntries = true;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
         Manifest manifest = builder.build();
 
-        // Build-Jdk-Spec is added from System property when buildJdkSpecDefaultEntry is true
+        // Build-Jdk-Spec is added from System property when addBuildEnvironmentEntries is true
         String specVersion = System.getProperty("java.specification.version");
         if (specVersion != null) {
             assertEquals(specVersion, manifest.getMainAttributes().getValue("Build-Jdk-Spec"));
@@ -93,17 +90,16 @@ class ManifestBuilderTest {
     }
 
     @Test
-    void buildJdkSpecAbsentWhenDisabled() {
+    void buildJdkSpecAbsentWhenBuildEnvironmentEntriesDisabled() {
         ArchiveConfiguration archive = new ArchiveConfiguration();
         archive.manifest.addBuildEnvironmentEntries = false;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setBuildJdkSpecDefaultEntry(false);
         Manifest manifest = builder.build();
 
         assertNull(
                 manifest.getMainAttributes().getValue("Build-Jdk-Spec"),
-                "Build-Jdk-Spec should be absent when buildJdkSpecDefaultEntry is false");
+                "Build-Jdk-Spec should be absent when addBuildEnvironmentEntries is false");
     }
 
     @Test
@@ -115,7 +111,6 @@ class ManifestBuilderTest {
         archive.manifestEntries.put("Main-Class", "com.example.Main");
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setBuildJdkSpecDefaultEntry(false);
         Manifest manifest = builder.build();
 
         assertEquals(
@@ -501,7 +496,6 @@ class ManifestBuilderTest {
         archive.manifest.useUniqueVersions = true;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setBuildJdkSpecDefaultEntry(false);
         Manifest manifest = builder.build();
 
         String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
@@ -528,7 +522,6 @@ class ManifestBuilderTest {
         archive.manifest.useUniqueVersions = true;
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setBuildJdkSpecDefaultEntry(false);
         Manifest manifest = builder.build();
 
         String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
@@ -556,7 +549,6 @@ class ManifestBuilderTest {
         archive.manifest.classpathPrefix = "lib/";
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setBuildJdkSpecDefaultEntry(false);
         Manifest manifest = builder.build();
 
         String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
@@ -583,7 +575,6 @@ class ManifestBuilderTest {
         archive.manifestEntries.put("Class-Path", "user-lib.jar");
 
         ManifestBuilder builder = new ManifestBuilder(session, project, archive);
-        builder.setBuildJdkSpecDefaultEntry(false);
         Manifest manifest = builder.build();
 
         String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);

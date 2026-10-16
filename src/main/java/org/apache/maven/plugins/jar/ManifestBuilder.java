@@ -65,21 +65,10 @@ final class ManifestBuilder {
     private final Project project;
     private final ArchiveConfiguration archive;
 
-    /**
-     * Whether to add the {@code Build-Jdk-Spec} entry (from {@code java.specification.version})
-     * when {@link ArchiveConfiguration.ManifestConfig#addBuildEnvironmentEntries} is {@code true}.
-     * Set by {@code AbstractJarMojo} to the value of that flag.
-     */
-    private boolean buildJdkSpecDefaultEntry = true;
-
     ManifestBuilder(Session session, Project project, ArchiveConfiguration archive) {
         this.session = session;
         this.project = project;
         this.archive = archive;
-    }
-
-    void setBuildJdkSpecDefaultEntry(boolean buildJdkSpecDefaultEntry) {
-        this.buildJdkSpecDefaultEntry = buildJdkSpecDefaultEntry;
     }
 
     /**
@@ -166,19 +155,14 @@ final class ManifestBuilder {
         if (jdk != null) {
             putIfAbsent(main, extra, "Java-Version", jdk);
         }
-
-        // Build-Jdk-Spec reflects the runtime JDK specification version.
-        // Only added when buildJdkSpecDefaultEntry is true, which AbstractJarMojo
-        // sets to the value of <archive><manifest><addBuildEnvironmentEntries>.
-        if (buildJdkSpecDefaultEntry) {
-            String specVersion = System.getProperty("java.specification.version");
-            if (specVersion != null) {
-                putIfAbsent(main, extra, "Build-Jdk-Spec", specVersion);
-            }
-        }
     }
 
     private void addBuildEnvironmentEntries(Attributes main, Map<String, String> extra) {
+        // Build-Jdk-Spec reflects the runtime JDK specification version.
+        String specVersion = System.getProperty("java.specification.version");
+        if (specVersion != null) {
+            putIfAbsent(main, extra, "Build-Jdk-Spec", specVersion);
+        }
         String javaVersion = System.getProperty("java.version");
         if (javaVersion != null) {
             putIfAbsent(main, extra, "Build-Jdk", javaVersion);
