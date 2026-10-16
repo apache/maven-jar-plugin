@@ -232,7 +232,7 @@ final class ManifestBuilder {
             if (interpolated != null) {
                 classpath.append(interpolated);
             } else {
-                classpath.append(artifactFile.getFileName().toString());
+                classpath.append(artifactFile.getFileName());
             }
         }
         return classpath.toString();
