@@ -198,7 +198,9 @@ final class ManifestBuilder {
             if (!classpath.isEmpty()) {
                 classpath.append(' ');
             }
-            classpath.append(prefix);
+            if (prefix != null && !prefix.isEmpty()) {
+                classpath.append(prefix);
+            }
             String interpolated = interpolator.interpolate(layout, key -> resolveArtifactExpression(dep, key));
             if (interpolated != null) {
                 classpath.append(interpolated);
