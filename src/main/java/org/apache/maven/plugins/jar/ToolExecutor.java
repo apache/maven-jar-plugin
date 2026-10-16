@@ -356,8 +356,9 @@ final class ToolExecutor {
                     mainAttributes.putValue(CREATED_BY, createdBy());
                 }
             } else {
-                // If reproducible build was not requested, let the tool declares itself.
-                // Remove any value set by ManifestBuilder so that the `jar` tool can add its own JDK-stamped value.
+                // TODO: workaround — ideally, "Created-By" handling should be done in ManifestBuilder
+                // (the archiver layer) rather than here in ToolExecutor. For now, we remove the attribute
+                // set by ManifestBuilder so that the `jar` tool can stamp its own JDK-based value.
                 mainAttributes.remove(CREATED_BY);
             }
         }
