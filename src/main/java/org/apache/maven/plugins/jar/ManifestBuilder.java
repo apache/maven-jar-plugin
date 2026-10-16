@@ -46,7 +46,7 @@ import org.apache.maven.api.xml.XmlNode;
  */
 final class ManifestBuilder {
 
-    private static final String CLASSPATH_LAYOUT_TYPE_SIMPLE = "simple";
+    static final String CLASSPATH_LAYOUT_TYPE_SIMPLE = "simple";
     private static final String CLASSPATH_LAYOUT_TYPE_REPOSITORY = "repository";
     private static final String CLASSPATH_LAYOUT_TYPE_CUSTOM = "custom";
 

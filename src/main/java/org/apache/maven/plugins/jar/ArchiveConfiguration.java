@@ -61,7 +61,7 @@ public class ArchiveConfiguration {
         boolean addBuildEnvironmentEntries;
         boolean addDefaultSpecificationEntries;
         boolean addDefaultImplementationEntries;
-        String classpathLayoutType = "simple";
+        String classpathLayoutType = ManifestBuilder.CLASSPATH_LAYOUT_TYPE_SIMPLE;
         String customClasspathLayout;
         boolean useUniqueVersions = true;
     }
