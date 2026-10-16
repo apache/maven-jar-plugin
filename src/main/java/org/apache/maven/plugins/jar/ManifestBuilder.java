@@ -79,13 +79,12 @@ final class ManifestBuilder {
      */
     Manifest build() {
         ArchiveConfiguration.ManifestConfig config = archive.manifest;
-        Map<String, String> extraEntries = archive.manifestEntries;
 
-        Manifest manifest = buildManifest(config, extraEntries);
+        Manifest manifest = buildManifest(config);
 
         // Merge any extra entries from <archive><manifestEntries>
         Attributes main = manifest.getMainAttributes();
-        for (Map.Entry<String, String> entry : extraEntries.entrySet()) {
+        for (Map.Entry<String, String> entry : archive.manifestEntries.entrySet()) {
             String key = entry.getKey();
             String value = sanitize(entry.getValue());
             if (key.equals(Attributes.Name.CLASS_PATH.toString())) {
@@ -112,18 +111,18 @@ final class ManifestBuilder {
         return manifest;
     }
 
-    private Manifest buildManifest(ArchiveConfiguration.ManifestConfig config, Map<String, String> extraEntries) {
+    private Manifest buildManifest(ArchiveConfiguration.ManifestConfig config) {
         Manifest manifest = new Manifest();
         Attributes main = manifest.getMainAttributes();
         // Manifest-Version must be present or java.util.jar.Manifest.write() silently drops all main attributes.
         main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 
         if (config.addDefaultEntries) {
-            addDefaultEntries(main, extraEntries);
+            addDefaultEntries(main);
         }
 
         if (config.addBuildEnvironmentEntries) {
-            addBuildEnvironmentEntries(main, extraEntries);
+            addBuildEnvironmentEntries(main);
         }
 
         if (config.addClasspath) {
@@ -134,75 +133,72 @@ final class ManifestBuilder {
         }
 
         if (config.addDefaultSpecificationEntries) {
-            addSpecificationEntries(main, extraEntries);
+            addSpecificationEntries(main);
         }
 
         if (config.addDefaultImplementationEntries) {
-            addImplementationEntries(main, extraEntries);
+            addImplementationEntries(main);
         }
 
         String mainClass = config.mainClass;
         if (mainClass != null && !mainClass.isEmpty()) {
-            putIfAbsent(main, extraEntries, Attributes.Name.MAIN_CLASS.toString(), mainClass);
+            putIfAbsent(main, Attributes.Name.MAIN_CLASS.toString(), mainClass);
         }
 
         return manifest;
     }
 
-    private void addDefaultEntries(Attributes main, Map<String, String> extra) {
+    private void addDefaultEntries(Attributes main) {
         // Java-Version reflects the compiler target (e.g. "11"), as set by maven-compiler-plugin.
         String jdk = discoverJavaRelease(project.getModel());
         if (jdk != null) {
-            putIfAbsent(main, extra, "Java-Version", jdk);
+            putIfAbsent(main, "Java-Version", jdk);
         }
     }
 
-    private void addBuildEnvironmentEntries(Attributes main, Map<String, String> extra) {
+    private void addBuildEnvironmentEntries(Attributes main) {
         // Build-Jdk-Spec reflects the runtime JDK specification version.
         String specVersion = System.getProperty("java.specification.version");
         if (specVersion != null) {
-            putIfAbsent(main, extra, "Build-Jdk-Spec", specVersion);
+            putIfAbsent(main, "Build-Jdk-Spec", specVersion);
         }
         String javaVersion = System.getProperty("java.version");
         if (javaVersion != null) {
-            putIfAbsent(main, extra, "Build-Jdk", javaVersion);
+            putIfAbsent(main, "Build-Jdk", javaVersion);
         }
         String user = System.getProperty("user.name");
         if (user != null) {
-            putIfAbsent(main, extra, "Built-By", user);
+            putIfAbsent(main, "Built-By", user);
         }
     }
 
-    private void addSpecificationEntries(Attributes main, Map<String, String> extra) {
+    private void addSpecificationEntries(Attributes main) {
         putIfAbsentNonEmpty(
                 main,
-                extra,
                 Attributes.Name.SPECIFICATION_TITLE.toString(),
                 project.getModel().getName());
         String version = specificationVersion();
         if (version != null) {
-            putIfAbsent(main, extra, Attributes.Name.SPECIFICATION_VERSION.toString(), version);
+            putIfAbsent(main, Attributes.Name.SPECIFICATION_VERSION.toString(), version);
         }
         var organization = project.getModel().getOrganization();
         if (organization != null) {
-            putIfAbsentNonEmpty(main, extra, Attributes.Name.SPECIFICATION_VENDOR.toString(), organization.getName());
+            putIfAbsentNonEmpty(main, Attributes.Name.SPECIFICATION_VENDOR.toString(), organization.getName());
         }
     }
 
-    private void addImplementationEntries(Attributes main, Map<String, String> extra) {
+    private void addImplementationEntries(Attributes main) {
         putIfAbsentNonEmpty(
                 main,
-                extra,
                 Attributes.Name.IMPLEMENTATION_TITLE.toString(),
                 project.getModel().getName());
-        putIfAbsent(main, extra, Attributes.Name.IMPLEMENTATION_VERSION.toString(), project.getVersion());
+        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VERSION.toString(), project.getVersion());
         var organization = project.getModel().getOrganization();
         if (organization != null) {
-            putIfAbsentNonEmpty(main, extra, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), organization.getName());
+            putIfAbsentNonEmpty(main, Attributes.Name.IMPLEMENTATION_VENDOR.toString(), organization.getName());
         }
-        putIfAbsent(main, extra, "Implementation-Vendor-Id", project.getGroupId());
-        putIfAbsentNonEmpty(
-                main, extra, "Implementation-URL", project.getModel().getUrl());
+        putIfAbsent(main, "Implementation-Vendor-Id", project.getGroupId());
+        putIfAbsentNonEmpty(main, "Implementation-URL", project.getModel().getUrl());
     }
 
     /**
@@ -222,7 +218,7 @@ final class ManifestBuilder {
         String layout = resolveLayout(layoutType, customLayout, uniqueVersions);
         for (Map.Entry<Dependency, Path> entry : result.getDependencies().entrySet()) {
             Path artifactFile = entry.getValue();
-            if (artifactFile == null || !Files.isRegularFile(artifactFile.toAbsolutePath())) {
+            if (artifactFile == null || !Files.isRegularFile(artifactFile)) {
                 continue;
             }
             Dependency dep = entry.getKey();
@@ -285,10 +281,10 @@ final class ManifestBuilder {
 
     /**
      * Puts a value in the manifest attributes only if the key is not already present
-     * (either in the attributes or in the user-supplied extra entries map).
+     * in the attributes or in the user-supplied extra entries ({@link ArchiveConfiguration#manifestEntries}).
      */
-    private static void putIfAbsent(Attributes attrs, Map<String, String> extra, String key, String value) {
-        if (!extra.containsKey(key)) {
+    private void putIfAbsent(Attributes attrs, String key, String value) {
+        if (!archive.manifestEntries.containsKey(key)) {
             attrs.merge(new Attributes.Name(key), sanitize(value), (existing, v) -> existing);
         }
     }
@@ -296,9 +292,9 @@ final class ManifestBuilder {
     /**
      * Like {@link #putIfAbsent}, but also skips null or empty values.
      */
-    private static void putIfAbsentNonEmpty(Attributes attrs, Map<String, String> extra, String key, String value) {
+    private void putIfAbsentNonEmpty(Attributes attrs, String key, String value) {
         if (value != null && !value.isEmpty()) {
-            putIfAbsent(attrs, extra, key, value);
+            putIfAbsent(attrs, key, value);
         }
     }
 
