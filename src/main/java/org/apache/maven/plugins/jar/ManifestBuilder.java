@@ -80,38 +80,6 @@ final class ManifestBuilder {
      * @throws MojoException if the manifest cannot be built
      */
     Manifest build() {
-        Manifest manifest = buildManifest();
-
-        // Merge any extra entries from <archive><manifestEntries>
-        Attributes main = manifest.getMainAttributes();
-        for (Map.Entry<String, String> entry : archive.manifestEntries.entrySet()) {
-            String key = entry.getKey();
-            String value = sanitize(entry.getValue());
-            if (key.equals(Attributes.Name.CLASS_PATH.toString())) {
-                // User-supplied value goes first (takes precedence), then programmatic one.
-                main.merge(
-                        Attributes.Name.CLASS_PATH, value, (existing, supplied) -> (String) supplied + ' ' + existing);
-            } else {
-                main.putValue(key, value);
-            }
-        }
-
-        // Extra manifest sections from <archive><manifestSections>
-        for (ArchiveConfiguration.ManifestSection section : archive.manifestSections) {
-            if (section.name == null || section.name.isBlank()) {
-                throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
-            }
-            Attributes attrs = new Attributes();
-            for (Map.Entry<String, String> e : section.manifestEntries.entrySet()) {
-                attrs.putValue(e.getKey(), sanitize(e.getValue()));
-            }
-            manifest.getEntries().put(section.name, attrs);
-        }
-
-        return manifest;
-    }
-
-    private Manifest buildManifest() {
         Manifest manifest = new Manifest();
         Attributes main = manifest.getMainAttributes();
         // Manifest-Version must be present or java.util.jar.Manifest.write() silently drops all main attributes.
@@ -141,9 +109,31 @@ final class ManifestBuilder {
             addImplementationEntries(main);
         }
 
-        String mainClass = config.mainClass;
-        if (mainClass != null && !mainClass.isEmpty()) {
-            putIfAbsent(main, Attributes.Name.MAIN_CLASS, mainClass);
+        putIfAbsentNonEmpty(main, Attributes.Name.MAIN_CLASS, config.mainClass);
+
+        // Merge any extra entries from <archive><manifestEntries>
+        for (Map.Entry<String, String> entry : archive.manifestEntries.entrySet()) {
+            String key = entry.getKey();
+            String value = sanitize(entry.getValue());
+            if (key.equals(Attributes.Name.CLASS_PATH.toString())) {
+                // User-supplied value goes first (takes precedence), then programmatic one.
+                main.merge(
+                        Attributes.Name.CLASS_PATH, value, (existing, supplied) -> (String) supplied + ' ' + existing);
+            } else {
+                main.putValue(key, value);
+            }
+        }
+
+        // Extra manifest sections from <archive><manifestSections>
+        for (ArchiveConfiguration.ManifestSection section : archive.manifestSections) {
+            if (section.name == null || section.name.isBlank()) {
+                throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
+            }
+            Attributes attrs = new Attributes();
+            for (Map.Entry<String, String> e : section.manifestEntries.entrySet()) {
+                attrs.putValue(e.getKey(), sanitize(e.getValue()));
+            }
+            manifest.getEntries().put(section.name, attrs);
         }
 
         return manifest;
@@ -151,10 +141,7 @@ final class ManifestBuilder {
 
     private void addDefaultEntries(Attributes main) {
         // Java-Version reflects the compiler target (e.g. "11"), as set by maven-compiler-plugin.
-        String jdk = discoverJavaRelease(project.getModel());
-        if (jdk != null) {
-            putIfAbsent(main, JAVA_VERSION, jdk);
-        }
+        putIfAbsentNonEmpty(main, JAVA_VERSION, discoverJavaRelease(project.getModel()));
     }
 
     private void addBuildEnvironmentEntries(Attributes main) {
