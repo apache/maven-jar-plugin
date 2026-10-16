@@ -29,18 +29,18 @@ under the License.
 The Default Manifest
 --------------------
 
-The documentation for [Maven Archiver](/shared/maven-archiver/examples/manifest.html) describes the default contents of the manifest.
-
-Since version 2.1, the Maven JAR Plugin no longer creates the Specification and Implementation details in the manifest by default.
-To add them, specify them explicitly in your plugin configuration.
-The documentation for [Maven Archiver](/shared/maven-archiver/examples/manifest.html) describes this as well.
+The default manifest is built by `ManifestBuilder` based on the `<archive>` configuration.
+By default, it includes the `Java-Version` attribute (when the compiler target is discoverable from the POM).
+`Created-By` is always present in the final JAR — set by `ToolExecutor` to a JDK-independent string for reproducible builds, or supplied by the `jar` tool itself otherwise.
+When `addBuildEnvironmentEntries` is enabled, `Built-By`, `Build-Jdk`, and `Build-Jdk-Spec` are also added.
+To add Specification and Implementation details or a classpath, configure them explicitly in the `<archive>` element.
 
 Manifest Customization
 ----------------------
 
 You can alter the default manifest with the `archive` configuration element.
 The example below shows some of the available configuration options.
-For more information, see the [Maven Archiver reference](/shared/maven-archiver/index.html).
+For more information, see the [plugin documentation](../plugin-info.html).
 
 ```unknown
 <project>

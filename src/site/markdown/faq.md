@@ -25,11 +25,12 @@ under the License.
 
 # Frequently Asked Questions
 
-1. [Why is there no documentation for the archive parameter?](#question1)
+1. [How do I configure the archive parameter?](#question1)
 
 <a id="question1"></a>
 
-### Why is there no documentation for the archive parameter?
+### How do I configure the archive parameter?
 
-The `archive` parameter is defined by the Maven Archiver library, not by the Maven JAR Plugin. Read the
-[Maven Archiver documentation](/shared/maven-archiver/index.html).
+The `archive` parameter is configured via `ArchiveConfiguration`.
+See the [plugin documentation](plugin-info.html) for the full list of configuration options,
+and [manifest customization](examples/manifest-customization.html) for examples.
