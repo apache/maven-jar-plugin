@@ -110,7 +110,7 @@ final class ManifestBuilder {
 
         // Extra manifest sections from <archive><manifestSections>
         for (ArchiveConfiguration.ManifestSection section : archive.manifestSections) {
-            if (section.name == null || section.name.isEmpty()) {
+            if (section.name == null || section.name.isBlank()) {
                 throw new MojoException("Each <manifestSection> must declare a non-empty <name>.");
             }
             Attributes attrs = new Attributes();
