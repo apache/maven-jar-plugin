@@ -78,9 +78,7 @@ final class ManifestBuilder {
      * @throws MojoException if the manifest cannot be built
      */
     Manifest build() {
-        ArchiveConfiguration.ManifestConfig config = archive.manifest;
-
-        Manifest manifest = buildManifest(config);
+        Manifest manifest = buildManifest();
 
         // Merge any extra entries from <archive><manifestEntries>
         Attributes main = manifest.getMainAttributes();
@@ -111,12 +109,13 @@ final class ManifestBuilder {
         return manifest;
     }
 
-    private Manifest buildManifest(ArchiveConfiguration.ManifestConfig config) {
+    private Manifest buildManifest() {
         Manifest manifest = new Manifest();
         Attributes main = manifest.getMainAttributes();
         // Manifest-Version must be present or java.util.jar.Manifest.write() silently drops all main attributes.
         main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 
+        ArchiveConfiguration.ManifestConfig config = archive.manifest;
         if (config.addDefaultEntries) {
             addDefaultEntries(main);
         }
@@ -126,9 +125,9 @@ final class ManifestBuilder {
         }
 
         if (config.addClasspath) {
-            String classpath = buildClasspath(config);
+            String classpath = buildClasspath();
             if (!classpath.isEmpty()) {
-                main.putValue(Attributes.Name.CLASS_PATH.toString(), classpath);
+                main.put(Attributes.Name.CLASS_PATH, classpath);
             }
         }
 
@@ -204,11 +203,12 @@ final class ManifestBuilder {
     /**
      * Resolves the runtime dependencies and builds the {@code Class-Path} manifest value.
      */
-    private String buildClasspath(ArchiveConfiguration.ManifestConfig config) {
+    private String buildClasspath() {
         DependencyResolverResult result =
                 session.getService(DependencyResolver.class).resolve(session, project, PathScope.MAIN_RUNTIME);
 
         Interpolator interpolator = session.getService(Interpolator.class);
+        ArchiveConfiguration.ManifestConfig config = archive.manifest;
         String prefix = config.classpathPrefix;
         String layoutType = config.classpathLayoutType;
         String customLayout = config.customClasspathLayout;
