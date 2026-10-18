@@ -37,7 +37,7 @@ The Default Manifest
 The default manifest is built by `ManifestBuilder` based on the `<archive>` configuration.
 By default, it includes the `Java-Version` attribute (when the compiler target is discoverable from the POM).
 `Created-By` is always present in the final JAR — set by `ToolExecutor` to a JDK-independent string for reproducible builds, or supplied by the `jar` tool itself otherwise.
-When `addBuildEnvironmentEntries` is enabled, `Built-By`, `Build-Jdk`, and `Build-Jdk-Spec` are also added.
+When `addBuildEnvironmentEntries` is enabled, `Build-Tool`, `Build-Jdk-Spec`, `Build-Jdk` (version and vendor), `Built-By`, and `Build-Os` are also added.
 To add Specification and Implementation details or a classpath, configure them explicitly in the `<archive>` element.
 
 The `<archive>` Configuration Element
@@ -61,15 +61,17 @@ The `<archive>` element accepts the following top-level options:
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `mainClass` | String | — | The `Main-Class` attribute value. Sets the entry point for executable JARs. |
+| `packageName` | String | — | The `Package` attribute value. When set, identifies the versioned package the classes belong to. |
 | `addClasspath` | boolean | `false` | Whether to generate a `Class-Path` attribute from the project's runtime dependencies. |
-| `classpathPrefix` | String | `""` | A prefix prepended to every entry in the generated `Class-Path`. |
+| `classpathPrefix` | String | `""` | A prefix prepended to every entry in the generated `Class-Path`. Backslashes are replaced with forward slashes, and a trailing `/` is added automatically if absent. |
 | `classpathLayoutType` | String | `"simple"` | Layout type for `Class-Path` entries. One of `simple`, `repository`, or `custom`. |
 | `customClasspathLayout` | String | — | Custom layout template when `classpathLayoutType` is `custom`. Supports `${esc.d}{artifact.*}` expressions (see below). |
 | `useUniqueVersions` | boolean | `true` | Whether to use unique timestamps for SNAPSHOT artifacts in `Class-Path` entries. |
 | `addDefaultEntries` | boolean | `true` | Whether to add the `Java-Version` attribute (sourced from the compiler plugin's `release`/`target` setting). |
-| `addBuildEnvironmentEntries` | boolean | `false` | Whether to add `Build-Jdk-Spec`, `Build-Jdk`, and `Built-By` attributes from the current JVM. |
+| `addBuildEnvironmentEntries` | boolean | `false` | Whether to add build environment attributes: `Build-Tool` (Maven version), `Build-Jdk-Spec` (JDK spec version), `Build-Jdk` (JDK version and vendor), `Built-By` (user name), and `Build-Os` (OS name, version, and architecture). |
 | `addDefaultSpecificationEntries` | boolean | `false` | Whether to add `Specification-Title`, `Specification-Version`, and `Specification-Vendor` from the POM. |
 | `addDefaultImplementationEntries` | boolean | `false` | Whether to add `Implementation-Title`, `Implementation-Version`, and `Implementation-Vendor` from the POM. |
+| `addExtensions` | boolean | `false` | Accepted for compatibility with maven-archiver configuration; has no effect (the JAR plugin does not manage extensions). |
 
 ### Classpath Layout Expressions
 

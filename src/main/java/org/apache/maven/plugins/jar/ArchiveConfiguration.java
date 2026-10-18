@@ -64,6 +64,17 @@ public class ArchiveConfiguration {
         String classpathLayoutType = ManifestBuilder.CLASSPATH_LAYOUT_TYPE_SIMPLE;
         String customClasspathLayout;
         boolean useUniqueVersions = true;
+        /**
+         * The package name for the {@code Package} manifest attribute.
+         * When set, the {@code Package} entry is added to the manifest main section.
+         */
+        String packageName;
+        /**
+         * Whether to add an {@code Extension-List} manifest entry.
+         * Kept for compatibility with maven-archiver; has no effect in this implementation
+         * because the JAR plugin does not manage extensions.
+         */
+        boolean addExtensions;
     }
 
     /**

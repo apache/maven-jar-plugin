@@ -29,6 +29,7 @@ import org.apache.maven.api.Dependency;
 import org.apache.maven.api.PathScope;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
+import org.apache.maven.api.Version;
 import org.apache.maven.api.model.Model;
 import org.apache.maven.api.model.Plugin;
 import org.apache.maven.api.plugin.MojoException;
@@ -104,6 +105,7 @@ final class ManifestBuilder {
         }
 
         putIfAbsent(main, Attributes.Name.MAIN_CLASS, config.mainClass);
+        putIfAbsent(main, new Attributes.Name("Package"), config.packageName);
 
         // Merge any extra entries from <archive><manifestEntries>
         for (Map.Entry<String, String> entry : archive.manifestEntries.entrySet()) {
@@ -139,10 +141,29 @@ final class ManifestBuilder {
     }
 
     private void addBuildEnvironmentEntries(Attributes main) {
+        // Build-Tool identifies the Maven version used to build the artifact.
+        Version mavenVersion = session.getMavenVersion();
+        if (mavenVersion != null) {
+            putIfAbsent(main, new Attributes.Name("Build-Tool"), "Apache Maven " + mavenVersion);
+        }
         // Build-Jdk-Spec reflects the runtime JDK specification version.
         putIfAbsent(main, new Attributes.Name("Build-Jdk-Spec"), System.getProperty("java.specification.version"));
-        putIfAbsent(main, new Attributes.Name("Build-Jdk"), System.getProperty("java.version"));
+        // Build-Jdk includes both the version and the vendor, matching maven-archiver behaviour.
+        putIfAbsent(
+                main,
+                new Attributes.Name("Build-Jdk"),
+                System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
         putIfAbsent(main, new Attributes.Name("Built-By"), System.getProperty("user.name"));
+        // Build-Os captures the operating system name, version, and architecture.
+        putIfAbsent(
+                main,
+                new Attributes.Name("Build-Os"),
+                System.getProperty("os.name")
+                        + " ("
+                        + System.getProperty("os.version")
+                        + "; "
+                        + System.getProperty("os.arch")
+                        + ")");
     }
 
     private void addSpecificationEntries(Attributes main) {
@@ -175,6 +196,16 @@ final class ManifestBuilder {
         Interpolator interpolator = session.getService(Interpolator.class);
         ArchiveConfiguration.ManifestConfig config = archive.manifest;
         String prefix = config.classpathPrefix;
+        // Normalize the classpath prefix: replace backslashes with forward slashes (Windows compat)
+        // and add a trailing slash if the prefix is non-empty (matching maven-archiver behaviour).
+        if (prefix != null && !prefix.isEmpty()) {
+            prefix = prefix.replace('\\', '/');
+            if (!prefix.endsWith("/")) {
+                prefix += "/";
+            }
+        } else {
+            prefix = "";
+        }
         String layoutType = config.classpathLayoutType;
         String customLayout = config.customClasspathLayout;
         boolean uniqueVersions = config.useUniqueVersions;
@@ -190,7 +221,7 @@ final class ManifestBuilder {
             if (!classpath.isEmpty()) {
                 classpath.append(' ');
             }
-            if (prefix != null) {
+            if (!prefix.isEmpty()) {
                 classpath.append(prefix);
             }
             String interpolated = interpolator.interpolate(layout, key -> resolveArtifactExpression(dep, key));
@@ -267,14 +298,17 @@ final class ManifestBuilder {
     }
 
     /**
-     * Returns the specification version from the project version, keeping only the {@code major.minor} part.
+     * Returns the specification version from the project version, keeping only the numeric {@code major.minor} part.
+     * Returns {@code null} if the version does not start with at least one numeric component.
+     * A trailing dot is never produced (e.g. {@code "1.foo"} → {@code "1"}, not {@code "1."}).
      */
     private String specificationVersion() {
         String projectVersion = project.getVersion();
         if (projectVersion == null) {
             return null;
         }
-        // Keep only "major.minor" (digits and dots up to the second dot or first non-digit).
+        // Keep only "major.minor": digits and at most one dot separator, stop at any non-digit
+        // (including a dot that would become trailing).
         var specificationVersion = new StringBuilder();
         int dots = 0;
         for (int i = 0; i < projectVersion.length(); i++) {
@@ -284,7 +318,12 @@ final class ManifestBuilder {
                 if (dots == 2) {
                     break;
                 }
-                specificationVersion.append(c);
+                // Only append the dot if the next character is a digit (avoids trailing dot).
+                if (i + 1 < projectVersion.length() && Character.isDigit(projectVersion.charAt(i + 1))) {
+                    specificationVersion.append(c);
+                } else {
+                    break;
+                }
             } else if (Character.isDigit(c)) {
                 specificationVersion.append(c);
             } else {

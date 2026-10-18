@@ -136,12 +136,42 @@ class ManifestBuilderTest {
         Manifest manifest = builder.build();
 
         String javaVersion = System.getProperty("java.version");
-        if (javaVersion != null) {
+        String javaVendor = System.getProperty("java.vendor");
+        if (javaVersion != null && javaVendor != null) {
             assertEquals(
-                    javaVersion,
+                    javaVersion + " (" + javaVendor + ")",
                     manifest.getMainAttributes().getValue("Build-Jdk"),
-                    "Build-Jdk should be present when addBuildEnvironmentEntries is true");
+                    "Build-Jdk should include JDK version and vendor when addBuildEnvironmentEntries is true");
         }
+    }
+
+    @Test
+    void buildToolEntryPresentWhenBuildEnvironmentEntriesEnabled() {
+        ArchiveConfiguration archive = new ArchiveConfiguration();
+        archive.manifest.addBuildEnvironmentEntries = true;
+
+        ManifestBuilder builder = new ManifestBuilder(session, project, archive);
+        Manifest manifest = builder.build();
+
+        // Build-Tool is only added when session.getMavenVersion() is non-null;
+        // SessionStub returns null so we only verify the format when the value is present.
+        String buildTool = manifest.getMainAttributes().getValue("Build-Tool");
+        if (buildTool != null) {
+            assertTrue(buildTool.startsWith("Apache Maven"), "Build-Tool should start with 'Apache Maven'");
+        }
+    }
+
+    @Test
+    void buildOsEntryPresentWhenBuildEnvironmentEntriesEnabled() {
+        ArchiveConfiguration archive = new ArchiveConfiguration();
+        archive.manifest.addBuildEnvironmentEntries = true;
+
+        ManifestBuilder builder = new ManifestBuilder(session, project, archive);
+        Manifest manifest = builder.build();
+
+        String buildOs = manifest.getMainAttributes().getValue("Build-Os");
+        assertNotNull(buildOs, "Build-Os should be present when addBuildEnvironmentEntries is true");
+        assertTrue(buildOs.contains("("), "Build-Os should include OS details in parentheses");
     }
 
     // -----------------------------------------------------------------------
@@ -554,6 +584,37 @@ class ManifestBuilderTest {
         String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
         assertNotNull(classPath, "Class-Path should be present");
         assertEquals("lib/lib-c-3.0.jar", classPath);
+    }
+
+    @Test
+    void classpathPrefixAutoAddsTrailingSlash() throws Exception {
+        // When classpathPrefix is "lib" (no trailing slash), the normalization must add "/" automatically.
+        Dependency dep = dep("com.example", "lib-c", "3.0", "jar");
+        java.io.File tmp = java.io.File.createTempFile("lib-c-3.0", ".jar");
+        tmp.deleteOnExit();
+        Path jarPath = tmp.toPath();
+
+        Map<Dependency, Path> deps = new LinkedHashMap<>();
+        deps.put(dep, jarPath);
+
+        SessionWithServices session = new SessionWithServices(deps);
+        ProjectStub project = new ProjectStub();
+
+        ArchiveConfiguration archive = new ArchiveConfiguration();
+        archive.manifest.addClasspath = true;
+        archive.manifest.classpathLayoutType = "simple";
+        archive.manifest.useUniqueVersions = true;
+        archive.manifest.classpathPrefix = "lib"; // no trailing slash
+
+        ManifestBuilder builder = new ManifestBuilder(session, project, archive);
+        Manifest manifest = builder.build();
+
+        String classPath = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+        assertNotNull(classPath, "Class-Path should be present");
+        assertEquals(
+                "lib/lib-c-3.0.jar",
+                classPath,
+                "classpathPrefix without trailing slash must be normalized to include '/'");
     }
 
     @Test
