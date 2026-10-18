@@ -46,12 +46,6 @@ final class ManifestBuilder {
     private static final String CLASSPATH_LAYOUT_TYPE_REPOSITORY = "repository";
     private static final String CLASSPATH_LAYOUT_TYPE_CUSTOM = "custom";
 
-    // Attribute name constants not predefined in java.util.jar.Attributes.Name
-    private static final Attributes.Name JAVA_VERSION = new Attributes.Name("Java-Version");
-    private static final Attributes.Name BUILD_JDK_SPEC = new Attributes.Name("Build-Jdk-Spec");
-    private static final Attributes.Name BUILD_JDK = new Attributes.Name("Build-Jdk");
-    private static final Attributes.Name BUILT_BY = new Attributes.Name("Built-By");
-
     private static final String SIMPLE_LAYOUT =
             "${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}";
     private static final String SIMPLE_LAYOUT_NONUNIQUE =
@@ -141,14 +135,14 @@ final class ManifestBuilder {
 
     private void addDefaultEntries(Attributes main) {
         // Java-Version reflects the compiler target (e.g. "11"), as set by maven-compiler-plugin.
-        putIfAbsent(main, JAVA_VERSION, discoverJavaRelease(project.getModel()));
+        putIfAbsent(main, new Attributes.Name("Java-Version"), discoverJavaRelease(project.getModel()));
     }
 
     private void addBuildEnvironmentEntries(Attributes main) {
         // Build-Jdk-Spec reflects the runtime JDK specification version.
-        putIfAbsent(main, BUILD_JDK_SPEC, System.getProperty("java.specification.version"));
-        putIfAbsent(main, BUILD_JDK, System.getProperty("java.version"));
-        putIfAbsent(main, BUILT_BY, System.getProperty("user.name"));
+        putIfAbsent(main, new Attributes.Name("Build-Jdk-Spec"), System.getProperty("java.specification.version"));
+        putIfAbsent(main, new Attributes.Name("Build-Jdk"), System.getProperty("java.version"));
+        putIfAbsent(main, new Attributes.Name("Built-By"), System.getProperty("user.name"));
     }
 
     private void addSpecificationEntries(Attributes main) {
