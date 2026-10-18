@@ -58,7 +58,7 @@ The `<archive>` element accepts the following top-level options:
 | `addClasspath` | boolean | `false` | Whether to generate a `Class-Path` attribute from the project's runtime dependencies. |
 | `classpathPrefix` | String | `""` | A prefix prepended to every entry in the generated `Class-Path`. |
 | `classpathLayoutType` | String | `"simple"` | Layout type for `Class-Path` entries. One of `simple`, `repository`, or `custom`. |
-| `customClasspathLayout` | String | — | Custom layout template when `classpathLayoutType` is `custom`. Supports `${artifact.*}` expressions (see below). |
+| `customClasspathLayout` | String | — | Custom layout template when `classpathLayoutType` is `custom`. Supports `\${artifact.*}` expressions (see below). |
 | `useUniqueVersions` | boolean | `true` | Whether to use unique timestamps for SNAPSHOT artifacts in `Class-Path` entries. |
 | `addDefaultEntries` | boolean | `true` | Whether to add the `Java-Version` attribute (sourced from the compiler plugin's `release`/`target` setting). |
 | `addBuildEnvironmentEntries` | boolean | `false` | Whether to add `Build-Jdk-Spec`, `Build-Jdk`, and `Built-By` attributes from the current JVM. |
@@ -68,24 +68,24 @@ The `<archive>` element accepts the following top-level options:
 ### Classpath Layout Expressions
 
 When `classpathLayoutType` is `custom`, the `customClasspathLayout` value is a template that may reference
-the following `${artifact.*}` expressions for each runtime dependency:
+the following `\${artifact.*}` expressions for each runtime dependency:
 
 | Expression | Description |
 |---|---|
-| `${artifact.groupId}` | The dependency's group ID. |
-| `${artifact.groupIdPath}` | The group ID with `.` replaced by `/` (for repository-style paths). |
-| `${artifact.artifactId}` | The dependency's artifact ID. |
-| `${artifact.version}` | The dependency's version (unique SNAPSHOT timestamp when applicable). |
-| `${artifact.baseVersion}` | The dependency's base version (e.g. `1.0-SNAPSHOT`). |
-| `${artifact.extension}` | The dependency's file extension (e.g. `jar`). |
-| `${artifact.classifier}` | The dependency's classifier, or empty string if absent. |
-| `${artifact.dashClassifier}` | `-${classifier}` if a classifier is present, otherwise empty. |
+| `\${artifact.groupId}` | The dependency's group ID. |
+| `\${artifact.groupIdPath}` | The group ID with `.` replaced by `/` (for repository-style paths). |
+| `\${artifact.artifactId}` | The dependency's artifact ID. |
+| `\${artifact.version}` | The dependency's version (unique SNAPSHOT timestamp when applicable). |
+| `\${artifact.baseVersion}` | The dependency's base version (e.g. `1.0-SNAPSHOT`). |
+| `\${artifact.extension}` | The dependency's file extension (e.g. `jar`). |
+| `\${artifact.classifier}` | The dependency's classifier, or empty string if absent. |
+| `\${artifact.dashClassifier}` | `-\${classifier}` if a classifier is present, otherwise empty. |
 
 The `repository` layout type is equivalent to:
-`${artifact.groupIdPath}/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}`
+`\${artifact.groupIdPath}/\${artifact.artifactId}/\${artifact.baseVersion}/\${artifact.artifactId}-\${artifact.version}\${dashClassifier?}.\${artifact.extension}`
 
 The `simple` layout type is equivalent to:
-`${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}`
+`\${artifact.artifactId}-\${artifact.version}\${dashClassifier?}.\${artifact.extension}`
 
 Manifest Customization
 ----------------------
