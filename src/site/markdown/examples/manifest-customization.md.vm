@@ -64,7 +64,7 @@ The `<archive>` element accepts the following top-level options:
 | `addDefaultEntries` | boolean | `true` | Whether to add the `Java-Version` attribute (sourced from the compiler plugin's `release`/`target` setting). |
 | `addBuildEnvironmentEntries` | boolean | `false` | Whether to add `Build-Jdk-Spec`, `Build-Jdk`, and `Built-By` attributes from the current JVM. |
 | `addDefaultSpecificationEntries` | boolean | `false` | Whether to add `Specification-Title`, `Specification-Version`, and `Specification-Vendor` from the POM. |
-| `addDefaultImplementationEntries` | boolean | `false` | Whether to add `Implementation-Title`, `Implementation-Version`, `Implementation-Vendor`, `Implementation-Vendor-Id`, and `Implementation-URL` from the POM. |
+| `addDefaultImplementationEntries` | boolean | `false` | Whether to add `Implementation-Title`, `Implementation-Version`, and `Implementation-Vendor` from the POM. |
 
 ### Classpath Layout Expressions
 
@@ -193,7 +193,7 @@ To include version and vendor metadata from the POM:
 </plugin>
 ```
 
-This adds attributes sourced from the POM's `<name>`, `<version>`, `<organization>`, `<groupId>`, and `<url>` elements.
+This adds attributes sourced from the POM's `<name>`, `<version>`, and `<organization>` elements.
 
 Adding Additional Manifest Sections
 -------------------------------------

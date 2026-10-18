@@ -169,8 +169,6 @@ final class ManifestBuilder {
         if (organization != null) {
             putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VENDOR, organization.getName());
         }
-        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_VENDOR_ID, project.getGroupId());
-        putIfAbsent(main, Attributes.Name.IMPLEMENTATION_URL, project.getModel().getUrl());
     }
 
     /**
@@ -234,8 +232,8 @@ final class ManifestBuilder {
      */
     private static String resolveArtifactExpression(Dependency dep, String key) {
         // Strip "artifact." prefix
-        String k = key.startsWith("artifact.") ? key.substring("artifact.".length()) : key;
-        return switch (k) {
+        String normalizedKey = key.startsWith("artifact.") ? key.substring("artifact.".length()) : key;
+        return switch (normalizedKey) {
             case "artifactId" -> dep.getArtifactId();
             case "groupId" -> dep.getGroupId();
             case "groupIdPath" -> dep.getGroupId().replace('.', '/');
@@ -244,8 +242,8 @@ final class ManifestBuilder {
             case "extension" -> dep.getType().getExtension();
             case "classifier" -> dep.getClassifier() != null ? dep.getClassifier() : "";
             case "dashClassifier", "dashClassifier?" -> {
-                String c = dep.getClassifier();
-                yield (c != null && !c.isEmpty()) ? "-" + c : "";
+                String classifier = dep.getClassifier();
+                yield (classifier != null && !classifier.isEmpty()) ? "-" + classifier : "";
             }
             case "type" -> dep.getType().id();
             default -> null;
