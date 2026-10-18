@@ -35,6 +35,58 @@ By default, it includes the `Java-Version` attribute (when the compiler target i
 When `addBuildEnvironmentEntries` is enabled, `Built-By`, `Build-Jdk`, and `Build-Jdk-Spec` are also added.
 To add Specification and Implementation details or a classpath, configure them explicitly in the `<archive>` element.
 
+The `<archive>` Configuration Element
+--------------------------------------
+
+The `<archive>` element accepts the following top-level options:
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `compress` | boolean | `true` | Whether to compress the JAR file entries. |
+| `addMavenDescriptor` | boolean | `true` | Whether to include the Maven POM descriptor (`META-INF/maven/…/pom.xml` and `pom.properties`) in the JAR. |
+| `forced` | boolean | `true` | Whether to recreate the archive even when up to date. |
+| `manifestFile` | File | — | Path to an existing manifest file to use as a base. Its entries are merged with any generated entries; explicitly configured values take precedence. |
+| `manifest` | ManifestConfig | — | Manifest-specific configuration; see below. |
+| `manifestEntries` | Map | — | Arbitrary key/value pairs to add to the main manifest section. |
+| `manifestSections` | List | — | Additional named manifest sections; each must have a `<name>` and `<manifestEntries>`. |
+
+### `<manifest>` Options
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `mainClass` | String | — | The `Main-Class` attribute value. Sets the entry point for executable JARs. |
+| `addClasspath` | boolean | `false` | Whether to generate a `Class-Path` attribute from the project's runtime dependencies. |
+| `classpathPrefix` | String | `""` | A prefix prepended to every entry in the generated `Class-Path`. |
+| `classpathLayoutType` | String | `"simple"` | Layout type for `Class-Path` entries. One of `simple`, `repository`, or `custom`. |
+| `customClasspathLayout` | String | — | Custom layout template when `classpathLayoutType` is `custom`. Supports `${artifact.*}` expressions (see below). |
+| `useUniqueVersions` | boolean | `true` | Whether to use unique timestamps for SNAPSHOT artifacts in `Class-Path` entries. |
+| `addDefaultEntries` | boolean | `true` | Whether to add the `Java-Version` attribute (sourced from the compiler plugin's `release`/`target` setting). |
+| `addBuildEnvironmentEntries` | boolean | `false` | Whether to add `Build-Jdk-Spec`, `Build-Jdk`, and `Built-By` attributes from the current JVM. |
+| `addDefaultSpecificationEntries` | boolean | `false` | Whether to add `Specification-Title`, `Specification-Version`, and `Specification-Vendor` from the POM. |
+| `addDefaultImplementationEntries` | boolean | `false` | Whether to add `Implementation-Title`, `Implementation-Version`, `Implementation-Vendor`, `Implementation-Vendor-Id`, and `Implementation-URL` from the POM. |
+
+### Classpath Layout Expressions
+
+When `classpathLayoutType` is `custom`, the `customClasspathLayout` value is a template that may reference
+the following `${artifact.*}` expressions for each runtime dependency:
+
+| Expression | Description |
+|---|---|
+| `${artifact.groupId}` | The dependency's group ID. |
+| `${artifact.groupIdPath}` | The group ID with `.` replaced by `/` (for repository-style paths). |
+| `${artifact.artifactId}` | The dependency's artifact ID. |
+| `${artifact.version}` | The dependency's version (unique SNAPSHOT timestamp when applicable). |
+| `${artifact.baseVersion}` | The dependency's base version (e.g. `1.0-SNAPSHOT`). |
+| `${artifact.extension}` | The dependency's file extension (e.g. `jar`). |
+| `${artifact.classifier}` | The dependency's classifier, or empty string if absent. |
+| `${artifact.dashClassifier}` | `-${classifier}` if a classifier is present, otherwise empty. |
+
+The `repository` layout type is equivalent to:
+`${artifact.groupIdPath}/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}`
+
+The `simple` layout type is equivalent to:
+`${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}`
+
 Manifest Customization
 ----------------------
 
@@ -42,7 +94,7 @@ You can alter the default manifest with the `archive` configuration element.
 The example below shows some of the available configuration options.
 For more information, see the [plugin documentation](../plugin-info.html).
 
-```unknown
+```xml
 <project>
   ...
   <build>
@@ -70,4 +122,117 @@ For more information, see the [plugin documentation](../plugin-info.html).
   </build>
   ...
 </project>
+```
+
+Making an Executable JAR
+------------------------
+
+To create an executable JAR, set the `Main-Class` attribute:
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>${project.version}</version>
+  <configuration>
+    <archive>
+      <manifest>
+        <mainClass>com.example.Main</mainClass>
+      </manifest>
+    </archive>
+  </configuration>
+</plugin>
+```
+
+Adding a Class-Path Attribute
+------------------------------
+
+To add a `Class-Path` attribute listing the project's runtime dependencies (useful for thin JARs
+that load dependencies from the file system at runtime):
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>${project.version}</version>
+  <configuration>
+    <archive>
+      <manifest>
+        <addClasspath>true</addClasspath>
+        <classpathPrefix>lib/</classpathPrefix>
+      </manifest>
+    </archive>
+  </configuration>
+</plugin>
+```
+
+This generates a manifest entry similar to:
+```
+Class-Path: lib/commons-lang3-3.12.0.jar lib/guava-31.0-jre.jar
+```
+
+Adding Specification and Implementation Entries
+------------------------------------------------
+
+To include version and vendor metadata from the POM:
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>${project.version}</version>
+  <configuration>
+    <archive>
+      <manifest>
+        <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+      </manifest>
+    </archive>
+  </configuration>
+</plugin>
+```
+
+This adds attributes sourced from the POM's `<name>`, `<version>`, `<organization>`, `<groupId>`, and `<url>` elements.
+
+Adding Additional Manifest Sections
+-------------------------------------
+
+Named manifest sections (used by Java extensions and some frameworks) can be added via `<manifestSections>`:
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>${project.version}</version>
+  <configuration>
+    <archive>
+      <manifestSections>
+        <manifestSection>
+          <name>com/example/MyClass.class</name>
+          <manifestEntries>
+            <Sealed>true</Sealed>
+          </manifestEntries>
+        </manifestSection>
+      </manifestSections>
+    </archive>
+  </configuration>
+</plugin>
+```
+
+Using an Existing Manifest File
+---------------------------------
+
+To base the manifest on an existing file and augment it with computed entries:
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>${project.version}</version>
+  <configuration>
+    <archive>
+      <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+    </archive>
+  </configuration>
+</plugin>
 ```
