@@ -45,10 +45,11 @@ The `<archive>` element accepts the following top-level options:
 | `compress` | boolean | `true` | Whether to compress the JAR file entries. |
 | `addMavenDescriptor` | boolean | `true` | Whether to include the Maven POM descriptor (`META-INF/maven/…/pom.xml` and `pom.properties`) in the JAR. |
 | `forced` | boolean | `true` | Whether to recreate the archive even when up to date. |
-| `manifestFile` | File | — | Path to an existing manifest file to use as a base. Its entries are merged with any generated entries; explicitly configured values take precedence. |
+| `manifestFile` | Path | — | Path to an existing manifest file to use as a base. Its entries are merged with any generated entries; explicitly configured values take precedence. |
 | `manifest` | ManifestConfig | — | Manifest-specific configuration; see below. |
 | `manifestEntries` | Map | — | Arbitrary key/value pairs to add to the main manifest section. |
 | `manifestSections` | List | — | Additional named manifest sections; each must have a `<name>` and `<manifestEntries>`. |
+| `pomPropertiesFile` | Path | — | Path to an existing `pom.properties` file to embed in the JAR. When set, overrides the auto-generated one. |
 
 ### `<manifest>` Options
 
@@ -79,7 +80,7 @@ the following `\${artifact.*}` expressions for each runtime dependency:
 | `\${artifact.baseVersion}` | The dependency's base version (e.g. `1.0-SNAPSHOT`). |
 | `\${artifact.extension}` | The dependency's file extension (e.g. `jar`). |
 | `\${artifact.classifier}` | The dependency's classifier, or empty string if absent. |
-| `\${artifact.dashClassifier}` | `-\${classifier}` if a classifier is present, otherwise empty. |
+| `\${dashClassifier?}` | `-\${classifier}` if a classifier is present, otherwise empty. |
 
 The `repository` layout type is equivalent to:
 `\${artifact.groupIdPath}/\${artifact.artifactId}/\${artifact.baseVersion}/\${artifact.artifactId}-\${artifact.version}\${dashClassifier?}.\${artifact.extension}`
