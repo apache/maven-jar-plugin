@@ -26,6 +26,11 @@ under the License.
 
 # Manifest customization
 
+> **Note:** Starting from version 4.x, the manifest configuration is handled directly by the
+> Maven JAR Plugin (via `ArchiveConfiguration` and `ManifestBuilder`) and is no longer delegated
+> to the external `maven-archiver` library. The `<archive>` configuration is fully documented
+> here. It may differ from the [Maven Archiver documentation](https://maven.apache.org/shared/maven-archiver/).
+
 The Default Manifest
 --------------------
 
