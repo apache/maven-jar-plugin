@@ -44,8 +44,6 @@ import org.apache.maven.api.xml.XmlNode;
 final class ManifestBuilder {
 
     static final String CLASSPATH_LAYOUT_TYPE_SIMPLE = "simple";
-    private static final String CLASSPATH_LAYOUT_TYPE_REPOSITORY = "repository";
-    private static final String CLASSPATH_LAYOUT_TYPE_CUSTOM = "custom";
 
     private static final String SIMPLE_LAYOUT =
             "${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}";
@@ -240,8 +238,8 @@ final class ManifestBuilder {
     private static String resolveLayout(String layoutType, String customLayout, boolean uniqueVersions) {
         return switch (layoutType == null ? CLASSPATH_LAYOUT_TYPE_SIMPLE : layoutType) {
             case CLASSPATH_LAYOUT_TYPE_SIMPLE -> uniqueVersions ? SIMPLE_LAYOUT : SIMPLE_LAYOUT_NONUNIQUE;
-            case CLASSPATH_LAYOUT_TYPE_REPOSITORY -> uniqueVersions ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
-            case CLASSPATH_LAYOUT_TYPE_CUSTOM -> {
+            case "repository" -> uniqueVersions ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
+            case "custom" -> {
                 if (customLayout == null) {
                     throw new MojoException("Classpath layout type 'custom' requires a <customClasspathLayout> value.");
                 }
