@@ -162,6 +162,11 @@
       <artifactId>maven-support</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-archiver</artifactId>
+      <version>4.0.0-beta-7-SNAPSHOT</version>
+    </dependency>
 
     <!-- Test -->
     <dependency>
