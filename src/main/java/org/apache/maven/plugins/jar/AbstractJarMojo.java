@@ -42,6 +42,7 @@ import org.apache.maven.api.services.PathMatcherFactory;
 import org.apache.maven.api.services.ProjectManager;
 import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 import org.apache.maven.shared.archiver.MavenArchiver;
+import org.apache.maven.shared.archiver.MavenArchiverException;
 
 /**
  * Base class for creating a <abbr>JAR</abbr> file from project classes.
@@ -116,8 +117,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
     protected Session session;
 
     /**
-     * The archive configuration to use. See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven
-     * Archiver Reference</a>.
+     * The archive configuration to use.
      */
     @Parameter
     protected MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
@@ -426,11 +426,15 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
             }
         }
         archive.setForced(forceCreation);
-        // TODO: we want a null manifest if there is no <archive> configuration.
-        final var archiver = new MavenArchiver();
+        final MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy("Maven JAR Plugin", "org.apache.maven.plugins", "maven-jar-plugin");
-        archiver.setBuildJdkSpecDefaultEntry(archive.getManifest().isAddBuildEnvironmentEntries());
-        var executor = new ToolExecutor(this, archiver.getManifest(session, project, archive), archive);
+        final java.util.jar.Manifest manifest;
+        try {
+            manifest = archiver.getManifest(session, project, archive);
+        } catch (MavenArchiverException e) {
+            throw new MojoException("Error generating manifest.", e);
+        }
+        var executor = new ToolExecutor(this, manifest, archive);
         var files = new FileCollector(this, executor, classesDirectory, matcherFactory);
         if (!notExists) {
             Files.walkFileTree(classesDirectory, files);

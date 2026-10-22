@@ -31,11 +31,8 @@ under the License.
 
 The examples below show how to use this plugin.
 For advanced configurations, see the [Example section](./index.html#Examples).
-See the documentation for [Maven Archiver](/shared/maven-archiver/).
-
 The plugin uses the JDK `jar` tool internally to create and verify the JAR file.
-This version of the Maven JAR Plugin uses [Maven Archiver](/shared/maven-archiver/index.html) ${mavenArchiverVersion}
-to handle manifest configuration.
+Manifest configuration is handled directly by the plugin via `ArchiveConfiguration` and `ManifestBuilder`.
 
 **Note:** If you need to sign your JAR files, use the [Maven Jarsigner Plugin](/plugins/maven-jarsigner-plugin/).
 
@@ -89,4 +86,4 @@ Since version 4.0.0-beta-2, this plugin can verify the JAR file with a `validate
 The checks depend on the JDK tool and can include a verification of `module-info.class`.
 
 If the JAR manifest contains the `Main-Class` attribute, this plugin sets the module main class to the same value.
-For an example, see [Make The Jar Executable](../../shared/maven-archiver/examples/classpath.html).
+To set the `Main-Class` attribute, configure it in the `<archive><manifest>` element (see [Manifest Customization](examples/manifest-customization.html)).
