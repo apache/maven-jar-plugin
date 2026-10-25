@@ -41,6 +41,9 @@ updates:
       # Maven 3 so use SLF4J 1.7.x
       - dependency-name: "org.slf4j:*"
         versions: [">= 2.0.0"]
+      # Maven 3 line: stay on Maven 3 core (4.x lives on the -4.x branch)
+      - dependency-name: "org.apache.maven:*"
+        versions: [">= 4.0.0"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
