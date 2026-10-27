@@ -41,8 +41,15 @@ updates:
       # Maven 3 so use SLF4J 1.7.x
       - dependency-name: "org.slf4j:*"
         versions: [">= 2.0.0"]
-      # Maven 3 line: stay on Maven 3 core (4.x lives on the -4.x branch)
-      - dependency-name: "org.apache.maven:*"
+      # Maven 3 line: stay on Maven 3 core (4.x lives on the -4.x branch).
+      # Scoped to the core artifacts this plugin actually uses, so other
+      # org.apache.maven:* artifacts with their own release line (e.g.
+      # maven-archiver) are untouched.
+      - dependency-name: "org.apache.maven:maven-artifact"
+        versions: [">= 4.0.0"]
+      - dependency-name: "org.apache.maven:maven-core"
+        versions: [">= 4.0.0"]
+      - dependency-name: "org.apache.maven:maven-plugin-api"
         versions: [">= 4.0.0"]
 
   - package-ecosystem: "github-actions"
