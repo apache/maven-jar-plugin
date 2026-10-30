@@ -73,7 +73,6 @@
   </distributionManagement>
 
   <properties>
-    <javaVersion>8</javaVersion>
     <mavenVersion>3.10.0</mavenVersion>
     <mavenArchiverVersion>3.6.6</mavenArchiverVersion>
 
