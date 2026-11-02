@@ -29,7 +29,7 @@ under the License.
 Add `<includes>`/`<include>` or `<excludes>`/`<exclude>` in your `pom.xml`.
 These elements specify the fileset patterns to include or exclude.
 
-```unknown
+```xml
 <project>
   ...
   <build>
