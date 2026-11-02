@@ -33,7 +33,7 @@ Add a `classifier` as well.
 Otherwise, it replaces the default use of the JAR Plugin. It does not add a second artifact.
 The `classifier` is also required to create more than one artifact.
 
-```unknown
+```xml
 <project>
   ...
   <build>

@@ -42,7 +42,7 @@ You can alter the default manifest with the `archive` configuration element.
 The example below shows some of the available configuration options.
 For more information, see the [Maven Archiver reference](/shared/maven-archiver/index.html).
 
-```unknown
+```xml
 <project>
   ...
   <build>
