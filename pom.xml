@@ -113,6 +113,12 @@
       <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- plugins annotations -->
     <dependency>
@@ -196,8 +202,7 @@
               <!--
                 ! The manifest specification does not describe any method for writing comments into the manifest.
               -->
-              <exclude>src/it/mjar-71-01/src/main/resources/META-INF/MANIFEST.MF</exclude>
-              <exclude>src/it/mjar-71-02/src/main/resources/META-INF/MANIFEST.MF</exclude>
+              <exclude>src/test/resources/unit/mjar-71-manifest-file/MANIFEST.MF</exclude>
             </inputExcludes>
           </configuration>
         </plugin>
