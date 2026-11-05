@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -126,7 +127,7 @@ class JarDefaultExcludesTest {
     /** The entries that the default excludes are meant to drop. */
     private static Set<String> ignoredFiles(Set<String> entries) {
         Set<String> ignored = new HashSet<>(entries);
-        ignored.retainAll(new HashSet<>(java.util.Arrays.asList(".DS_Store", ".svn/entries", "Foo.java~")));
+        ignored.retainAll(new HashSet<>(Arrays.asList(".DS_Store", ".svn/entries", "Foo.java~")));
         return ignored;
     }
 }

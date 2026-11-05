@@ -93,7 +93,11 @@ class JarRecreationTest {
         assertArrayEquals(STALE, Files.readAllBytes(jar), "the up to date jar was rewritten");
     }
 
-    /** Runs the mojo, replaces the jar with stale bytes dated ahead of its sources, runs the mojo again. */
+    /**
+     * Runs the mojo, replaces the jar with stale bytes dated ahead of its sources, runs the mojo again. The stale
+     * bytes are not a valid archive: the kept case relies on the archiver deciding from the timestamps alone,
+     * without opening the existing jar. An archiver that validates the file first would fail it instead.
+     */
     private Path packageOverStaleJar(JarMojo mojo) throws Exception {
         project.setGroupId("org.apache.maven.plugins");
         project.setArtifactId("recreation");
