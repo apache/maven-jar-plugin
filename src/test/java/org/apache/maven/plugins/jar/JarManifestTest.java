@@ -21,6 +21,7 @@ package org.apache.maven.plugins.jar;
 import javax.inject.Inject;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,12 +40,14 @@ import org.apache.maven.api.plugin.testing.MojoTest;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Organization;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.jar.ManifestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.apache.maven.plugins.jar.JarTestSupport.fileEntries;
@@ -71,6 +74,9 @@ class JarManifestTest {
     @Inject
     private MavenProject project;
 
+    @Inject
+    private MavenSession session;
+
     @TempDir
     private Path tmp;
 
@@ -82,6 +88,14 @@ class JarManifestTest {
     void setUp() throws IOException {
         output = Files.createDirectories(tmp.resolve("target"));
         classes = output.resolve("classes");
+    }
+
+    /** {@code -Dmaven.jar.detectMultiReleaseJar=false}, as the deleted MJAR-292 integration test passed it. */
+    @BeforeEach
+    void disableDetectionOnTheCommandLine(TestInfo info) {
+        if (info.getTestMethod().map(Method::getName).orElse("").equals("multiReleaseDetectionCanBeDisabled")) {
+            session.getUserProperties().setProperty("maven.jar.detectMultiReleaseJar", "false");
+        }
     }
 
     /** The harness replaces the project model when it creates the mojo, so the project is set up afterwards. */
@@ -268,7 +282,7 @@ class JarManifestTest {
 
     @Test
     @InjectMojo(goal = "jar", pom = FIXTURES + "main-class/plugin-config.xml")
-    @MojoParameter(name = "detectMultiReleaseJar", value = "false")
+    @MojoParameter(name = "detectMultiReleaseJar", value = "${maven.jar.detectMultiReleaseJar}")
     void multiReleaseDetectionCanBeDisabled(JarMojo mojo) throws Exception {
         initProject();
         files(

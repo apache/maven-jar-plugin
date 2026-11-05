@@ -59,10 +59,10 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * {@code module-info.class}, and the entries of the descriptor are reproducible.
  *
  * <p>The descriptor is compiled from {@code src/test/resources/unit/module-info} by the test, so the tests need a
- * JDK 9 or newer.
+ * JDK 11 or newer.
  */
 @MojoTest
-@EnabledForJreRange(min = JRE.JAVA_9)
+@EnabledForJreRange(min = JRE.JAVA_11)
 class JarModuleInfoTest {
 
     private static final String FIXTURES = "src/test/resources/unit/";
