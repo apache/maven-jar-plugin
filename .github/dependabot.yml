@@ -41,20 +41,17 @@ updates:
       # Maven 3 so use SLF4J 1.7.x
       - dependency-name: "org.slf4j:*"
         versions: [">= 2.0.0"]
-      # This plugin's Maven 3 line builds against 3.10.0 (see
-      # <mavenVersion> in pom.xml), so keep it on the 3.10.x line. Cap
-      # the core-artifact ignores at the next minor (3.11) so Dependabot
-      # still offers 3.10.x patches, while a Maven-baseline minor bump
-      # (3.11) or the jump to Maven 4 stays a deliberate decision.
-      # Scoped to the core artifacts this plugin uses; other
-      # org.apache.maven:* artifacts with their own release line (e.g.
-      # maven-archiver) are untouched.
+      # Baseline is Maven 3.9 with Resolver 1.9; Maven 3.10 pulls Resolver 2.x.
+      # Excludes the Maven artifacts this plugin uses.
       - dependency-name: "org.apache.maven:maven-artifact"
-        versions: [">= 3.11.0"]
+        versions: [">= 3.10.0"]
       - dependency-name: "org.apache.maven:maven-core"
-        versions: [">= 3.11.0"]
+        versions: [">= 3.10.0"]
+      - dependency-name: "org.apache.maven:maven-model"
+        versions: [">= 3.10.0"]
       - dependency-name: "org.apache.maven:maven-plugin-api"
-        versions: [">= 3.11.0"]
+        versions: [">= 3.10.0"]
+
 
   - package-ecosystem: "github-actions"
     directory: "/"
