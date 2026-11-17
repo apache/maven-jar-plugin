@@ -179,7 +179,8 @@ class AbstractJarMojoTest {
     /** Verifies that EPOCH_MIN equals Instant.parse("1980-01-01T00:00:02Z").getEpochSecond(). */
     @Test
     void epochMinMatchesParsedInstant() {
-        assertEquals(Instant.parse("1980-01-01T00:00:02Z").getEpochSecond(), AbstractJarMojo.EPOCH_MIN);
+        assertEquals(
+                AbstractJarMojo.EPOCH_MIN, Instant.parse("1980-01-01T00:00:02Z").getEpochSecond());
     }
 
     /**
