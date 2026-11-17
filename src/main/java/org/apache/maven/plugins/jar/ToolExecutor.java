@@ -151,7 +151,7 @@ final class ToolExecutor {
          * common case where a project sets Automatic-Module-Name to
          * "${project.groupId}.${project.artifactId}" and the artifactId contains hyphens (MJAR-596).
          */
-        String pluginName = (manifestFromPlugin != null)
+        String pluginName = manifestFromPlugin != null
                 ? manifestFromPlugin.getMainAttributes().getValue(AUTOMATIC_MODULE_NAME)
                 : null;
         if (name.equals(pluginName)) {
@@ -314,8 +314,7 @@ final class ToolExecutor {
         artifactType = mojo.getType();
         outputDirectory = mojo.getOutputDirectory();
         classifier = AbstractJarMojo.nullIfAbsent(mojo.getClassifier());
-        finalName =
-                (mojo.finalName != null) ? mojo.finalName : project.getBuild().getFinalName();
+        finalName = mojo.finalName != null ? mojo.finalName : project.getBuild().getFinalName();
         forceCreation = mojo.forceCreation;
         outputTimestamp = mojo.getOutputTimestamp();
         validate = mojo.getValidate();
@@ -463,10 +462,10 @@ final class ToolExecutor {
          * merge those entries with the content of `MANIFEST.MF` file found in
          * the files to archive.
          */
-        boolean writeTemporaryManifest = (manifestFromPlugin != null && manifestFile == null); // Check <archive>.
+        boolean writeTemporaryManifest = manifestFromPlugin != null && manifestFile == null; // Check <archive>.
         Manifest manifest = archive.mergeManifest(manifestFile, manifestFromPlugin);
         if (manifest != manifestFromPlugin) {
-            writeTemporaryManifest |= (manifestFromPlugin != null); // Check if a merge of two manifests.
+            writeTemporaryManifest |= manifestFromPlugin != null; // Check if a merge of two manifests.
         } else if (manifest != null) {
             /*
              * `setMainClass` below removes the Main-Class attribute, and `manifestFromPlugin` is
@@ -573,7 +572,7 @@ final class ToolExecutor {
      */
     private int executeJarTool() {
         String[] options = new String[arguments.size()];
-        Arrays.setAll(options, (i) -> arguments.get(i).toString());
+        Arrays.setAll(options, i -> arguments.get(i).toString());
         int status = tool.run(messageWriter, errorWriter, options);
         if (!messages.isEmpty()) {
             logger.info(messages);
@@ -607,7 +606,7 @@ final class ToolExecutor {
             baseDir = relativize(Path.of(System.getProperty("user.dir")), baseDir);
             String chdir = baseDir.toString();
             if (!chdir.isEmpty()) {
-                boolean isWindows = (File.separatorChar == '\\');
+                boolean isWindows = File.separatorChar == '\\';
                 commandLine
                         .append(System.lineSeparator())
                         .append("    ")

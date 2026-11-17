@@ -141,7 +141,7 @@ final class PomDerivation {
         moduleFinder = ModuleFinder.of(allModulePaths);
         if (moduleFinder != null) {
             for (ModuleReference reference : moduleFinder.findAll()) {
-                reference.location().ifPresent((location) -> fromURI.put(location, reference));
+                reference.location().ifPresent(location -> fromURI.put(location, reference));
             }
         }
         fromDependency = new HashMap<>(dependencies.size());
@@ -366,10 +366,10 @@ final class PomDerivation {
                 if (!r.modifiers().contains(ModuleDescriptor.Requires.Modifier.TRANSITIVE)) {
                     modifiers.add(Modifier.RUNTIME);
                 }
-                EnumSet<Modifier> current = requires.computeIfAbsent(r.name(), (key) -> modifiers);
+                EnumSet<Modifier> current = requires.computeIfAbsent(r.name(), key -> modifiers);
                 if (EXPAND_TRANSITIVE && (current == modifiers || current.retainAll(modifiers))) {
                     // Transitive dependencies if not already added or if it needs to update modifiers.
-                    findModuleDescriptor(r.name()).ifPresent((td) -> addDependencies(td, modifiers));
+                    findModuleDescriptor(r.name()).ifPresent(td -> addDependencies(td, modifiers));
                 }
             }
         }
