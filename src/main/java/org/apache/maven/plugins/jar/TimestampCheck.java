@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.logging.Logger;
 
 /**
  * Checks file timestamps in order to determine if anything changed compared to an existing <abbr>JAR</abbr> file.
@@ -62,7 +62,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
     /**
      * Where to send non-fatal error messages.
      */
-    private final Log logger;
+    private final Logger logger;
 
     /**
      * Entries of the <abbr>JAR</abbr> file. Note that getting elements from this enumeration can be costly.
@@ -131,7 +131,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
      * @param logger where to send a warning if an error occurred while checking an existing <abbr>JAR</abbr> file
      * @throws IOException if an error occurred while fetching the <abbr>JAR</abbr> file modification time
      */
-    TimestampCheck(final Path jarFile, final Path classesDir, final Log logger) throws IOException {
+    TimestampCheck(final Path jarFile, final Path classesDir, final Logger logger) throws IOException {
         this.classesDir = classesDir;
         this.jarFile = jarFile;
         this.logger = logger;
@@ -204,7 +204,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
                 }
             }
         } catch (IOException e) {
-            logger.warn(e);
+            logger.atWarn().withThrowable(e).log("");
             return false;
         } finally {
             entries = null;
