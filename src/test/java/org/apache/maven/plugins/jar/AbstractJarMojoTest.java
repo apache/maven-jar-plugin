@@ -22,15 +22,18 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.apache.maven.api.PathScope;
-import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.logging.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link AbstractJarMojo#getOutputTimestamp()}.
@@ -42,95 +45,14 @@ class AbstractJarMojoTest {
 
         TestMojo(String outputTimestamp) {
             this.outputTimestamp = outputTimestamp;
-            this.log = new Log() {
-                @Override
-                public boolean isDebugEnabled() {
-                    return false;
-                }
-
-                @Override
-                public void debug(CharSequence message) {}
-
-                @Override
-                public void debug(CharSequence message, Throwable throwable) {}
-
-                @Override
-                public void debug(Throwable throwable) {}
-
-                @Override
-                public void debug(Supplier<String> message) {}
-
-                @Override
-                public void debug(Supplier<String> message, Throwable throwable) {}
-
-                @Override
-                public boolean isInfoEnabled() {
-                    return false;
-                }
-
-                @Override
-                public void info(CharSequence message) {}
-
-                @Override
-                public void info(CharSequence message, Throwable throwable) {}
-
-                @Override
-                public void info(Throwable throwable) {}
-
-                @Override
-                public void info(Supplier<String> message) {}
-
-                @Override
-                public void info(Supplier<String> message, Throwable throwable) {}
-
-                @Override
-                public boolean isWarnEnabled() {
-                    return true;
-                }
-
-                @Override
-                public void warn(CharSequence message) {
-                    warnings.add(message.toString());
-                }
-
-                @Override
-                public void warn(CharSequence message, Throwable throwable) {
-                    warnings.add(message.toString());
-                }
-
-                @Override
-                public void warn(Throwable throwable) {}
-
-                @Override
-                public void warn(Supplier<String> message) {
-                    warnings.add(message.get());
-                }
-
-                @Override
-                public void warn(Supplier<String> message, Throwable throwable) {
-                    warnings.add(message.get());
-                }
-
-                @Override
-                public boolean isErrorEnabled() {
-                    return false;
-                }
-
-                @Override
-                public void error(CharSequence message) {}
-
-                @Override
-                public void error(CharSequence message, Throwable throwable) {}
-
-                @Override
-                public void error(Throwable throwable) {}
-
-                @Override
-                public void error(Supplier<String> message) {}
-
-                @Override
-                public void error(Supplier<String> message, Throwable throwable) {}
-            };
+            this.log = mock(Logger.class);
+            when(log.isWarnEnabled()).thenReturn(true);
+            doAnswer(invocation -> {
+                        warnings.add(invocation.getArgument(0));
+                        return null;
+                    })
+                    .when(log)
+                    .warn(anyString());
         }
 
         @Override

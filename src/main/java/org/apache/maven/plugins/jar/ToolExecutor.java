@@ -38,7 +38,7 @@ import java.util.spi.ToolProvider;
 
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Type;
-import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.logging.Logger;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.shared.archiver.MavenArchiveConfiguration;
 
@@ -177,7 +177,7 @@ final class ToolExecutor {
         message.append(" Consider setting a valid name explicitly in <archive><manifestEntries><")
                 .append(AUTOMATIC_MODULE_NAME)
                 .append(">.");
-        logger.warn(message);
+        logger.warn(message.toString());
         return true;
     }
 
@@ -299,7 +299,7 @@ final class ToolExecutor {
     /**
      * Where to send informative or error messages.
      */
-    private final Log logger;
+    private final Logger logger;
 
     /**
      * Creates a new writer.
@@ -575,10 +575,10 @@ final class ToolExecutor {
         Arrays.setAll(options, i -> arguments.get(i).toString());
         int status = tool.run(messageWriter, errorWriter, options);
         if (!messages.isEmpty()) {
-            logger.info(messages);
+            logger.info(messages.toString());
         }
         if (!errors.isEmpty()) {
-            logger.error(errors);
+            logger.error(errors.toString());
         }
         return status;
     }
@@ -620,7 +620,7 @@ final class ToolExecutor {
                 .append(tool.name())
                 .append(" @")
                 .append(debugFile);
-        logger.info(commandLine);
+        logger.info(commandLine.toString());
     }
 
     /**
@@ -638,7 +638,7 @@ final class ToolExecutor {
         if (cause != null) {
             message.append(System.lineSeparator()).append("Caused by: ").append(cause);
         }
-        logger.warn(message, e);
+        logger.warn(message.toString(), e);
     }
 
     /**
