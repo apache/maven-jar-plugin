@@ -38,7 +38,7 @@ import java.util.jar.Manifest;
 import org.apache.maven.api.Type;
 import org.apache.maven.api.annotations.Nonnull;
 import org.apache.maven.api.annotations.Nullable;
-import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.logging.Logger;
 import org.apache.maven.api.plugin.MojoException;
 
 /**
@@ -276,7 +276,7 @@ final class Archive {
             final Runtime.Version version,
             final Path directory,
             final boolean forceCreation,
-            final Log logger) {
+            final Logger logger) {
         this.jarFile = jarFile;
         this.moduleName = moduleName;
         filesetForRelease = new TreeMap<>((v1, v2) -> {
@@ -291,7 +291,7 @@ final class Archive {
                 existingJAR = new TimestampCheck(jarFile, directory, logger);
             } catch (IOException e) {
                 // Ignore, we will regenerate the JAR file.
-                logger.warn(e);
+                logger.atWarn().withThrowable(e).log("");
             }
         }
     }
