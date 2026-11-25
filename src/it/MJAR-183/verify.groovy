@@ -18,34 +18,8 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
+File target = new File( basedir, "target" );
+assert target.exists() && target.isDirectory() : "target file is missing or not a directory."
 
-boolean result = true;
-
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
-    }
-
-    File artifact = new File( target, "maven-jar-plugin-test-mjar-183-1.0-SNAPSHOT.jar" );
-    if ( !artifact.exists() )
-    {
-        System.err.println( "default artifact should exist." );
-        return false;
-    }
-
-    return true;
-}
-catch( Throwable e )
-{
-    e.printStackTrace();
-    return false;
-}
-
-return false;
+File artifact = new File( target, "maven-jar-plugin-test-mjar-183-1.0-SNAPSHOT.jar" );
+assert artifact.exists() : "default artifact should exist."

@@ -18,58 +18,27 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
 import org.codehaus.plexus.util.cli.*;
 import org.codehaus.plexus.util.FileUtils;
 
-boolean result = true;
+File target = new File( basedir, "target" );
+assert target.exists() && target.isDirectory() : "target file is missing or not a directory."
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
-    }
+File artifact = new File( target, "MJAR-82-1.0-SNAPSHOT.jar" );
+assert artifact.exists() && !artifact.isDirectory() : "artifact file is missing or a directory."
 
-    File artifact = new File( target, "MJAR-82-1.0-SNAPSHOT.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "artifact file is missing or a directory." );
-        return false;
-    }
+String localRepoPath = basedir.getParentFile().getParentFile().getParentFile().getPath() + "/target/local-repo";
+FileUtils.copyFile( artifact, new File( localRepoPath, "MJAR-82-1.0-SNAPSHOT.jar" ) );
+Commandline commandline = new Commandline();
+commandline.setExecutable( "java" );
+commandline.setWorkingDirectory( localRepoPath );
+System.out.println(" localRepoPath " + localRepoPath );
+commandline.createArg().setLine( "-jar MJAR-82-1.0-SNAPSHOT.jar" );
+CommandLineUtils.StringStreamConsumer consumer = new CommandLineUtils.StringStreamConsumer();
+int res = CommandLineUtils.executeCommandLine( commandline, consumer, consumer );
+String output = consumer.getOutput();
+System.out.println( "res " + res );
+System.out.println( output );
+assert res == 0 : "commandline execution return code != 0 " + res
 
-    String localRepoPath = basedir.getParentFile().getParentFile().getParentFile().getPath() + "/target/local-repo";
-    FileUtils.copyFile( artifact, new File( localRepoPath, "MJAR-82-1.0-SNAPSHOT.jar" ) );
-    Commandline commandline = new Commandline();
-    commandline.setExecutable( "java" );
-    commandline.setWorkingDirectory( localRepoPath );
-    System.out.println(" localRepoPath " + localRepoPath );
-    commandline.createArg().setLine( "-jar MJAR-82-1.0-SNAPSHOT.jar" );
-    CommandLineUtils.StringStreamConsumer consumer = new CommandLineUtils.StringStreamConsumer();
-    int res = CommandLineUtils.executeCommandLine( commandline, consumer, consumer );
-    String output = consumer.getOutput();
-    System.out.println( "res " + res );
-    System.out.println( output );
-    if ( res != 0 )
-    {
-        System.err.println( "commandline execution return code != 0 " + res );
-        return false;    	
-    }
-
-    if ( output.indexOf("great it works") < 0 )
-    {
-        System.err.println( "output not contains great it works" );
-        return false;
-    }
-}
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
-}
-
-return result;
+assert output.indexOf("great it works") >= 0 : "output not contains great it works"
