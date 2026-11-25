@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import java.util.jar.*;
+import java.util.jar.*
 
 /*
  * The project sets addDefaultEntries=false, so Maven archiver writes no Created-By. Without the fix the

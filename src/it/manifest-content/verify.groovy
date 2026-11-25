@@ -18,101 +18,87 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-import java.util.zip.*;
+import java.io.*
+import java.util.*
+import java.util.jar.*
+import java.util.zip.*
 
-boolean result = true;
+boolean result = true
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    if (!target.exists() || !target.isDirectory()) {
+        System.err.println("target file is missing or not a directory.")
+        return false
     }
 
-    File artifact = new File( target, "manifest-content-1.0-SNAPSHOT.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "artifact file is missing or a directory." );
-        return false;
+    File artifact = new File(target, "manifest-content-1.0-SNAPSHOT.jar")
+    if (!artifact.exists() || artifact.isDirectory()) {
+        System.err.println("artifact file is missing or a directory.")
+        return false
     }
 
-    ZipFile zip = new ZipFile( artifact );
-    Enumeration resultingEntries = zip.entries();
-    if ( !"META-INF/".equals( resultingEntries.nextElement().getName() ) )
-    {
-        System.err.println( "META-INF/ must be first zip entry" );
-        return false;
+    ZipFile zip = new ZipFile(artifact)
+    Enumeration resultingEntries = zip.entries()
+    if (!"META-INF/".equals(resultingEntries.nextElement().getName())) {
+        System.err.println("META-INF/ must be first zip entry")
+        return false
     }
-    if ( !"META-INF/MANIFEST.MF".equals( resultingEntries.nextElement().getName() ) )
-    {
-        System.err.println( "META-INF/MANIFEST.MF must be second zip entry" );
-        return false;
+    if (!"META-INF/MANIFEST.MF".equals(resultingEntries.nextElement().getName())) {
+        System.err.println("META-INF/MANIFEST.MF must be second zip entry")
+        return false
     }
-    zip.close();
+    zip.close()
 
-    JarFile jar = new JarFile( artifact );
+    JarFile jar = new JarFile(artifact)
 
-    Attributes manifest = jar.getManifest().getMainAttributes();
+    Attributes manifest = jar.getManifest().getMainAttributes()
 
-    if ( !"manifest-content-it".equals( manifest.get( Attributes.Name.SPECIFICATION_TITLE ) ) )
-    {
-        System.err.println( Attributes.Name.SPECIFICATION_TITLE.toString() + " not equals manifest-content-it" );
-        return false;
+    if (!"manifest-content-it".equals(manifest.get(Attributes.Name.SPECIFICATION_TITLE))) {
+        System.err.println(Attributes.Name.SPECIFICATION_TITLE.toString() + " not equals manifest-content-it")
+        return false
     }
 
     // https://docs.oracle.com/javase/6/docs/technotes/guides/versioning/spec/versioning2.html
     // Based on the above this must be "1.0" and NOT "1.0-SNAPSHOT"
-    if ( !"1.0".equals( manifest.get( Attributes.Name.SPECIFICATION_VERSION ) ) )
-    {
-        System.err.println( Attributes.Name.SPECIFICATION_VERSION.toString() + " not equals 1.0" );
-        return false;
+    if (!"1.0".equals(manifest.get(Attributes.Name.SPECIFICATION_VERSION))) {
+        System.err.println(Attributes.Name.SPECIFICATION_VERSION.toString() + " not equals 1.0")
+        return false
     }
 
-    if ( !"jar plugin it".equals( manifest.get( Attributes.Name.SPECIFICATION_VENDOR ) ) )
-    {
-        System.err.println( Attributes.Name.SPECIFICATION_VENDOR.toString() + " not equals jar plugin it" );
-        return false;
+    if (!"jar plugin it".equals(manifest.get(Attributes.Name.SPECIFICATION_VENDOR))) {
+        System.err.println(Attributes.Name.SPECIFICATION_VENDOR.toString() + " not equals jar plugin it")
+        return false
     }
 
-    if ( !"manifest-content-it".equals( manifest.get( Attributes.Name.IMPLEMENTATION_TITLE ) ) )
-    {
-        System.err.println( Attributes.Name.IMPLEMENTATION_TITLE.toString() + " not equals manifest-content-it" );
-        return false;
+    if (!"manifest-content-it".equals(manifest.get(Attributes.Name.IMPLEMENTATION_TITLE))) {
+        System.err.println(Attributes.Name.IMPLEMENTATION_TITLE.toString() + " not equals manifest-content-it")
+        return false
     }
 
-    if ( !"1.0-SNAPSHOT".equals( manifest.get( Attributes.Name.IMPLEMENTATION_VERSION ) ) )
-    {
-        System.err.println( Attributes.Name.SPECIFICATION_VERSION.toString() + " not equals 1.0-SNAPSHOT" );
-        return false;
+    if (!"1.0-SNAPSHOT".equals(manifest.get(Attributes.Name.IMPLEMENTATION_VERSION))) {
+        System.err.println(Attributes.Name.SPECIFICATION_VERSION.toString() + " not equals 1.0-SNAPSHOT")
+        return false
     }
 
-    if ( !"jar plugin it".equals( manifest.get( Attributes.Name.IMPLEMENTATION_VENDOR ) ) )
-    {
-        System.err.println( Attributes.Name.IMPLEMENTATION_VENDOR.toString() + " not equals jar plugin it" );
-        return false;
+    if (!"jar plugin it".equals(manifest.get(Attributes.Name.IMPLEMENTATION_VENDOR))) {
+        System.err.println(Attributes.Name.IMPLEMENTATION_VENDOR.toString() + " not equals jar plugin it")
+        return false
     }
 
-    if ( !"myproject.HelloWorld".equals( manifest.get( Attributes.Name.MAIN_CLASS ) ) )
-    {
-        System.err.println( Attributes.Name.MAIN_CLASS.toString() + " not equals myproject.HelloWorld" );
-        return false;
+    if (!"myproject.HelloWorld".equals(manifest.get(Attributes.Name.MAIN_CLASS))) {
+        System.err.println(Attributes.Name.MAIN_CLASS.toString() + " not equals myproject.HelloWorld")
+        return false
     }
 
-    if ( !"11".equals( manifest.getValue( "Java-Version" ) ) )
-    {
-        System.err.println( "Java-Version not equals 11" );
-        return false;
+    if (!"11".equals(manifest.getValue("Java-Version"))) {
+        System.err.println("Java-Version not equals 11")
+        return false
     }
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch(Throwable e) {
+    e.printStackTrace()
+    result = false
 }
 
-return result;
+return result

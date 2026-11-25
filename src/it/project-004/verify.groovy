@@ -18,109 +18,101 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
+import java.io.*
+import java.util.*
+import java.util.jar.*
 
-boolean result = true;
+boolean result = true
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    if (!target.exists() || !target.isDirectory()) {
+        System.err.println("target file is missing or not a directory.")
+        return false
     }
 
-    File artifact = new File( target, "maven-jar-plugin-test-project-004-99.0.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "target file is missing or a directory." );
-        return false;
+    File artifact = new File(target, "maven-jar-plugin-test-project-004-99.0.jar")
+    if (!artifact.exists() || artifact.isDirectory()) {
+        System.err.println("target file is missing or a directory.")
+        return false
     }
 
-    String[] artifactNames = [ "service/TestInterface.class",
-            "service/impl/TestImplementation.class", "TestCompile1.class", "notIncluded.xml", "META-INF/MANIFEST.MF",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.properties",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.xml"  ];
+    String[] artifactNames = [
+        "service/TestInterface.class",
+        "service/impl/TestImplementation.class",
+        "TestCompile1.class",
+        "notIncluded.xml",
+        "META-INF/MANIFEST.MF",
+        "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.properties",
+        "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.xml"
+    ]
 
-    Set contents = new HashSet();
+    Set contents = new HashSet()
 
-    JarFile jar = new JarFile( artifact );
-    Enumeration jarEntries = jar.entries();
-    while ( jarEntries.hasMoreElements() )
-    {
-        JarEntry entry = (JarEntry) jarEntries.nextElement();
-        if ( !entry.isDirectory() )
-        {
+    JarFile jar = new JarFile(artifact)
+    Enumeration jarEntries = jar.entries()
+    while (jarEntries.hasMoreElements()) {
+        JarEntry entry = (JarEntry) jarEntries.nextElement()
+        if (!entry.isDirectory()) {
             // Only compare files
-            contents.add( entry.getName() );
+            contents.add(entry.getName())
         }
     }
 
-    if  ( artifactNames.length != contents.size() )
-    {
-    	System.err.println( "jar content size is different from the expected content size" );
-    	return false;
+    if (artifactNames.length != contents.size()) {
+        System.err.println("jar content size is different from the expected content size")
+        return false
     }
-    for ( int i = 0; i < artifactNames.length; i++ )
-    {
-        String artifactName = artifactNames[i];
-		if ( !contents.contains( artifactName ) )
-		{
-        	System.err.println( "Artifact[" + artifactName + "] not found in jar archive" );
-        	return false;
+    for (int i = 0; i <artifactNames.length; i++) {
+        String artifactName = artifactNames[i]
+        if (!contents.contains(artifactName)) {
+            System.err.println("Artifact[" + artifactName + "] not found in jar archive")
+            return false
         }
     }
 
     // second jar
 
-    artifact = new File( target, "maven-jar-plugin-test-project-004-99.0-service.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "target file is missing or a directory." );
-        return false;
+    artifact = new File(target, "maven-jar-plugin-test-project-004-99.0-service.jar")
+    if (!artifact.exists() || artifact.isDirectory()) {
+        System.err.println("target file is missing or a directory.")
+        return false
     }
 
-    artifactNames =  [ "service/TestInterface.class",
-            "META-INF/MANIFEST.MF",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.properties",
-            "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.xml" ];
+    artifactNames = [
+        "service/TestInterface.class",
+        "META-INF/MANIFEST.MF",
+        "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.properties",
+        "META-INF/maven/org.apache.maven.plugins/maven-jar-plugin-test-project-004/pom.xml"
+    ]
 
-    contents = new HashSet();
+    contents = new HashSet()
 
-    jar = new JarFile( artifact );
-    jarEntries = jar.entries();
-    while ( jarEntries.hasMoreElements() )
-    {
-        JarEntry entry = (JarEntry) jarEntries.nextElement();
-        if ( !entry.isDirectory() )
-        {
+    jar = new JarFile(artifact)
+    jarEntries = jar.entries()
+    while (jarEntries.hasMoreElements()) {
+        JarEntry entry = (JarEntry) jarEntries.nextElement()
+        if (!entry.isDirectory()) {
             // Only compare files
-            contents.add( entry.getName() );
+            contents.add(entry.getName())
         }
     }
 
-    if  ( artifactNames.length != contents.size() )
-    {
-    	System.err.println( "jar content size is different from the expected content size" );
-    	return false;
+    if (artifactNames.length != contents.size()) {
+        System.err.println("jar content size is different from the expected content size")
+        return false
     }
-    for ( int i = 0; i < artifactNames.length; i++ )
-    {
-        String artifactName = artifactNames[i];
-		if ( !contents.contains( artifactName ) )
-		{
-        	System.err.println( "Artifact[" + artifactName + "] not found in jar archive" );
-        	return false;
+    for (int i = 0; i <artifactNames.length; i++) {
+        String artifactName = artifactNames[i]
+        if (!contents.contains(artifactName)) {
+            System.err.println("Artifact[" + artifactName + "] not found in jar archive")
+            return false
         }
     }
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch(Throwable e) {
+    e.printStackTrace()
+    result = false
 }
 
-return result;
+return result

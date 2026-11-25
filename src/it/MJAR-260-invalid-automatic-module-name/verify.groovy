@@ -18,48 +18,44 @@
  * under the License.
  */
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
-import java.util.jar.*;
+import java.io.*
+import java.nio.file.*
+import java.util.*
+import java.util.jar.*
 
-boolean result = true;
+boolean result = true
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    if (!target.exists() || !target.isDirectory()) {
+        System.err.println("target file is missing or not a directory.")
+        return false
     }
 
-    File artifact = new File( target, "mjar260-invalid-automatic-module-name-1.0-SNAPSHOT.jar" );
-    if ( artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "artifact file is created or a directory." );
-        return false;
+    File artifact = new File(target, "mjar260-invalid-automatic-module-name-1.0-SNAPSHOT.jar")
+    if (artifact.exists() || artifact.isDirectory()) {
+        System.err.println("artifact file is created or a directory.")
+        return false
     }
 
-    String log = new String(Files.readAllBytes(basedir.toPath().resolve("build.log")), "UTF-8");
+    String log = new String(Files.readAllBytes(basedir.toPath().resolve("build.log")), "UTF-8")
     String[] snippets = [
-      "BUILD FAILURE",
-      "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin",
-      "Invalid automatic module name: \"in-valid.name.with.new.keyword\"."
-    ];
+        "BUILD FAILURE",
+        "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin",
+        "Invalid automatic module name: \"in-valid.name.with.new.keyword\"."
+    ]
 
     for (String snippet : snippets) {
-      if (!log.contains(snippet)) {
-        System.err.println("XXX| Snippet `" + snippet + "` not found");
-        result = false;
-        continue;
-      }
+        if (!log.contains(snippet)) {
+            System.err.println("XXX| Snippet `" + snippet + "` not found")
+            result = false
+            continue
+        }
     }
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch(Throwable e) {
+    e.printStackTrace()
+    result = false
 }
 
-return result;
+return result

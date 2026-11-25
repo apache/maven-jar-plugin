@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import java.nio.file.*;
+import java.nio.file.*
 
 // No JAR should be created.
 File jar = new File(basedir, "target/maven-jar-plugin-test-mng-8137-1.0.jar")

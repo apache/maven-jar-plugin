@@ -18,34 +18,30 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
+import java.io.*
+import java.util.*
 
-File target = new File( basedir, "target" );
-if ( !target.isDirectory() )
-{
-    throw new IOException( "target file is missing or not a directory: " + target );
+File target = new File(basedir, "target")
+if (!target.isDirectory()) {
+    throw new IOException("target file is missing or not a directory: " + target)
 }
 
-File jarFile = new File( target, "MJAR-70-no-recreation-1.0-SNAPSHOT.jar" );
-if ( !jarFile.isFile() )
-{
-    throw new IOException( "artifact file is missing or a directory: " + jarFile );
+File jarFile = new File(target, "MJAR-70-no-recreation-1.0-SNAPSHOT.jar")
+if (!jarFile.isFile()) {
+    throw new IOException("artifact file is missing or a directory: " + jarFile)
 }
 
-File refFile = new File( target, "reference.jar" );
-if ( !refFile.isFile() )
-{
-    throw new IOException( "reference file is missing or a directory: " + refFile );
+File refFile = new File(target, "reference.jar")
+if (!refFile.isFile()) {
+    throw new IOException("reference file is missing or a directory: " + refFile)
 }
 
-long referenceTimestamp = refFile.lastModified();
+long referenceTimestamp = refFile.lastModified()
 
-long actualTimestamp = jarFile.lastModified();
+long actualTimestamp = jarFile.lastModified()
 
-if ( referenceTimestamp != actualTimestamp)
-{
-    throw new Exception( "Timestamps don't match, JAR was recreated although contents has not changed" );
+if (referenceTimestamp != actualTimestamp) {
+    throw new Exception("Timestamps don't match, JAR was recreated although contents has not changed")
 }
 
-return true;
+return true

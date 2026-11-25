@@ -27,7 +27,7 @@ JarFile jar = new JarFile(artifact)
 try {
     // Sanity: this must really be a multi-release JAR.
     assert jar.manifest.mainAttributes.getValue(Attributes.Name.MULTI_RELEASE) == "true" :
-        "Expected Multi-Release: true in the manifest"
+    "Expected Multi-Release: true in the manifest"
 
     // Regression guard for maven-jar-plugin #508, extended to non-modular multi-release JARs.
     // if the JAR is built by enumerating individual files, the intermediate directory entries

@@ -18,34 +18,28 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
+import java.io.*
+import java.util.*
+import java.util.jar.*
 
-boolean result = true;
+boolean result = true
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    if (!target.exists() || !target.isDirectory()) {
+        System.err.println("target file is missing or not a directory.")
+        return false
     }
 
-    File artifact = new File( target, "mjar260-valid-automatic-module-name-1.0-SNAPSHOT.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "artifact file is missing or a directory." );
-        return false;
+    File artifact = new File(target, "mjar260-valid-automatic-module-name-1.0-SNAPSHOT.jar")
+    if (!artifact.exists() || artifact.isDirectory()) {
+        System.err.println("artifact file is missing or a directory.")
+        return false
     }
-
-
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch(Throwable e) {
+    e.printStackTrace()
+    result = false
 }
 
-return result;
+return result

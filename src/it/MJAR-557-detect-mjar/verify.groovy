@@ -26,5 +26,5 @@ assert jarFile.isFile()
 new JarFile(jarFile).withCloseable { mrjar ->
     def manifest = mrjar.manifest.mainAttributes
     assert manifest.getValue(Attributes.Name.MULTI_RELEASE) == "true",
-        "Expected Multi-Release: true but got: " + manifest.getValue(Attributes.Name.MULTI_RELEASE)
+    "Expected Multi-Release: true but got: " + manifest.getValue(Attributes.Name.MULTI_RELEASE)
 }

@@ -18,59 +18,49 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-import org.apache.commons.io.*;
+import java.io.*
+import java.util.*
+import java.util.jar.*
+import org.apache.commons.io.*
 
-boolean result = true;
+boolean result = true
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    if (!target.exists() || !target.isDirectory()) {
+        System.err.println("target file is missing or not a directory.")
+        return false
     }
 
-    File artifact = new File( target, "MJAR-60-1.0-SNAPSHOT.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "artifact file is missing or a directory." );
-        return false;
+    File artifact = new File(target, "MJAR-60-1.0-SNAPSHOT.jar")
+    if (!artifact.exists() || artifact.isDirectory()) {
+        System.err.println("artifact file is missing or a directory.")
+        return false
     }
 
-    JarFile jar = new JarFile( artifact );
-    Enumeration jarEntries = jar.entries();
-    while ( jarEntries.hasMoreElements() )
-    {
-        JarEntry entry = (JarEntry) jarEntries.nextElement();
-        if ( !entry.isDirectory() )
-        {
+    JarFile jar = new JarFile(artifact)
+    Enumeration jarEntries = jar.entries()
+    while (jarEntries.hasMoreElements()) {
+        JarEntry entry = (JarEntry) jarEntries.nextElement()
+        if (!entry.isDirectory()) {
             // Only compare files
-            if ( entry.getName().equals( "META-INF/MANIFEST.MF" ) )
-            {
-            	String manifest = IOUtils.toString( jar.getInputStream ( entry ) );
-            	int index = manifest.indexOf( "Class-Path: config/" );
-            	if ( index <= 0 )
-            	{	
-            		System.err.println( "MANIFEST doesn't contain: Class-Path: config/" );
-            		return false;
-            	}
-            	return true;
+            if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                String manifest = IOUtils.toString(jar.getInputStream(entry))
+                int index = manifest.indexOf("Class-Path: config/")
+                if (index <= 0) {
+                    System.err.println("MANIFEST doesn't contain: Class-Path: config/")
+                    return false
+                }
+                return true
             }
         }
     }
-	System.err.println( "MANIFEST.MF not found" );
-	return false;
-
-
+    System.err.println("MANIFEST.MF not found")
+    return false
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch(Throwable e) {
+    e.printStackTrace()
+    result = false
 }
 
-return result;
+return result

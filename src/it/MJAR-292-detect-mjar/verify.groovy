@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import java.util.jar.*;
+import java.util.jar.*
 
 def mrjar = new JarFile(new File(basedir,'target/mjar-292-detect-multi-release-jar-1.0-SNAPSHOT.jar'))
 def manifest = mrjar.manifest.mainAttributes
 
-assert manifest.getValue( Attributes.Name.MAIN_CLASS ) == "myproject.HelloWorld"
-assert manifest.getValue( Attributes.Name.MULTI_RELEASE ) == "true"
+assert manifest.getValue(Attributes.Name.MAIN_CLASS) == "myproject.HelloWorld"
+assert manifest.getValue(Attributes.Name.MULTI_RELEASE) == "true"
