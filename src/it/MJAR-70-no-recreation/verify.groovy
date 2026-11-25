@@ -18,19 +18,19 @@
  * under the License.
  */
 
-File target = new File( basedir, "target" );
+File target = new File(basedir, "target")
 assert target.isDirectory() : "target file is missing or not a directory: " + target
 
-File jarFile = new File( target, "MJAR-70-no-recreation-1.0-SNAPSHOT.jar" );
+File jarFile = new File( target, "MJAR-70-no-recreation-1.0-SNAPSHOT.jar" )
 assert jarFile.isFile() : "artifact file is missing or a directory: " + jarFile
 
-File refFile = new File( target, "reference.jar" );
+File refFile = new File( target, "reference.jar" )
 assert refFile.isFile() : "reference file is missing or a directory: " + refFile
 
-long referenceTimestamp = refFile.lastModified();
-System.out.println( "Reference timestamp: " + referenceTimestamp );
+long referenceTimestamp = refFile.lastModified()
+System.out.println( "Reference timestamp: " + referenceTimestamp )
 
-long actualTimestamp = jarFile.lastModified();
-System.out.println( "Actual timestamp   : " + actualTimestamp );
+long actualTimestamp = jarFile.lastModified()
+System.out.println( "Actual timestamp   : " + actualTimestamp )
 
 assert referenceTimestamp == actualTimestamp : "Timestamps don't match, JAR was recreated although contents has not changed"

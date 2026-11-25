@@ -19,7 +19,7 @@ import java.util.jar.JarFile
  * under the License.
  */
 
-def target = new File( basedir, "target" );
-def jarFile = new File( target, "mjar-307-1.0.jar" );
+def target = new File(basedir, "target")
+def jarFile = new File(target, "mjar-307-1.0.jar")
 
 assert jarFile.exists()

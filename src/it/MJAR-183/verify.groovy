@@ -18,8 +18,8 @@
  * under the License.
  */
 
-File target = new File( basedir, "target" );
+File target = new File(basedir, "target")
 assert target.exists() && target.isDirectory() : "target file is missing or not a directory."
 
-File artifact = new File( target, "maven-jar-plugin-test-mjar-183-1.0-SNAPSHOT.jar" );
+File artifact = new File( target, "maven-jar-plugin-test-mjar-183-1.0-SNAPSHOT.jar" )
 assert artifact.exists() : "default artifact should exist."
