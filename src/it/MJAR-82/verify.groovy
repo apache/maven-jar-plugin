@@ -18,27 +18,27 @@
  * under the License.
  */
 
-import org.codehaus.plexus.util.cli.*;
-import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.cli.*
+import org.codehaus.plexus.util.FileUtils
 
-File target = new File( basedir, "target" );
+File target = new File(basedir, "target")
 assert target.exists() && target.isDirectory() : "target file is missing or not a directory."
 
-File artifact = new File( target, "MJAR-82-1.0-SNAPSHOT.jar" );
+File artifact = new File( target, "MJAR-82-1.0-SNAPSHOT.jar" )
 assert artifact.exists() && !artifact.isDirectory() : "artifact file is missing or a directory."
 
-String localRepoPath = basedir.getParentFile().getParentFile().getParentFile().getPath() + "/target/local-repo";
-FileUtils.copyFile( artifact, new File( localRepoPath, "MJAR-82-1.0-SNAPSHOT.jar" ) );
-Commandline commandline = new Commandline();
-commandline.setExecutable( "java" );
-commandline.setWorkingDirectory( localRepoPath );
-System.out.println(" localRepoPath " + localRepoPath );
-commandline.createArg().setLine( "-jar MJAR-82-1.0-SNAPSHOT.jar" );
-CommandLineUtils.StringStreamConsumer consumer = new CommandLineUtils.StringStreamConsumer();
-int res = CommandLineUtils.executeCommandLine( commandline, consumer, consumer );
-String output = consumer.getOutput();
-System.out.println( "res " + res );
-System.out.println( output );
+String localRepoPath = basedir.getParentFile().getParentFile().getParentFile().getPath() + "/target/local-repo"
+FileUtils.copyFile( artifact, new File( localRepoPath, "MJAR-82-1.0-SNAPSHOT.jar" ) )
+Commandline commandline = new Commandline()
+commandline.setExecutable( "java" )
+commandline.setWorkingDirectory( localRepoPath )
+System.out.println(" localRepoPath " + localRepoPath )
+commandline.createArg().setLine( "-jar MJAR-82-1.0-SNAPSHOT.jar" )
+CommandLineUtils.StringStreamConsumer consumer = new CommandLineUtils.StringStreamConsumer()
+int res = CommandLineUtils.executeCommandLine( commandline, consumer, consumer )
+String output = consumer.getOutput()
+System.out.println( "res " + res )
+System.out.println( output )
 assert res == 0 : "commandline execution return code != 0 " + res
 
 assert output.indexOf("great it works") >= 0 : "output not contains great it works"
