@@ -22,9 +22,9 @@
 // resolve it as a reactor artifact and compile its test sources against it.
 
 // 1. The model test-jar must have been produced despite -DskipTests.
-File testJar = new File(basedir, "model/target/model-1.0-SNAPSHOT-tests.jar");
+File testJar = new File(basedir, "model/target/model-1.0-SNAPSHOT-tests.jar")
 assert testJar.isFile(), "MJAR-138: model test-jar is missing: " + testJar
 
 // 2. The client's test classes must have compiled (they depend on TestComponent from the test-jar).
-File clientTestClasses = new File(basedir, "client/target/test-classes/org/apache/maven/its/mjar138/ClientTest.class");
+File clientTestClasses = new File(basedir, "client/target/test-classes/org/apache/maven/its/mjar138/ClientTest.class")
 assert clientTestClasses.isFile(), "MJAR-138: client test classes not compiled (test-jar was not available in reactor): " + clientTestClasses

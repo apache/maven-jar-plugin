@@ -17,49 +17,47 @@
  * under the License.
  */
 
-import java.io.*;
-import java.lang.module.*;
-import java.nio.file.attribute.FileTime;
-import java.time.Instant;
-import java.util.*;
-import java.util.jar.*;
+import java.io.*
+import java.lang.module.*
+import java.nio.file.attribute.FileTime
+import java.time.Instant
+import java.util.*
+import java.util.jar.*
 
-File target = new File( basedir, "target" )
+File target = new File(basedir, "target")
 
 assert target.exists()
 assert target.isDirectory()
 
-File artifact = new File( target, "mjar-275-reproducible-multi-release-modular-jar-1.0-SNAPSHOT.jar" );
+File artifact = new File(target, "mjar-275-reproducible-multi-release-modular-jar-1.0-SNAPSHOT.jar")
 
 assert artifact.exists()
 assert artifact.isFile()
 
-JarFile jar = new JarFile( artifact );
+JarFile jar = new JarFile(artifact)
 
-Attributes manifest = jar.getManifest().getMainAttributes();
+Attributes manifest = jar.getManifest().getMainAttributes()
 
-assert "myproject.HelloWorld".equals( manifest.get( Attributes.Name.MAIN_CLASS ) )
+assert "myproject.HelloWorld".equals(manifest.get(Attributes.Name.MAIN_CLASS))
 
-InputStream moduleDescriptorInputStream = jar.getInputStream( jar.getEntry( "META-INF/versions/9/module-info.class" ) );
-ModuleDescriptor moduleDescriptor = ModuleDescriptor.read( moduleDescriptorInputStream );
+InputStream moduleDescriptorInputStream = jar.getInputStream(jar.getEntry("META-INF/versions/9/module-info.class"))
+ModuleDescriptor moduleDescriptor = ModuleDescriptor.read(moduleDescriptorInputStream)
 
-assert "myproject.HelloWorld".equals( moduleDescriptor.mainClass().orElse( null ) )
+assert "myproject.HelloWorld".equals(moduleDescriptor.mainClass().orElse(null))
 
 // Normalize to UTC
-long normalizeUTC( String timestamp )
-{
-  long millis = Instant.parse( timestamp ).toEpochMilli();
-  Calendar cal = Calendar.getInstance();
-  cal.setTimeInMillis( millis );
-  return millis - ( cal.get( Calendar.ZONE_OFFSET ) + cal.get( Calendar.DST_OFFSET ) );
+long normalizeUTC(String timestamp) {
+    long millis = Instant.parse(timestamp).toEpochMilli()
+    Calendar cal = Calendar.getInstance()
+    cal.setTimeInMillis(millis)
+    return millis - (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET))
 }
 
 // All entries should have the same timestamp
-FileTime expectedTimestamp = FileTime.fromMillis( normalizeUTC( "2022-06-26T13:25:58Z" ) );
-Enumeration<JarEntry> entries = jar.entries();
-while ( entries.hasMoreElements() )
-{
-    assert expectedTimestamp.equals( entries.nextElement().getLastModifiedTime() )
+FileTime expectedTimestamp = FileTime.fromMillis(normalizeUTC("2022-06-26T13:25:58Z"))
+Enumeration<JarEntry> entries = jar.entries()
+while (entries.hasMoreElements()) {
+    assert expectedTimestamp.equals(entries.nextElement().getLastModifiedTime())
 }
 
-jar.close();
+jar.close()

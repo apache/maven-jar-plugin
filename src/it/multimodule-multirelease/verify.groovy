@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
+import java.io.*
+import java.util.*
+import java.util.jar.*
 
-File target = new File(basedir, "target");
+File target = new File(basedir, "target")
 
-Set<String> content = new HashSet<>();
+Set<String> content = new HashSet<>()
 content.add("module-info.class")
 content.add("foo/MainFile.class")
 content.add("foo/OtherFile.class")
@@ -44,15 +44,12 @@ content.add("META-INF/maven/org.apache.maven.plugins/multirelease-with-modules/p
 content.add("META-INF/maven/org.apache.maven.plugins/multirelease-with-modules/pom.properties")
 verify(new File(target, "foo.bar.more-1.0-SNAPSHOT.jar"), content, null)
 
-void verify(File artifact, Set<String> content, String mainClass)
-{
+void verify(File artifact, Set<String> content, String mainClass) {
     JarFile jar = new JarFile(artifact)
     Enumeration jarEntries = jar.entries()
-    while (jarEntries.hasMoreElements())
-    {
+    while (jarEntries.hasMoreElements()) {
         JarEntry entry = (JarEntry) jarEntries.nextElement()
-        if (!entry.isDirectory())
-        {
+        if (!entry.isDirectory()) {
             String name = entry.getName()
             assert content.remove(name) : "Missing entry: " + name
         }
@@ -63,5 +60,5 @@ void verify(File artifact, Set<String> content, String mainClass)
     assert Objects.equals("true", attributes.get(Attributes.Name.MULTI_RELEASE))
     assert Objects.equals(mainClass, attributes.get(Attributes.Name.MAIN_CLASS))
 
-    jar.close();
+    jar.close()
 }

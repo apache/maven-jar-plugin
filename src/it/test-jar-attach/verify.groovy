@@ -17,7 +17,7 @@
  * under the License.
  */
 
-def localRepo = basedir.getParentFile().getParentFile().getParentFile().getPath() + "/target/local-repo";
+def localRepo = basedir.getParentFile().getParentFile().getParentFile().getPath() + "/target/local-repo"
 
 def artifact = new File(localRepo, "org/apache/maven/plugins/test-jar-attach/1.0-SNAPSHOT/test-jar-attach-1.0-SNAPSHOT-tests.jar")
 assert !artifact.exists()

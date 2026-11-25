@@ -18,28 +18,24 @@
  * under the License.
  */
 
-import java.io.*;
+import java.io.*
 
-try
-{
-    File target = new File( basedir, "target" );
-    File artifact = new File( target, "maven-jar-plugin-test-mjar-510-1.0.jar" );
-    if ( !artifact.exists() )
-    {
-        System.err.println( "main artifact is missing." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    File artifact = new File(target, "maven-jar-plugin-test-mjar-510-1.0.jar")
+    if (!artifact.exists()) {
+        System.err.println("main artifact is missing.")
+        return false
     }
 
-    File junitArtifact = new File( target, "maven-jar-plugin-test-mjar-510-1.0-junit.jar" );
-    if ( junitArtifact.exists() )
-    {
-        System.err.println( "junit classifier jar should not exist when includes match no files." );
-        return false;
+    File junitArtifact = new File(target, "maven-jar-plugin-test-mjar-510-1.0-junit.jar")
+    if (junitArtifact.exists()) {
+        System.err.println("junit classifier jar should not exist when includes match no files.")
+        return false
     }
-    return true;
+    return true
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
+catch(Throwable e) {
+    e.printStackTrace()
 }
-return false;
+return false

@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import java.util.jar.*;
+import java.util.jar.*
 
-File target = new File( basedir, "target" );
+File target = new File(basedir, "target")
 assert target.exists()
 assert target.isDirectory()
 
-File artifact = new File( target, "mjar-539-build-environment-entries-1.0-SNAPSHOT.jar" );
+File artifact = new File(target, "mjar-539-build-environment-entries-1.0-SNAPSHOT.jar")
 assert artifact.exists()
 assert artifact.isFile()
 
-JarFile jar = new JarFile( artifact );
-Attributes manifest = jar.getManifest().getMainAttributes();
+JarFile jar = new JarFile(artifact)
+Attributes manifest = jar.getManifest().getMainAttributes()
 
-assert "myproject.HelloWorld".equals( manifest.get( Attributes.Name.MAIN_CLASS ) )
-assert manifest.getValue( "Build-Jdk-Spec" ) == null
-assert manifest.getValue( "Build-Tool" ) == null
-assert manifest.getValue( "Build-Jdk" ) == null
-assert manifest.getValue( "Build-Os" ) == null
-assert manifest.getValue( "Build-Tool-Jdk-Spec" ) == null
+assert "myproject.HelloWorld".equals(manifest.get(Attributes.Name.MAIN_CLASS))
+assert manifest.getValue("Build-Jdk-Spec") == null
+assert manifest.getValue("Build-Tool") == null
+assert manifest.getValue("Build-Jdk") == null
+assert manifest.getValue("Build-Os") == null
+assert manifest.getValue("Build-Tool-Jdk-Spec") == null
 
-jar.close();
+jar.close()

@@ -17,44 +17,37 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.jar.*;
+import java.io.*
+import java.util.jar.*
 
-boolean result = true;
-JarFile jar = null;
+boolean result = true
+JarFile jar = null
 
-try
-{
-    File artifact = new File( basedir, "target/records-jar-validate-1.0-SNAPSHOT.jar" );
-    if ( !artifact.isFile() )
-    {
-        System.err.println( "Expected JAR is missing: " + artifact );
-        return false;
+try {
+    File artifact = new File(basedir, "target/records-jar-validate-1.0-SNAPSHOT.jar")
+    if (!artifact.isFile()) {
+        System.err.println("Expected JAR is missing: " + artifact)
+        return false
     }
 
-    jar = new JarFile( artifact );
-    if ( jar.getEntry( "it/records/Point.class" ) == null )
-    {
-        System.err.println( "JAR does not contain the record class it/records/Point.class" );
-        return false;
+    jar = new JarFile(artifact)
+    if (jar.getEntry("it/records/Point.class") == null) {
+        System.err.println("JAR does not contain the record class it/records/Point.class")
+        return false
     }
-    if ( jar.getEntry( "module-info.class" ) == null )
-    {
-        System.err.println( "JAR does not contain module-info.class" );
-        return false;
+    if (jar.getEntry("module-info.class") == null) {
+        System.err.println("JAR does not contain module-info.class")
+        return false
     }
 }
-catch ( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch (Throwable e) {
+    e.printStackTrace()
+    result = false
 }
-finally
-{
-    if ( jar != null )
-    {
-        jar.close();
+finally {
+    if (jar != null) {
+        jar.close()
     }
 }
 
-return result;
+return result

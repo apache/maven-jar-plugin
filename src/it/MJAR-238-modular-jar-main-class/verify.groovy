@@ -17,59 +17,51 @@
  * under the License.
  */
 
-import java.io.*;
-import java.lang.module.*;
-import java.util.jar.*;
+import java.io.*
+import java.lang.module.*
+import java.util.jar.*
 
-boolean result = true;
-JarFile jar;
+boolean result = true
+JarFile jar
 
-try
-{
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() )
-    {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
+try {
+    File target = new File(basedir, "target")
+    if (!target.exists() || !target.isDirectory()) {
+        System.err.println("target file is missing or not a directory.")
+        return false
     }
 
-    File artifact = new File( target, "mjar-238-modular-jar-main-class-1.0-SNAPSHOT.jar" );
-    if ( !artifact.exists() || artifact.isDirectory() )
-    {
-        System.err.println( "artifact file is missing or a directory." );
-        return false;
+    File artifact = new File(target, "mjar-238-modular-jar-main-class-1.0-SNAPSHOT.jar")
+    if (!artifact.exists() || artifact.isDirectory()) {
+        System.err.println("artifact file is missing or a directory.")
+        return false
     }
 
-    jar = new JarFile( artifact );
+    jar = new JarFile(artifact)
 
-    Attributes manifest = jar.getManifest().getMainAttributes();
+    Attributes manifest = jar.getManifest().getMainAttributes()
 
-    if ( !"myproject.HelloWorld".equals( manifest.get( Attributes.Name.MAIN_CLASS ) ) )
-    {
-        System.err.println( "Manifest main class attribute not equals myproject.HelloWorld" );
-        return false;
+    if (!"myproject.HelloWorld".equals(manifest.get(Attributes.Name.MAIN_CLASS))) {
+        System.err.println("Manifest main class attribute not equals myproject.HelloWorld")
+        return false
     }
 
-    InputStream moduleDescriptorInputStream = jar.getInputStream( jar.getEntry( "module-info.class" ) );
-    ModuleDescriptor moduleDescriptor = ModuleDescriptor.read( moduleDescriptorInputStream );
+    InputStream moduleDescriptorInputStream = jar.getInputStream(jar.getEntry("module-info.class"))
+    ModuleDescriptor moduleDescriptor = ModuleDescriptor.read(moduleDescriptorInputStream)
 
-    if ( !"myproject.HelloWorld".equals( moduleDescriptor.mainClass().orElse( null ) ) )
-    {
-        System.err.println( "Module descriptor main class not equals myproject.HelloWorld" );
-        return false;
+    if (!"myproject.HelloWorld".equals(moduleDescriptor.mainClass().orElse(null))) {
+        System.err.println("Module descriptor main class not equals myproject.HelloWorld")
+        return false
     }
 }
-catch( Throwable e )
-{
-    e.printStackTrace();
-    result = false;
+catch(Throwable e) {
+    e.printStackTrace()
+    result = false
 }
-finally
-{
-    if ( jar != null )
-    {
-        jar.close();
+finally {
+    if (jar != null) {
+        jar.close()
     }
 }
 
-return result;
+return result

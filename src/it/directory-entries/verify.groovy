@@ -29,11 +29,7 @@ try {
     // can not be specified (if they were, they would be traversed), which breaks consumers
     // relying on JAR directory traversal (e.g. Spring Boot @ComponentScan).
     // Assert that the directory entries are present.
-    def requiredDirectoryEntries = [
-        "com/",
-        "com/acme/",
-        "com/acme/sub/"
-    ]
+    def requiredDirectoryEntries = ["com/", "com/acme/", "com/acme/sub/"]
     for (String name : requiredDirectoryEntries) {
         def entry = jar.getEntry(name)
         assert entry != null : "Missing directory entry: " + name
@@ -41,10 +37,7 @@ try {
     }
 
     // The class files must of course still be present.
-    def requiredFileEntries = [
-        "com/acme/App.class",
-        "com/acme/sub/Helper.class"
-    ]
+    def requiredFileEntries = ["com/acme/App.class", "com/acme/sub/Helper.class"]
     for (String name : requiredFileEntries) {
         def entry = jar.getEntry(name)
         assert entry != null : "Missing class entry: " + name
