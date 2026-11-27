@@ -35,7 +35,7 @@ import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
 import org.apache.maven.api.Type;
 import org.apache.maven.api.di.Inject;
-import org.apache.maven.api.plugin.Log;
+import org.apache.maven.api.logging.Logger;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Parameter;
 import org.apache.maven.api.services.PathMatcherFactory;
@@ -220,7 +220,7 @@ public abstract class AbstractJarMojo implements org.apache.maven.api.plugin.Moj
      * The <abbr>MOJO</abbr> logger.
      */
     @Inject
-    protected Log log;
+    protected Logger log;
 
     /**
      * Creates a new <abbr>MOJO</abbr>.
