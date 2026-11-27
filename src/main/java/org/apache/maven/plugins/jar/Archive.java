@@ -291,7 +291,7 @@ final class Archive {
                 existingJAR = new TimestampCheck(jarFile, directory, logger);
             } catch (IOException e) {
                 // Ignore, we will regenerate the JAR file.
-                logger.atWarn().withThrowable(e).log("");
+                logger.warn("Cannot read the existing JAR file: " + e.getMessage(), e);
             }
         }
     }

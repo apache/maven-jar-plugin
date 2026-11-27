@@ -204,7 +204,7 @@ final class TimestampCheck extends SimpleFileVisitor<Path> {
                 }
             }
         } catch (IOException e) {
-            logger.atWarn().withThrowable(e).log("");
+            logger.warn("Cannot read the existing JAR file: " + e.getMessage(), e);
             return false;
         } finally {
             entries = null;
